@@ -309,7 +309,7 @@ export default function App() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-100 selection:text-emerald-900 w-full max-w-full overflow-x-hidden">
       
       {/* 1. TOP ANNOUNCEMENT BANNER (Strict 5km delivery notice) */}
       <DeliveryNoticeBanner
@@ -337,10 +337,12 @@ export default function App() {
       />
 
       {/* 3. HERO SECTION */}
-      <section className="relative bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 text-white overflow-hidden py-6 sm:py-12 lg:py-14">
-        {/* Decorative background circles */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
+      <section className="relative bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 text-white overflow-hidden py-6 sm:py-12 lg:py-14 w-full max-w-full">
+        {/* Decorative background circles strictly contained within section bounds */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-500/20 blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-teal-500/20 blur-3xl" />
+        </div>
 
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center">
@@ -422,8 +424,8 @@ export default function App() {
       </section>
 
       {/* 4. CATEGORY SELECTOR & FILTER TABS */}
-      <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-2 sm:py-3 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-2 sm:py-3 shadow-xs w-full max-w-full overflow-hidden">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full overflow-hidden">
           <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
             {categoryPills.map((pill) => {
               const Icon = pill.icon;
@@ -451,11 +453,11 @@ export default function App() {
       </div>
 
       {/* 5. PRODUCT CATALOG: DEDICATED SECTIONS PER CATEGORY */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-24 sm:py-8 flex-1">
+      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-24 sm:py-8 flex-1 min-w-0">
         
         {/* Loading state */}
         {loadingProducts ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
             {[...Array(10)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs animate-pulse space-y-3">
                 <div className="aspect-square bg-gray-200 rounded-xl" />
@@ -500,7 +502,7 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5">
+              <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
                 {products.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -548,7 +550,7 @@ export default function App() {
                 <section
                   key={section.id}
                   id={`section-${section.id}`}
-                  className="scroll-mt-36"
+                  className="scroll-mt-36 w-full max-w-full min-w-0"
                 >
                   {/* Category Section Header & AI Banner */}
                   <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-3.5 sm:mb-6 border border-gray-200 bg-white shadow-2xs">
@@ -606,7 +608,7 @@ export default function App() {
                   </div>
 
                   {/* Responsive Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5">
+                  <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
                     {sectionProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -682,7 +684,7 @@ export default function App() {
                       </button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5">
+                    <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
                       {displayedProducts.map((product) => (
                         <ProductCard
                           key={product.id}

@@ -3,13 +3,23 @@
 @tailwind utilities;
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
   html, body {
     overflow-x: hidden;
+    max-width: 100%;
     width: 100%;
     -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply antialiased selection:bg-green-100 selection:text-green-800;
+  }
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    min-height: 100vh;
   }
   button, input, select, textarea {
     touch-action: manipulation;

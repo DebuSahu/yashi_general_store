@@ -82,7 +82,7 @@ export default function ProductCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group">
+    <div className="w-full min-w-0 max-w-full bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group">
       
       {/* Product Image & Badges */}
       <div className="relative aspect-square w-full overflow-hidden bg-gray-50">
@@ -97,12 +97,12 @@ export default function ProductCard({
         />
 
         {/* Top Badges (Category + Brand) */}
-        <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 flex-wrap pointer-events-none">
+        <div className="absolute top-1.5 left-1.5 right-1.5 sm:top-2 sm:left-2 sm:right-2 flex items-center justify-between gap-1 flex-wrap pointer-events-none">
           <div>{getCategoryBadge(product.category)}</div>
 
           {product.brand && (
             <span
-              className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs ${
+              className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs ${
                 product.brand.toLowerCase() === 'amul'
                   ? 'bg-blue-600 text-white'
                   : 'bg-red-600 text-white'
@@ -127,8 +127,8 @@ export default function ProductCard({
       </div>
 
       {/* Product Details */}
-      <div className="p-2.5 sm:p-4 flex-1 flex flex-col justify-between">
-        <div>
+      <div className="p-2 sm:p-4 flex-1 flex flex-col justify-between min-w-0">
+        <div className="min-w-0">
           <h3
             className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition line-clamp-2 leading-snug mb-1"
             title={product.name}
@@ -148,7 +148,7 @@ export default function ProductCard({
         </div>
 
         {/* Pricing and Cart Stepper */}
-        <div className="pt-1.5 sm:pt-2 border-t border-gray-50 flex items-center justify-between gap-1.5 sm:gap-2 mt-auto">
+        <div className="pt-1.5 sm:pt-2 border-t border-gray-50 flex items-center justify-between gap-1 mt-auto min-w-0">
           <div className="min-w-0">
             <span className="text-sm sm:text-lg font-black text-emerald-700">
               ₹{product.price}
@@ -160,12 +160,9 @@ export default function ProductCard({
 
           {/* Cart Controls */}
           {isOutOfStock ? (
-            <button
-              disabled
-              className="px-2 py-1 text-[10px] sm:text-[11px] font-semibold text-gray-400 bg-gray-100 rounded-xl cursor-not-allowed whitespace-nowrap"
-            >
-              Out of Stock
-            </button>
+            <span className="px-1.5 py-0.5 text-[9px] sm:text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg shrink-0">
+              Out of stock
+            </span>
           ) : cartQty > 0 ? (
             <div className="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-50 border border-emerald-300 rounded-xl p-0.5 sm:p-1 shrink-0">
               <button
@@ -199,21 +196,26 @@ export default function ProductCard({
 
         {/* Direct Admin In-Stock / Out of Stock Control */}
         {isAdmin && (
-          <div className="mt-2 pt-1.5 border-t border-dashed border-purple-200 flex flex-col xs:flex-row items-center justify-between gap-1 bg-purple-50/70 -mx-2.5 -mb-2.5 sm:-mx-4 sm:-mb-4 p-1.5 sm:p-2 rounded-b-2xl">
-            <span className="text-[9px] font-black uppercase tracking-wider text-purple-700">
-              Admin:
-            </span>
-            <div className="inline-flex w-full xs:w-auto rounded-lg bg-white p-0.5 border border-purple-200 shadow-2xs justify-center">
+          <div className="mt-2 pt-1.5 border-t border-dashed border-purple-200 flex flex-col items-stretch gap-1 bg-purple-50/70 p-1.5 rounded-xl min-w-0 w-full">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[9px] font-black uppercase tracking-wider text-purple-700">
+                Stock:
+              </span>
+              <span className={`text-[9px] font-extrabold ${!isOutOfStock ? 'text-emerald-700' : 'text-red-600'}`}>
+                {!isOutOfStock ? 'In Stock' : 'Out of Stock'}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-1 w-full bg-white p-0.5 border border-purple-200 rounded-lg shadow-2xs">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleStock?.(product.id, true);
                 }}
-                className={`flex-1 xs:flex-initial px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-extrabold transition whitespace-nowrap ${
+                className={`w-full py-1 rounded text-[9px] sm:text-[10px] font-extrabold transition text-center ${
                   !isOutOfStock
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-gray-500 hover:text-emerald-700'
+                    : 'text-gray-500 hover:text-emerald-700 bg-gray-50'
                 }`}
                 title="Directly mark In Stock"
               >
@@ -225,10 +227,10 @@ export default function ProductCard({
                   e.stopPropagation();
                   onToggleStock?.(product.id, false);
                 }}
-                className={`flex-1 xs:flex-initial px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-extrabold transition whitespace-nowrap ${
+                className={`w-full py-1 rounded text-[9px] sm:text-[10px] font-extrabold transition text-center ${
                   isOutOfStock
                     ? 'bg-red-600 text-white shadow-xs'
-                    : 'text-gray-500 hover:text-red-700'
+                    : 'text-gray-500 hover:text-red-700 bg-gray-50'
                 }`}
                 title="Directly mark Out of Stock"
               >
