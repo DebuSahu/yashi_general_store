@@ -172,42 +172,48 @@ export default function App() {
       label: 'Dairy Products',
       icon: Milk,
       description: 'Fresh Milk, Curd, Paneer, Butter, Pure Desi Ghee & Cheese',
-      colorClass: 'bg-sky-100 text-sky-800 border-sky-200'
+      colorClass: 'bg-sky-100 text-sky-800 border-sky-200',
+      bannerImage: './images/dairy_showcase.jpg'
     },
     {
       id: 'icecream',
       label: 'Ice Cream',
       icon: IceCream,
       description: 'Delicious Cones, Cups, Bars, Kulfi & Party Tubs',
-      colorClass: 'bg-pink-100 text-pink-800 border-pink-200'
+      colorClass: 'bg-pink-100 text-pink-800 border-pink-200',
+      bannerImage: './images/icecream_showcase.jpg'
     },
     {
       id: 'vegetables',
       label: 'Vegetables',
       icon: Carrot,
       description: 'Farm-Fresh Green Vegetables Restocked Daily',
-      colorClass: 'bg-green-100 text-green-800 border-green-200'
+      colorClass: 'bg-green-100 text-green-800 border-green-200',
+      bannerImage: './images/vegetables_showcase.jpg'
     },
     {
       id: 'grocery',
       label: 'Grocery',
       icon: ShoppingBag,
       description: 'Chakki Atta, Basmati Rice, Dal, Edible Oil, Tea & Spices',
-      colorClass: 'bg-amber-100 text-amber-800 border-amber-200'
+      colorClass: 'bg-amber-100 text-amber-800 border-amber-200',
+      bannerImage: './images/grocery_showcase.jpg'
     },
     {
       id: 'stationery',
       label: 'Stationery',
       icon: BookOpen,
       description: 'Notebooks, Pens, Pencils, Geometry Box & Study Supplies',
-      colorClass: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+      colorClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      bannerImage: './images/stationery_showcase.jpg'
     },
     {
       id: 'general store',
       label: 'General Store',
       icon: Package,
       description: 'Household Soaps, Detergents & Cleaning Essentials',
-      colorClass: 'bg-purple-100 text-purple-800 border-purple-200'
+      colorClass: 'bg-purple-100 text-purple-800 border-purple-200',
+      bannerImage: './images/cleaning_showcase.jpg'
     }
   ];
 
@@ -291,31 +297,33 @@ export default function App() {
               </div>
             </div>
 
-            {/* Visual Feature Card */}
-            <div className="lg:col-span-5 hidden lg:block">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl shadow-2xl space-y-3">
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-200">
-                    Why Order With GS?
-                  </span>
-                  <span className="text-[11px] bg-yellow-400/90 text-gray-900 font-extrabold px-2 py-0.5 rounded-full">
-                    Shop Local
-                  </span>
-                </div>
-
-                <div className="space-y-2.5 text-xs">
-                  <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-300 flex-shrink-0" />
-                    <span><strong>100% Fresh Daily Harvest:</strong> Vegetables restocked every morning.</span>
+            {/* Visual Hero Feature Showcase Card */}
+            <div className="lg:col-span-5">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-emerald-950/40 group">
+                <img
+                  src="./images/hero_banner.jpg"
+                  alt="Yashi General Store (YGS) Fresh Catalog"
+                  className="w-full h-56 sm:h-72 object-cover transition-transform duration-700 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4 sm:p-5 text-white">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-yellow-300 bg-emerald-900/90 border border-emerald-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-yellow-300" />
+                      <span>Actual Store Showcase</span>
+                    </span>
+                    <span className="text-[10px] text-emerald-200 font-bold bg-white/10 px-2 py-0.5 rounded-full">
+                      70+ Products
+                    </span>
                   </div>
-                  <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-300 flex-shrink-0" />
-                    <span><strong>Verified Mobile Ordering:</strong> Simple OTP login with instant admin alerts.</span>
-                  </div>
-                  <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-300 flex-shrink-0" />
-                    <span><strong>Precise GPS Routing:</strong> Directly connects our delivery partner to your pin.</span>
-                  </div>
+                  <h3 className="text-sm sm:text-base font-black leading-tight text-white">
+                    Fresh Farm Vegetables, Amul Dairy, Groceries & Stationery
+                  </h3>
+                  <p className="text-[11px] text-emerald-200 mt-0.5">
+                    Order online • Strictly delivered up to 5 km from shop location
+                  </p>
                 </div>
               </div>
             </div>
@@ -451,32 +459,59 @@ export default function App() {
                   id={`section-${section.id}`}
                   className="scroll-mt-36"
                 >
-                  {/* Category Section Header */}
-                  <div className="flex items-center justify-between pb-3.5 mb-4 sm:mb-5 border-b border-gray-200">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center ${section.colorClass} border shadow-2xs`}>
-                        <SectionIcon className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
-                          {section.label}
-                        </h2>
-                        <p className="text-xs text-gray-500 font-medium">
-                          {section.description} • {sectionProducts.length} items
-                        </p>
-                      </div>
-                    </div>
+                  {/* Category Section Header & AI Banner */}
+                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-4 sm:mb-6 border border-gray-200 bg-white shadow-2xs">
+                    <div className="flex flex-col md:flex-row items-stretch justify-between">
+                      <div className="p-4 sm:p-5 flex-1 flex items-center justify-between gap-4">
+                        <div className="flex items-center space-x-3.5">
+                          <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${section.colorClass} border shadow-xs shrink-0`}>
+                            <SectionIcon className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
+                                {section.label}
+                              </h2>
+                              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                                {sectionProducts.length} Items
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 font-medium mt-0.5">
+                              {section.description}
+                            </p>
+                          </div>
+                        </div>
 
-                    <button
-                      onClick={() => {
-                        setSelectedCategory(section.id);
-                        window.scrollTo({ top: 350, behavior: 'smooth' });
-                      }}
-                      className="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition active:scale-95"
-                    >
-                      <span>View All</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                        <button
+                          onClick={() => {
+                            setSelectedCategory(section.id);
+                            window.scrollTo({ top: 350, behavior: 'smooth' });
+                          }}
+                          className="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition active:scale-95"
+                        >
+                          <span>View All</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {/* AI Category Showcase Thumbnail */}
+                      {section.bannerImage && (
+                        <div className="w-full md:w-56 h-28 sm:h-32 md:h-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
+                          <img
+                            src={section.bannerImage}
+                            alt={`${section.label} Showcase`}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/50 via-transparent to-transparent flex items-end md:items-center p-2.5 text-white">
+                            <span className="bg-black/60 px-2 py-0.5 rounded text-[10px] font-bold backdrop-blur-xs flex items-center gap-1">
+                              <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
+                              <span>Showcase</span>
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Responsive Grid */}
