@@ -1,0 +1,28 @@
+{
+  "name": "yashi-general-store",
+  "version": "1.0.0",
+  "description": "Yashi General Store (YGS) - Full-Stack E-Commerce Platform with 5km delivery radius restriction, OTP verification, Admin management, and Order tracking",
+  "main": "server/src/server.js",
+  "type": "module",
+  "scripts": {
+    "install:server": "npm --prefix server install",
+    "install:client": "npm --prefix client install",
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "build:client": "npm --prefix client run build",
+    "build": "npm --prefix client install && npm --prefix client run build && npm --prefix server install",
+    "start": "node server/src/server.js",
+    "server": "node server/src/server.js",
+    "client": "npm --prefix client run dev"
+  },
+  "keywords": [
+    "ecommerce",
+    "general-store",
+    "grocery",
+    "delivery",
+    "react",
+    "express",
+    "nodejs"
+  ],
+  "author": "Yashi General Store",
+  "license": "ISC"
+}
