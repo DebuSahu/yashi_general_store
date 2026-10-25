@@ -39,8 +39,8 @@ import { api } from '../api';
 export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated, onLogoutAdmin }) {
   const [token, setToken] = useState(localStorage.getItem('gs_admin_token') || '');
   const [currentAdminUser, setCurrentAdminUser] = useState(localStorage.getItem('gs_admin_user') || 'admin');
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -582,7 +582,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               </div>
 
               <div className="text-[11px] text-gray-500 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
-                Default Credentials: Username: <strong className="text-purple-700">admin</strong> / Password: <strong className="text-purple-700">admin123</strong>
+                🔒 Restricted access. All authorization attempts are logged and protected.
               </div>
 
               <button

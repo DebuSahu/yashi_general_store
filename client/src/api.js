@@ -39,7 +39,7 @@ function setLocalStore(key, value) {
   }
 }
 
-const CURRENT_CATALOG_VERSION = 'v3_73_ai_products';
+const CURRENT_CATALOG_VERSION = 'v5_73_ai_products';
 
 // Initialize local mock data
 function initLocalData() {
@@ -47,7 +47,7 @@ function initLocalData() {
   const existingProducts = getLocalStore('products', null);
 
   // Auto-upgrade catalog if version changed or missing
-  if (currentVersion !== CURRENT_CATALOG_VERSION || !existingProducts || existingProducts.length < (defaultData.products || []).length) {
+  if (currentVersion !== CURRENT_CATALOG_VERSION || !existingProducts || !Array.isArray(existingProducts) || existingProducts.length < (defaultData.products || []).length) {
     setLocalStore('products', defaultData.products || []);
     setLocalStore('catalog_version', CURRENT_CATALOG_VERSION);
   }
@@ -80,13 +80,19 @@ export const api = {
         let url = `${API_BASE}/settings`;
         if (lat && lon) url += `?lat=${lat}&lon=${lon}`;
         const res = await fetch(url);
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          return {
+            success: true,
+            settings: data.settings || data
+          };
+        }
       } catch (err) {
         console.warn('Falling back to local store settings:', err.message);
       }
     }
 
-    const settings = getLocalStore('settings', defaultData.settings);
+    const settings = getLocalStore('settings', defaultData.settings || {});
     let distanceKm = null;
     let withinDeliveryRadius = true;
 
@@ -100,13 +106,13 @@ export const api = {
       withinDeliveryRadius = distanceKm <= (settings.maxDeliveryRadiusKm || 5);
     }
 
-    return {
+    const normalizedSettings = {
       storeName: settings.storeName || 'Yashi General Store',
       acronym: settings.acronym || 'YGS',
-      tagline: settings.tagline || 'Your Daily Grocery, Fresh Vegetables & Dairy',
+      tagline: settings.tagline || 'Your Daily Grocery, Fresh Vegetables, Amul & Namaste India Dairy & Household Essentials',
       phone: settings.phone || '+91 98765 43210',
       email: settings.email || 'contact@yashigeneralstore.com',
-      address: settings.address || 'Shop No. 12, Main Market Road',
+      address: settings.address || 'Shop No. 12, Main Market Road, City Center, PIN - 492001',
       latitude: settings.latitude || 21.2514,
       longitude: settings.longitude || 81.6296,
       maxDeliveryRadiusKm: settings.maxDeliveryRadiusKm || 5,
@@ -115,6 +121,11 @@ export const api = {
       userLocation: lat && lon ? { latitude: parseFloat(lat), longitude: parseFloat(lon) } : null,
       distanceKm,
       withinDeliveryRadius
+    };
+
+    return {
+      success: true,
+      settings: normalizedSettings
     };
   },
 
@@ -149,15 +160,27 @@ export const api = {
         if (category && category !== 'all') params.append('category', category);
         if (search) params.append('search', search);
         const res = await fetch(`${API_BASE}/products?${params.toString()}`);
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          return {
+            success: true,
+            products: Array.isArray(data) ? data : (data.products || [])
+          };
+        }
       } catch (err) {
         console.warn('Falling back to local products data:', err.message);
       }
     }
 
     let products = getLocalStore('products', defaultData.products || []);
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      products = defaultData.products || [];
+      setLocalStore('products', products);
+    }
+
     if (category && category !== 'all') {
-      products = products.filter(p => (p.category || '').toLowerCase() === category.toLowerCase());
+      const catClean = category.toLowerCase().replace(/[\s-_]+/g, '');
+      products = products.filter(p => (p.category || '').toLowerCase().replace(/[\s-_]+/g, '') === catClean);
     }
     if (search) {
       const q = search.toLowerCase();
@@ -167,7 +190,10 @@ export const api = {
         (p.description || '').toLowerCase().includes(q)
       );
     }
-    return products;
+    return {
+      success: true,
+      products: products
+    };
   },
 
   addProduct: async (productData, token) => {

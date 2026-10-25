@@ -115,3 +115,4 @@ const clientData = JSON.parse(fs.readFileSync(CLIENT_DEFAULT_DATA_PATH, 'utf-8')
 clientData.products = serverData.products;
 fs.writeFileSync(CLIENT_DEFAULT_DATA_PATH, JSON.stringify(clientData, null, 2), 'utf-8');
 console.log(`Synced ${clientData.products.length} products to ${CLIENT_DEFAULT_DATA_PATH}`);
+

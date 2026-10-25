@@ -3,6 +3,29 @@ import { Plus, Minus, ShoppingCart, Carrot, ShoppingBag, Package, Milk, IceCream
 
 export default function ProductCard({ product, cartQty, onAddToCart, onUpdateQty }) {
   const isOutOfStock = product.inStock === false || product.stock === 0;
+  const [imgSrc, setImgSrc] = React.useState(product.image);
+
+  React.useEffect(() => {
+    setImgSrc(product.image);
+  }, [product.image]);
+
+  const handleImageError = () => {
+    // Fall back gracefully to category showcase image if specific packshot fails
+    const cat = (product.category || '').toLowerCase().replace(/\s+/g, '');
+    if (cat.includes('dairy')) {
+      setImgSrc('./images/dairy_showcase.jpg');
+    } else if (cat.includes('ice')) {
+      setImgSrc('./images/icecream_showcase.jpg');
+    } else if (cat.includes('veg')) {
+      setImgSrc('./images/vegetables_showcase.jpg');
+    } else if (cat.includes('groc')) {
+      setImgSrc('./images/grocery_showcase.jpg');
+    } else if (cat.includes('stat')) {
+      setImgSrc('./images/stationery_showcase.jpg');
+    } else {
+      setImgSrc('./images/cleaning_showcase.jpg');
+    }
+  };
 
   const getCategoryBadge = (category) => {
     switch (category?.toLowerCase()?.replace(/\s+/g, '')) {
@@ -57,8 +80,9 @@ export default function ProductCard({ product, cartQty, onAddToCart, onUpdateQty
       {/* Product Image & Badges */}
       <div className="relative aspect-square w-full overflow-hidden bg-gray-50">
         <img
-          src={product.image}
+          src={imgSrc}
           alt={product.name}
+          onError={handleImageError}
           className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
             isOutOfStock ? 'grayscale opacity-60' : ''
           }`}

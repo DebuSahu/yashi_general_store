@@ -32,9 +32,9 @@ export default function AuthModal({
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Admin state
-  const [adminUsername, setAdminUsername] = useState('admin');
-  const [adminPassword, setAdminPassword] = useState('admin123');
+  // Admin state - empty by default for security
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoading, setAdminLoading] = useState(false);
 
@@ -324,7 +324,7 @@ export default function AuthModal({
                 <input
                   type="text"
                   required
-                  placeholder="admin"
+                  placeholder="Enter admin username"
                   value={adminUsername}
                   onChange={(e) => setAdminUsername(e.target.value)}
                   className="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 font-semibold"
@@ -344,7 +344,7 @@ export default function AuthModal({
                 <input
                   type={showAdminPassword ? 'text' : 'password'}
                   required
-                  placeholder="••••••••"
+                  placeholder="Enter secure password"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   className="w-full pl-9 pr-10 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 font-semibold"
@@ -359,9 +359,9 @@ export default function AuthModal({
               </div>
             </div>
 
-            <div className="text-[11px] text-gray-500 bg-purple-50/60 p-2.5 rounded-xl border border-purple-100 flex items-center justify-between">
-              <span>Admin verification required</span>
-              <span className="font-mono text-purple-700 font-bold">admin / admin123</span>
+            <div className="text-[11px] text-gray-600 bg-purple-50/70 p-2.5 rounded-xl border border-purple-100 flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5 text-purple-700 shrink-0" />
+              <span>Restricted to authorized store personnel only. Login attempts are monitored.</span>
             </div>
 
             <button

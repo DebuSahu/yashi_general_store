@@ -9,6 +9,7 @@ import OrderTrackerModal from './components/OrderTrackerModal';
 import LocationPicker from './components/LocationPicker';
 import AdminDashboard from './pages/AdminDashboard';
 import YGSLogo from './components/YGSLogo';
+import defaultData from './defaultData.json';
 import { api } from './api';
 import {
   Carrot,
@@ -32,12 +33,12 @@ import {
 
 export default function App() {
   const [isAdminView, setIsAdminView] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [products, setProducts] = useState(defaultData.products || []);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [shopSettings, setShopSettings] = useState(null);
+  const [shopSettings, setShopSettings] = useState(defaultData.settings || null);
 
   // Cart state
   const [cart, setCart] = useState(() => {
@@ -96,12 +97,26 @@ export default function App() {
         api.getProducts(selectedCategory, searchTerm)
       ]);
 
-      if (settingsRes.success) {
+      if (settingsRes?.settings) {
         setShopSettings(settingsRes.settings);
+      } else if (settingsRes && typeof settingsRes === 'object') {
+        setShopSettings(settingsRes);
       }
-      if (productsRes.success) {
-        setProducts(productsRes.products || []);
+
+      let prods = [];
+      if (productsRes?.products && Array.isArray(productsRes.products)) {
+        prods = productsRes.products;
+      } else if (Array.isArray(productsRes)) {
+        prods = productsRes;
+      } else if (productsRes?.success && Array.isArray(productsRes.products)) {
+        prods = productsRes.products;
       }
+
+      if (!prods || prods.length === 0) {
+        prods = defaultData.products || [];
+      }
+
+      setProducts(prods);
     } catch (err) {
       console.error('Error fetching initial store data:', err);
     } finally {
