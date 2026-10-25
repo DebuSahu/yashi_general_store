@@ -205,6 +205,29 @@ export default function App() {
     setIsAdminView(false);
   };
 
+  // Admin Direct In-Stock / Out of Stock updater from Storefront
+  const handleToggleProductStock = async (productId, inStock) => {
+    // 1. Optimistic UI update
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (p.id === productId) {
+          const updatedStock = inStock ? (p.stock > 0 ? p.stock : 25) : 0;
+          return { ...p, inStock, stock: updatedStock };
+        }
+        return p;
+      })
+    );
+
+    // 2. Persist update
+    try {
+      const target = products.find((p) => p.id === productId);
+      const updatedStock = inStock ? (target?.stock > 0 ? target.stock : 25) : 0;
+      await api.updateProduct(productId, { inStock, stock: updatedStock }, adminUser?.token);
+    } catch (err) {
+      console.error('Failed to update product stock:', err);
+    }
+  };
+
   const handleOpenAdmin = () => {
     if (adminUser) {
       setIsAdminView(true);
@@ -485,6 +508,8 @@ export default function App() {
                     cartQty={cart[product.id]?.quantity || 0}
                     onAddToCart={handleAddToCart}
                     onUpdateQty={handleUpdateQty}
+                    isAdmin={Boolean(adminUser)}
+                    onToggleStock={handleToggleProductStock}
                   />
                 ))}
               </div>
@@ -589,6 +614,8 @@ export default function App() {
                         cartQty={cart[product.id]?.quantity || 0}
                         onAddToCart={handleAddToCart}
                         onUpdateQty={handleUpdateQty}
+                        isAdmin={Boolean(adminUser)}
+                        onToggleStock={handleToggleProductStock}
                       />
                     ))}
                   </div>
@@ -663,6 +690,8 @@ export default function App() {
                           cartQty={cart[product.id]?.quantity || 0}
                           onAddToCart={handleAddToCart}
                           onUpdateQty={handleUpdateQty}
+                          isAdmin={Boolean(adminUser)}
+                          onToggleStock={handleToggleProductStock}
                         />
                       ))}
                     </div>

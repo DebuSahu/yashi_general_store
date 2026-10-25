@@ -1,7 +1,14 @@
 import React from 'react';
 import { Plus, Minus, ShoppingCart, Carrot, ShoppingBag, Package, Milk, IceCream, BookOpen } from 'lucide-react';
 
-export default function ProductCard({ product, cartQty, onAddToCart, onUpdateQty }) {
+export default function ProductCard({
+  product,
+  cartQty,
+  onAddToCart,
+  onUpdateQty,
+  isAdmin = false,
+  onToggleStock
+}) {
   const isOutOfStock = product.inStock === false || product.stock === 0;
   const [imgSrc, setImgSrc] = React.useState(product.image);
 
@@ -189,6 +196,47 @@ export default function ProductCard({ product, cartQty, onAddToCart, onUpdateQty
             </button>
           )}
         </div>
+
+        {/* Direct Admin In-Stock / Out of Stock Control */}
+        {isAdmin && (
+          <div className="mt-3 pt-2 border-t border-dashed border-purple-200 flex items-center justify-between gap-1 bg-purple-50/50 -mx-3 -mb-3 sm:-mx-4 sm:-mb-4 p-2.5 rounded-b-2xl">
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700">
+              Admin:
+            </span>
+            <div className="inline-flex rounded-lg bg-white p-0.5 border border-purple-200 shadow-2xs">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleStock?.(product.id, true);
+                }}
+                className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold transition ${
+                  !isOutOfStock
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-gray-500 hover:text-emerald-700'
+                }`}
+                title="Directly mark In Stock"
+              >
+                In Stock
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleStock?.(product.id, false);
+                }}
+                className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold transition ${
+                  isOutOfStock
+                    ? 'bg-red-600 text-white shadow-xs'
+                    : 'text-gray-500 hover:text-red-700'
+                }`}
+                title="Directly mark Out of Stock"
+              >
+                Out of Stock
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
 
