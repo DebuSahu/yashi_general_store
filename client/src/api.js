@@ -1,149 +1,410 @@
+import defaultData from './defaultData.json';
+
+// Dynamic API Base URL
+// On GitHub Pages (github.io), defaults to local browser fallback unless VITE_API_BASE is set
+const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
 const API_BASE = import.meta.env.VITE_API_BASE || 
-  (typeof window !== 'undefined' && window.location.port === '5173' 
-    ? 'http://localhost:5000/api' 
-    : '/api');
+  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? (window.location.port === '5173' || window.location.port === '3000' ? 'http://localhost:5000/api' : '/api')
+    : (isGitHubPages ? null : '/api'));
+
+// Haversine formula for 5km delivery radius calculation
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round((R * c) * 10) / 10;
+}
+
+// LocalStorage helpers for standalone GitHub Pages mode
+function getLocalStore(key, defaultValue) {
+  try {
+    const val = localStorage.getItem(`ygs_${key}`);
+    return val ? JSON.parse(val) : defaultValue;
+  } catch (e) {
+    return defaultValue;
+  }
+}
+
+function setLocalStore(key, value) {
+  try {
+    localStorage.setItem(`ygs_${key}`, JSON.stringify(value));
+  } catch (e) {
+    console.warn('LocalStorage error:', e);
+  }
+}
+
+// Initialize local mock data
+function initLocalData() {
+  if (!getLocalStore('products', null)) {
+    setLocalStore('products', defaultData.products || []);
+  }
+  if (!getLocalStore('settings', null)) {
+    setLocalStore('settings', defaultData.settings || {});
+  }
+  if (!getLocalStore('orders', null)) {
+    setLocalStore('orders', []);
+  }
+}
+initLocalData();
 
 export const api = {
   // Store Settings & 5km Radius check
   getSettings: async (lat, lon) => {
-    let url = `${API_BASE}/settings`;
-    if (lat && lon) {
-      url += `?lat=${lat}&lon=${lon}`;
+    if (API_BASE) {
+      try {
+        let url = `${API_BASE}/settings`;
+        if (lat && lon) url += `?lat=${lat}&lon=${lon}`;
+        const res = await fetch(url);
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local store settings:', err.message);
+      }
     }
-    const res = await fetch(url);
-    return res.json();
+
+    const settings = getLocalStore('settings', defaultData.settings);
+    let distanceKm = null;
+    let withinDeliveryRadius = true;
+
+    if (lat && lon && settings.latitude && settings.longitude) {
+      distanceKm = calculateDistanceKm(
+        parseFloat(settings.latitude),
+        parseFloat(settings.longitude),
+        parseFloat(lat),
+        parseFloat(lon)
+      );
+      withinDeliveryRadius = distanceKm <= (settings.maxDeliveryRadiusKm || 5);
+    }
+
+    return {
+      storeName: settings.storeName || 'Yashi General Store',
+      acronym: settings.acronym || 'YGS',
+      tagline: settings.tagline || 'Your Daily Grocery, Fresh Vegetables & Dairy',
+      phone: settings.phone || '+91 98765 43210',
+      email: settings.email || 'contact@yashigeneralstore.com',
+      address: settings.address || 'Shop No. 12, Main Market Road',
+      latitude: settings.latitude || 21.2514,
+      longitude: settings.longitude || 81.6296,
+      maxDeliveryRadiusKm: settings.maxDeliveryRadiusKm || 5,
+      minOrderAmount: settings.minOrderAmount || 100,
+      deliveryFee: settings.deliveryFee || 0,
+      userLocation: lat && lon ? { latitude: parseFloat(lat), longitude: parseFloat(lon) } : null,
+      distanceKm,
+      withinDeliveryRadius
+    };
   },
 
   updateSettings: async (settingsData, token) => {
-    const res = await fetch(`${API_BASE}/settings`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(settingsData)
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/settings`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(settingsData)
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local settings update:', err.message);
+      }
+    }
+
+    const current = getLocalStore('settings', defaultData.settings);
+    const updated = { ...current, ...settingsData };
+    setLocalStore('settings', updated);
+    return { success: true, message: 'Store settings updated successfully', settings: updated };
   },
 
   // Products
   getProducts: async (category = 'all', search = '') => {
-    const params = new URLSearchParams();
-    if (category && category !== 'all') params.append('category', category);
-    if (search) params.append('search', search);
+    if (API_BASE) {
+      try {
+        const params = new URLSearchParams();
+        if (category && category !== 'all') params.append('category', category);
+        if (search) params.append('search', search);
+        const res = await fetch(`${API_BASE}/products?${params.toString()}`);
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local products data:', err.message);
+      }
+    }
 
-    const res = await fetch(`${API_BASE}/products?${params.toString()}`);
-    return res.json();
+    let products = getLocalStore('products', defaultData.products || []);
+    if (category && category !== 'all') {
+      products = products.filter(p => (p.category || '').toLowerCase() === category.toLowerCase());
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      products = products.filter(p =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.brand || '').toLowerCase().includes(q) ||
+        (p.description || '').toLowerCase().includes(q)
+      );
+    }
+    return products;
   },
 
   addProduct: async (productData, token) => {
-    const res = await fetch(`${API_BASE}/products`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(productData)
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/products`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(productData)
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local product creation:', err.message);
+      }
+    }
+
+    const products = getLocalStore('products', defaultData.products || []);
+    const newProduct = {
+      ...productData,
+      id: `prod-${Date.now()}`,
+      inStock: productData.inStock !== false
+    };
+    products.unshift(newProduct);
+    setLocalStore('products', products);
+    return newProduct;
   },
 
   updateProduct: async (id, productData, token) => {
-    const res = await fetch(`${API_BASE}/products/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(productData)
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/products/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(productData)
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local product update:', err.message);
+      }
+    }
+
+    const products = getLocalStore('products', defaultData.products || []);
+    const index = products.findIndex(p => p.id === id);
+    if (index !== -1) {
+      products[index] = { ...products[index], ...productData };
+      setLocalStore('products', products);
+      return products[index];
+    }
+    return productData;
   },
 
   deleteProduct: async (id, token) => {
-    const res = await fetch(`${API_BASE}/products/${id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/products/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local product deletion:', err.message);
       }
-    });
-    return res.json();
+    }
+
+    let products = getLocalStore('products', defaultData.products || []);
+    products = products.filter(p => p.id !== id);
+    setLocalStore('products', products);
+    return { success: true, message: 'Product removed' };
   },
 
   // Upload local photo
   uploadImage: async (imageBase64, filename, token) => {
-    const res = await fetch(`${API_BASE}/upload`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ image: imageBase64, filename })
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ image: imageBase64, filename })
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to base64 image representation:', err.message);
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Photo uploaded to local storage successfully',
+      url: imageBase64
+    };
   },
 
   // User Mobile OTP
   sendOtp: async (phone) => {
-    const res = await fetch(`${API_BASE}/auth/send-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone })
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/send-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to simulated OTP:', err.message);
+      }
+    }
+
+    return {
+      success: true,
+      message: 'OTP sent successfully to ' + phone,
+      testOtp: '123456',
+      phone
+    };
   },
 
   verifyOtp: async (phone, otp, name) => {
-    const res = await fetch(`${API_BASE}/auth/verify-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, otp, name })
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, otp, name })
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to simulated OTP verification:', err.message);
+      }
+    }
+
+    return {
+      success: true,
+      token: 'demo-user-token-' + Date.now(),
+      user: { phone, name: name || 'Valued Customer' }
+    };
   },
 
   // Admin Login
   adminLogin: async (username, password) => {
-    const res = await fetch(`${API_BASE}/auth/admin-login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/admin-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local admin verification:', err.message);
+      }
+    }
+
+    if (username === 'admin' && password === 'admin123') {
+      return {
+        success: true,
+        token: 'admin-jwt-token-' + Date.now(),
+        admin: { username: 'admin', storeName: 'Yashi General Store' }
+      };
+    }
+    return { error: 'Invalid admin username or password' };
   },
 
   // Orders & Delivery Requests
   submitOrder: async (orderData) => {
-    const res = await fetch(`${API_BASE}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local order submission:', err.message);
+      }
+    }
+
+    // Validate 100rs minimum order
+    const total = orderData.totalAmount || orderData.items?.reduce((s, i) => s + (i.price * i.quantity), 0) || 0;
+    if (total < 100) {
+      return {
+        error: `Minimum order value must be ₹100. Your current order total is ₹${total}. Please add items worth at least ₹${100 - total} more to proceed.`
+      };
+    }
+
+    const orders = getLocalStore('orders', []);
+    const newOrder = {
+      ...orderData,
+      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    orders.unshift(newOrder);
+    setLocalStore('orders', orders);
+    return newOrder;
   },
 
   getOrders: async (phone = '', status = 'all', token = null) => {
-    const params = new URLSearchParams();
-    if (phone) params.append('phone', phone);
-    if (status && status !== 'all') params.append('status', status);
+    if (API_BASE) {
+      try {
+        const params = new URLSearchParams();
+        if (phone) params.append('phone', phone);
+        if (status && status !== 'all') params.append('status', status);
+        const headers = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+        const res = await fetch(`${API_BASE}/orders?${params.toString()}`, { headers });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local orders query:', err.message);
+      }
+    }
 
-    const headers = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
-
-    const res = await fetch(`${API_BASE}/orders?${params.toString()}`, { headers });
-    return res.json();
+    let orders = getLocalStore('orders', []);
+    if (phone) {
+      orders = orders.filter(o => o.customerPhone === phone);
+    }
+    if (status && status !== 'all') {
+      orders = orders.filter(o => o.status === status);
+    }
+    return orders;
   },
 
   updateOrderStatus: async (id, status, token, note = '') => {
-    const res = await fetch(`${API_BASE}/orders/${id}/status`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ status, note })
-    });
-    return res.json();
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/orders/${id}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status, note })
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local order status update:', err.message);
+      }
+    }
+
+    const orders = getLocalStore('orders', []);
+    const order = orders.find(o => o.id === id);
+    if (order) {
+      order.status = status;
+      order.updatedAt = new Date().toISOString();
+      if (note) order.adminNote = note;
+      setLocalStore('orders', orders);
+      return { success: true, message: 'Order status updated', order };
+    }
+    return { error: 'Order not found' };
   }
 };
-
