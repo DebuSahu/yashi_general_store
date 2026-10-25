@@ -522,12 +522,12 @@ export default function App() {
           <div className="space-y-10 sm:space-y-12">
             
             {/* Top Store Overview Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 pb-3 border-b border-gray-200">
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
                   Shop by Categories
                 </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5 leading-normal break-words">
                   Browse {products.length} daily essentials available for superfast 5km delivery
                 </p>
               </div>
@@ -555,41 +555,47 @@ export default function App() {
                   {/* Category Section Header & AI Banner */}
                   <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-3.5 sm:mb-6 border border-gray-200 bg-white shadow-2xs">
                     <div className="flex flex-col md:flex-row items-stretch justify-between">
-                      <div className="p-3.5 sm:p-5 flex-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                        <div className="flex items-center space-x-3 min-w-0">
-                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center ${section.colorClass} border shadow-xs shrink-0`}>
-                            <SectionIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                              <h2 className="text-base sm:text-2xl font-black text-gray-900 tracking-tight">
-                                {section.label}
-                              </h2>
-                              <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
-                                {sectionProducts.length} Items
-                              </span>
+                      <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between gap-2.5 sm:gap-4">
+                        
+                        {/* Header Row: Icon + Title + Pill on left, View All on right */}
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+                            <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center ${section.colorClass} border shadow-xs shrink-0`}>
+                              <SectionIcon className="w-4 h-4 sm:w-6 sm:h-6" />
                             </div>
-                            <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate mt-0.5">
-                              {section.description}
-                            </p>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <h2 className="text-sm sm:text-2xl font-black text-gray-900 tracking-tight">
+                                  {section.label}
+                                </h2>
+                                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                                  {sectionProducts.length} Items
+                                </span>
+                              </div>
+                            </div>
                           </div>
+
+                          <button
+                            onClick={() => {
+                              setSelectedCategory(section.id);
+                              window.scrollTo({ top: 350, behavior: 'smooth' });
+                            }}
+                            className="shrink-0 inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-emerald-200 transition active:scale-95"
+                          >
+                            <span>View All</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
                         </div>
 
-                        <button
-                          onClick={() => {
-                            setSelectedCategory(section.id);
-                            window.scrollTo({ top: 350, behavior: 'smooth' });
-                          }}
-                          className="self-end sm:self-auto shrink-0 inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-emerald-200 transition active:scale-95"
-                        >
-                          <span>View All</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
+                        {/* Description: full width, clean wrapping with NO cut off words */}
+                        <p className="text-[11px] sm:text-xs text-gray-600 font-medium leading-normal break-words">
+                          {section.description}
+                        </p>
                       </div>
 
                       {/* AI Category Showcase Thumbnail */}
                       {section.bannerImage && (
-                        <div className="w-full md:w-56 h-24 sm:h-32 md:h-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
+                        <div className="w-full md:w-56 h-28 sm:h-36 md:h-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
                           <img
                             src={section.bannerImage}
                             alt={`${section.label} Showcase`}
@@ -599,7 +605,7 @@ export default function App() {
                           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 via-transparent to-transparent flex items-end md:items-center p-2 text-white">
                             <span className="bg-black/60 px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold backdrop-blur-xs flex items-center gap-1">
                               <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
-                              <span>Showcase</span>
+                              <span>{section.label} Showcase</span>
                             </span>
                           </div>
                         </div>
@@ -642,15 +648,15 @@ export default function App() {
                 <div>
                   {/* Category Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 mb-6 border-b border-gray-200">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center ${activeCat.colorClass} border shadow-2xs`}>
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center ${activeCat.colorClass} border shadow-2xs shrink-0`}>
                         <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
-                      <div>
-                        <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                      <div className="min-w-0">
+                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
                           {activeCat.label}
                         </h2>
-                        <p className="text-xs text-gray-500 font-medium">
+                        <p className="text-[11px] sm:text-xs text-gray-500 font-medium break-words leading-normal mt-0.5">
                           {activeCat.description} • {displayedProducts.length} items available
                         </p>
                       </div>
