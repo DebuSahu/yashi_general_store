@@ -68,15 +68,16 @@ export default function AuthModal({
     setLoading(true);
     try {
       const res = await api.sendOtp(clean);
-      if (res.success) {
+      if (res && res.success) {
+        const code = String(res.simulatedOtp || res.testOtp || '123456');
         setOtpSent(true);
-        setSimulatedOtp(res.simulatedOtp);
-        setOtp(res.simulatedOtp); // Auto-fill for convenience
+        setSimulatedOtp(code);
+        setOtp(code); // Auto-fill for convenience
       } else {
-        setError(res.error || 'Failed to send OTP');
+        setError(res?.error || 'Failed to send OTP');
       }
     } catch (err) {
-      setError('Failed to connect to server');
+      setError('Failed to connect to server: ' + (err?.message || 'unknown error'));
     } finally {
       setLoading(false);
     }
@@ -85,22 +86,23 @@ export default function AuthModal({
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setError('');
-    if (!otp) {
+    const currentOtp = (otp || '').trim();
+    if (!currentOtp) {
       setError('Please enter the OTP');
       return;
     }
 
     setLoading(true);
     try {
-      const res = await api.verifyOtp(phone, otp, name.trim());
-      if (res.success) {
+      const res = await api.verifyOtp(phone, currentOtp, (name || '').trim());
+      if (res && res.success) {
         onLoginSuccess(res.user, res.token);
         onClose();
       } else {
-        setError(res.error || 'Invalid OTP');
+        setError(res?.error || 'Invalid OTP');
       }
     } catch (err) {
-      setError('Error verifying OTP');
+      setError('Error verifying OTP: ' + (err?.message || 'unknown error'));
     } finally {
       setLoading(false);
     }
@@ -277,7 +279,7 @@ export default function AuthModal({
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength="6"
-                    value={otp}
+                    value={otp || ''}
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="123456"
                     className="w-full px-4 py-2 text-center text-lg tracking-widest font-mono font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
@@ -287,7 +289,7 @@ export default function AuthModal({
 
                 <button
                   type="submit"
-                  disabled={loading || otp.length < 4}
+                  disabled={loading || (otp || '').length < 4}
                   className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
                 >
                   {loading ? 'Verifying...' : 'Verify Mobile & Login'}

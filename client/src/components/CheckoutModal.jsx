@@ -55,15 +55,16 @@ export default function CheckoutModal({
     setAuthLoading(true);
     try {
       const res = await api.sendOtp(phone);
-      if (res.success) {
+      if (res && res.success) {
+        const code = String(res.simulatedOtp || res.testOtp || '123456');
         setOtpSent(true);
-        setSimulatedOtp(res.simulatedOtp);
-        setOtp(res.simulatedOtp); // Auto-fill for friction-free testing
+        setSimulatedOtp(code);
+        setOtp(code); // Auto-fill for friction-free testing
       } else {
-        setAuthError(res.error || 'Failed to send OTP');
+        setAuthError(res?.error || 'Failed to send OTP');
       }
     } catch (err) {
-      setAuthError('Network error connecting to store server');
+      setAuthError('Network error connecting to store server: ' + (err?.message || ''));
     } finally {
       setAuthLoading(false);
     }
@@ -79,22 +80,23 @@ export default function CheckoutModal({
       return;
     }
 
-    if (!otp) {
+    const currentOtp = (otp || '').trim();
+    if (!currentOtp) {
       setAuthError('Please enter the 6-digit OTP');
       return;
     }
 
     setAuthLoading(true);
     try {
-      const res = await api.verifyOtp(phone, otp, customerName.trim());
-      if (res.success) {
+      const res = await api.verifyOtp(phone, currentOtp, customerName.trim());
+      if (res && res.success) {
         onUserVerified?.(res.user, res.token);
         setStep(2); // Proceed to address and location step
       } else {
-        setAuthError(res.error || 'Invalid OTP');
+        setAuthError(res?.error || 'Invalid OTP');
       }
     } catch (err) {
-      setAuthError('Error verifying OTP');
+      setAuthError('Error verifying OTP: ' + (err?.message || ''));
     } finally {
       setAuthLoading(false);
     }
@@ -300,7 +302,7 @@ export default function CheckoutModal({
                       inputMode="numeric"
                       pattern="[0-9]*"
                       maxLength="6"
-                      value={otp}
+                      value={otp || ''}
                       onChange={(e) => setOtp(e.target.value)}
                       placeholder="123456"
                       className="w-full px-4 py-2.5 text-center text-lg tracking-widest font-mono font-bold bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
@@ -310,7 +312,7 @@ export default function CheckoutModal({
 
                   <button
                     type="submit"
-                    disabled={authLoading || otp.length < 4}
+                    disabled={authLoading || (otp || '').length < 4}
                     className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
                   >
                     {authLoading ? 'Verifying...' : 'Verify & Continue'}

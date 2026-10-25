@@ -552,64 +552,62 @@ export default function App() {
                   id={`section-${section.id}`}
                   className="scroll-mt-36 w-full max-w-full min-w-0"
                 >
-                  {/* Category Section Header & AI Banner */}
-                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-3.5 sm:mb-6 border border-gray-200 bg-white shadow-2xs">
-                    <div className="flex flex-col md:flex-row items-stretch justify-between">
-                      <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between gap-2.5 sm:gap-4">
-                        
-                        {/* Header Row: Icon + Title + Pill on left, View All on right */}
-                        <div className="flex items-center justify-between gap-2 min-w-0">
-                          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
-                            <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center ${section.colorClass} border shadow-xs shrink-0`}>
-                              <SectionIcon className="w-4 h-4 sm:w-6 sm:h-6" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                <h2 className="text-sm sm:text-2xl font-black text-gray-900 tracking-tight">
-                                  {section.label}
-                                </h2>
-                                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
-                                  {sectionProducts.length} Items
-                                </span>
-                              </div>
+                  {/* Category Section Header with Showcase Blurred Background */}
+                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-3.5 sm:mb-6 border border-gray-200/80 shadow-md group min-h-[140px] sm:min-h-[175px] md:min-h-[195px] flex flex-col justify-between bg-slate-900">
+                    {/* Background Showcase Image */}
+                    {section.bannerImage && (
+                      <img
+                        src={section.bannerImage}
+                        alt={`${section.label} Showcase Background`}
+                        className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    )}
+
+                    {/* Glassmorphic Gradient & Blur Overlay for High Contrast & Text Legibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/35 backdrop-blur-[2px] sm:backdrop-blur-sm" />
+
+                    {/* Foreground Content */}
+                    <div className="relative z-10 p-3.5 sm:p-5 md:p-6 flex flex-col justify-between h-full gap-2.5 sm:gap-3.5">
+                      
+                      {/* Header Row: Icon + Title + Items Pill on left, View All on right */}
+                      <div className="flex items-center justify-between gap-2.5 min-w-0">
+                        <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-md shrink-0">
+                            <SectionIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap">
+                              <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                {section.label}
+                              </h2>
+                              <span className="text-[10px] sm:text-xs font-black uppercase px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-500/95 text-white shadow-xs backdrop-blur-xs border border-emerald-400/40">
+                                {sectionProducts.length} Items
+                              </span>
+                              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-yellow-300 bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-full border border-yellow-300/30">
+                                <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
+                                <span>Showcase</span>
+                              </span>
                             </div>
                           </div>
-
-                          <button
-                            onClick={() => {
-                              setSelectedCategory(section.id);
-                              window.scrollTo({ top: 350, behavior: 'smooth' });
-                            }}
-                            className="shrink-0 inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-emerald-200 transition active:scale-95"
-                          >
-                            <span>View All</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </button>
                         </div>
 
-                        {/* Description: full width, clean wrapping with NO cut off words */}
-                        <p className="text-[11px] sm:text-xs text-gray-600 font-medium leading-normal break-words">
-                          {section.description}
-                        </p>
+                        <button
+                          onClick={() => {
+                            setSelectedCategory(section.id);
+                            window.scrollTo({ top: 350, behavior: 'smooth' });
+                          }}
+                          className="shrink-0 inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-gray-900 bg-white/95 hover:bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-md transition active:scale-95 border border-white/60 hover:shadow-lg"
+                        >
+                          <span>View All</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-emerald-700" />
+                        </button>
                       </div>
 
-                      {/* AI Category Showcase Thumbnail */}
-                      {section.bannerImage && (
-                        <div className="w-full md:w-64 lg:w-72 aspect-[4/3] md:aspect-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
-                          <img
-                            src={section.bannerImage}
-                            alt={`${section.label} Showcase`}
-                            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                            onError={(e) => { e.target.style.display = 'none'; }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 via-transparent to-transparent flex items-end md:items-center p-2.5 sm:p-3 text-white">
-                            <span className="bg-black/60 px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold backdrop-blur-xs flex items-center gap-1 shadow-sm">
-                              <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
-                              <span>{section.label} Showcase</span>
-                            </span>
-                          </div>
-                        </div>
-                      )}
+                      {/* Description with Increased Size & High Contrast Text */}
+                      <p className="text-xs sm:text-sm md:text-base text-gray-100 font-medium leading-relaxed max-w-2xl drop-shadow-sm">
+                        {section.description}
+                      </p>
                     </div>
                   </div>
 
@@ -646,34 +644,53 @@ export default function App() {
 
               return (
                 <div>
-                  {/* Category Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 mb-6 border-b border-gray-200">
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center ${activeCat.colorClass} border shadow-2xs shrink-0`}>
-                        <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </div>
-                      <div className="min-w-0">
-                        <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
-                          {activeCat.label}
-                        </h2>
-                        <p className="text-[11px] sm:text-xs text-gray-500 font-medium break-words leading-normal mt-0.5">
-                          {activeCat.description} • {displayedProducts.length} items available
-                        </p>
-                      </div>
-                    </div>
+                  {/* Category Header Card with Showcase Blurred Background */}
+                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-4 sm:mb-6 border border-gray-200/80 shadow-md group min-h-[140px] sm:min-h-[175px] md:min-h-[195px] flex flex-col justify-between bg-slate-900">
+                    {/* Background Showcase Image */}
+                    {activeCat.bannerImage && (
+                      <img
+                        src={activeCat.bannerImage}
+                        alt={`${activeCat.label} Showcase Background`}
+                        className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    )}
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSelectedCategory('all')}
-                        className="text-xs font-bold text-gray-700 hover:text-emerald-700 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-xl transition"
-                      >
-                        &larr; View All Categories
-                      </button>
+                    {/* Glassmorphic Gradient & Blur Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/35 backdrop-blur-[2px] sm:backdrop-blur-sm" />
 
-                      <div className="hidden sm:flex items-center space-x-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                        <Truck className="w-4 h-4" />
-                        <span>≤ 5 km Delivery</span>
+                    {/* Foreground Content */}
+                    <div className="relative z-10 p-3.5 sm:p-5 md:p-6 flex flex-col justify-between h-full gap-2.5 sm:gap-3.5">
+                      <div className="flex items-center justify-between gap-2.5 min-w-0">
+                        <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-md shrink-0">
+                            <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap">
+                              <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                {activeCat.label}
+                              </h2>
+                              <span className="text-[10px] sm:text-xs font-black uppercase px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-500/95 text-white shadow-xs backdrop-blur-xs border border-emerald-400/40">
+                                {displayedProducts.length} Items
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => setSelectedCategory('all')}
+                            className="shrink-0 inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-gray-900 bg-white/95 hover:bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-md transition active:scale-95 border border-white/60 hover:shadow-lg"
+                          >
+                            <span>&larr; All Categories</span>
+                          </button>
+                        </div>
                       </div>
+
+                      <p className="text-xs sm:text-sm md:text-base text-gray-100 font-medium leading-relaxed max-w-2xl drop-shadow-sm">
+                        {activeCat.description}
+                      </p>
                     </div>
                   </div>
 
