@@ -59,6 +59,22 @@ export default function App() {
     }
   });
 
+  // Admin auth state
+  const [adminUser, setAdminUser] = useState(() => {
+    try {
+      const token = localStorage.getItem('gs_admin_token');
+      const savedUser = localStorage.getItem('gs_admin_user');
+      if (token && savedUser) {
+        return { username: savedUser, token };
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  });
+
+  const [authInitialTab, setAuthInitialTab] = useState('user');
+
   // Modals
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
@@ -154,13 +170,43 @@ export default function App() {
     localStorage.removeItem('gs_user_token');
   };
 
-  // Switch to Admin Dashboard View if requested
-  if (isAdminView) {
+  const handleAdminLoginSuccess = (adminData, token) => {
+    const userObj = {
+      username: adminData.username || 'admin',
+      name: adminData.name || adminData.username || 'Store Admin',
+      role: adminData.role || 'admin',
+      token
+    };
+    setAdminUser(userObj);
+    localStorage.setItem('gs_admin_token', token);
+    localStorage.setItem('gs_admin_user', userObj.username);
+    setIsAdminView(true);
+  };
+
+  const handleLogoutAdmin = () => {
+    setAdminUser(null);
+    localStorage.removeItem('gs_admin_token');
+    localStorage.removeItem('gs_admin_user');
+    setIsAdminView(false);
+  };
+
+  const handleOpenAdmin = () => {
+    if (adminUser) {
+      setIsAdminView(true);
+    } else {
+      setAuthInitialTab('admin');
+      setAuthModalOpen(true);
+    }
+  };
+
+  // Switch to Admin Dashboard View if requested and authenticated as admin
+  if (isAdminView && adminUser) {
     return (
       <AdminDashboard
         shopSettings={shopSettings}
         onSettingsUpdated={(newSettings) => setShopSettings(newSettings)}
         onBackToStore={() => setIsAdminView(false)}
+        onLogoutAdmin={handleLogoutAdmin}
       />
     );
   }
@@ -239,11 +285,16 @@ export default function App() {
         cartCount={cartCount}
         cartTotal={cartTotal}
         onOpenCart={() => setCartDrawerOpen(true)}
-        onOpenAuth={() => setAuthModalOpen(true)}
+        onOpenAuth={() => {
+          setAuthInitialTab('user');
+          setAuthModalOpen(true);
+        }}
         onOpenOrders={() => setOrderTrackerOpen(true)}
-        onOpenAdmin={() => setIsAdminView(true)}
+        onOpenAdmin={handleOpenAdmin}
         user={user}
         onLogoutUser={handleLogoutUser}
+        adminUser={adminUser}
+        onLogoutAdmin={handleLogoutAdmin}
         shopSettings={shopSettings}
       />
 
@@ -671,10 +722,13 @@ export default function App() {
               <span className="text-sm font-bold text-white block mb-1">Portals</span>
               <div className="space-y-2 mt-2">
                 <button
-                  onClick={() => setAuthModalOpen(true)}
+                  onClick={() => {
+                    setAuthInitialTab('user');
+                    setAuthModalOpen(true);
+                  }}
                   className="block text-emerald-400 hover:underline"
                 >
-                  &rarr; Customer Mobile Login
+                  &rarr; Customer & Store Login
                 </button>
                 <button
                   onClick={() => setOrderTrackerOpen(true)}
@@ -682,12 +736,14 @@ export default function App() {
                 >
                   &rarr; Track My Delivery Request
                 </button>
-                <button
-                  onClick={() => setIsAdminView(true)}
-                  className="block text-purple-400 hover:underline font-bold"
-                >
-                  &rarr; Admin Management Portal
-                </button>
+                {adminUser && (
+                  <button
+                    onClick={() => setIsAdminView(true)}
+                    className="block text-purple-400 hover:underline font-bold"
+                  >
+                    &rarr; 🛡️ Admin Management Portal
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -728,11 +784,13 @@ export default function App() {
         }}
       />
 
-      {/* STANDALONE USER AUTH MODAL */}
+      {/* STANDALONE SINGLE UNIFIED AUTH MODAL (ADMIN & USER) */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         onLoginSuccess={handleUserVerified}
+        onAdminLoginSuccess={handleAdminLoginSuccess}
+        initialTab={authInitialTab}
       />
 
       {/* USER ORDER TRACKER MODAL */}

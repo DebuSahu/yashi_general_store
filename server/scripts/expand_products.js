@@ -442,3 +442,4 @@ if (clientData.admins) {
 fs.writeFileSync(CLIENT_DB_PATH, JSON.stringify(clientData, null, 2), 'utf-8');
 
 console.log(`Successfully added ${addedCount} new products! Total catalog now: ${db.products.length} products.`);
+

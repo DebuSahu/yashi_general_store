@@ -13,6 +13,8 @@ export default function Navbar({
   onOpenAdmin,
   user,
   onLogoutUser,
+  adminUser,
+  onLogoutAdmin,
   shopSettings
 }) {
   return (
@@ -76,7 +78,7 @@ export default function Navbar({
               <span>Track Orders</span>
             </button>
 
-            {/* User Login / Phone verification button */}
+            {/* Customer Login / Profile Badge */}
             {user ? (
               <div className="flex items-center space-x-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
                 <User className="h-4 w-4 text-emerald-700" />
@@ -93,25 +95,45 @@ export default function Navbar({
                   Logout
                 </button>
               </div>
-            ) : (
+            ) : !adminUser ? (
               <button
                 onClick={onOpenAuth}
                 className="flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-emerald-800 bg-emerald-100/80 hover:bg-emerald-200 rounded-xl transition"
               >
                 <User className="h-4 w-4" />
-                <span>User Login</span>
+                <span>Login</span>
               </button>
-            )}
+            ) : null}
 
-            {/* Admin Login Portal Link */}
-            <button
-              onClick={onOpenAdmin}
-              className="flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-gray-700 hover:text-purple-700 hover:bg-purple-50 rounded-xl border border-gray-200 transition"
-              title="Admin Portal (Catalog & Delivery Management)"
-            >
-              <ShieldCheck className="h-4 w-4 text-purple-600" />
-              <span className="hidden sm:inline">Admin Portal</span>
-            </button>
+            {/* Admin Portal Section: Visible ONLY when admin is logged in! */}
+            {adminUser && (
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={onOpenAdmin}
+                  className="flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-md shadow-purple-600/20 transition active:scale-95"
+                  title="Open Admin Portal"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Admin Portal</span>
+                </button>
+
+                <div className="hidden sm:flex items-center space-x-2 bg-purple-50 border border-purple-200 px-2.5 py-1.5 rounded-xl">
+                  <div className="text-left">
+                    <p className="text-[11px] font-bold text-purple-900 leading-tight flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                      {adminUser.username || 'Admin'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={onLogoutAdmin}
+                    className="text-[10px] text-gray-500 hover:text-red-600 ml-1 font-semibold underline"
+                    title="Logout Store Admin"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Cart Button */}
             <button
@@ -150,4 +172,3 @@ export default function Navbar({
     </header>
   );
 }
-

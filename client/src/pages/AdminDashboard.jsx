@@ -36,7 +36,7 @@ import {
 import YGSLogo from '../components/YGSLogo';
 import { api } from '../api';
 
-export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated }) {
+export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated, onLogoutAdmin }) {
   const [token, setToken] = useState(localStorage.getItem('gs_admin_token') || '');
   const [currentAdminUser, setCurrentAdminUser] = useState(localStorage.getItem('gs_admin_user') || 'admin');
   const [username, setUsername] = useState('admin');
@@ -146,6 +146,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     localStorage.removeItem('gs_admin_token');
     localStorage.removeItem('gs_admin_user');
     setToken('');
+    if (onLogoutAdmin) {
+      onLogoutAdmin();
+    } else {
+      onBackToStore?.();
+    }
   };
 
   // Fetch Admins
