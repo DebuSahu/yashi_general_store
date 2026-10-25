@@ -337,21 +337,21 @@ export default function App() {
       />
 
       {/* 3. HERO SECTION */}
-      <section className="relative bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 text-white overflow-hidden py-8 sm:py-12 lg:py-14">
+      <section className="relative bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 text-white overflow-hidden py-6 sm:py-12 lg:py-14">
         {/* Decorative background circles */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center">
             
-            <div className="lg:col-span-7 space-y-3 sm:space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-semibold text-emerald-100">
-                <Truck className="w-3.5 h-3.5 text-yellow-300" />
+            <div className="lg:col-span-7 space-y-2.5 sm:space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs font-semibold text-emerald-100">
+                <Truck className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
                 <span>Superfast Local Delivery • Strictly within 5 km of Shop</span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+              <h1 className="text-xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
                 Fresh Milk, Dairy, Vegetables & Grocery Delivered to Your Doorstep.
               </h1>
 
@@ -361,13 +361,13 @@ export default function App() {
               </p>
 
               {/* 5km Radius Highlight Badge */}
-              <div className="pt-2 flex flex-wrap items-center gap-3">
-                <div className="bg-emerald-900/60 backdrop-blur-md border border-emerald-400/40 rounded-2xl px-4 py-2.5 flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-yellow-400 text-emerald-950 flex items-center justify-center font-black text-lg">
+              <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+                <div className="bg-emerald-900/60 backdrop-blur-md border border-emerald-400/40 rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 flex items-center space-x-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-yellow-400 text-emerald-950 flex items-center justify-center font-black text-base sm:text-lg shrink-0">
                     5
                   </div>
-                  <div>
-                    <span className="text-xs font-black uppercase text-yellow-300 tracking-wider block">
+                  <div className="min-w-0">
+                    <span className="text-[10px] sm:text-xs font-black uppercase text-yellow-300 tracking-wider block">
                       Delivery Perimeter
                     </span>
                     <span className="text-xs text-white/90">
@@ -378,7 +378,7 @@ export default function App() {
 
                 <button
                   onClick={() => setEligibilityModalOpen(true)}
-                  className="px-4 py-3 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg transition active:scale-95 flex items-center gap-2"
+                  className="px-4 py-2.5 sm:py-3 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 shrink-0"
                 >
                   <MapPin className="w-4 h-4 text-emerald-700" />
                   <span>Check If We Deliver To You</span>
@@ -388,29 +388,29 @@ export default function App() {
 
             {/* Visual Hero Feature Showcase Card */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-emerald-950/40 group">
+              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-emerald-950/40 group">
                 <img
                   src="./images/hero_banner.jpg"
                   alt="Yashi General Store (YGS) Fresh Catalog"
-                  className="w-full h-56 sm:h-72 object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-44 sm:h-72 object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
                     e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80';
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4 sm:p-5 text-white">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-yellow-300 bg-emerald-900/90 border border-emerald-400/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-yellow-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-3.5 sm:p-5 text-white">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider text-yellow-300 bg-emerald-900/90 border border-emerald-400/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
                       <span>Actual Store Showcase</span>
                     </span>
-                    <span className="text-[10px] text-emerald-200 font-bold bg-white/10 px-2 py-0.5 rounded-full">
+                    <span className="text-[9px] sm:text-[10px] text-emerald-200 font-bold bg-white/10 px-2 py-0.5 rounded-full">
                       70+ Products
                     </span>
                   </div>
-                  <h3 className="text-sm sm:text-base font-black leading-tight text-white">
+                  <h3 className="text-xs sm:text-base font-black leading-tight text-white">
                     Fresh Farm Vegetables, Amul Dairy, Groceries & Stationery
                   </h3>
-                  <p className="text-[11px] text-emerald-200 mt-0.5">
+                  <p className="text-[10px] sm:text-[11px] text-emerald-200 mt-0.5">
                     Order online • Strictly delivered up to 5 km from shop location
                   </p>
                 </div>
@@ -422,9 +422,9 @@ export default function App() {
       </section>
 
       {/* 4. CATEGORY SELECTOR & FILTER TABS */}
-      <div className="sticky top-20 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-2.5 sm:py-3 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar scroll-smooth py-1">
+      <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-2 sm:py-3 shadow-xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
             {categoryPills.map((pill) => {
               const Icon = pill.icon;
               const isActive = selectedCategory === pill.id;
@@ -435,7 +435,7 @@ export default function App() {
                     setSelectedCategory(pill.id);
                     setSelectedBrand('all');
                   }}
-                  className={`flex-shrink-0 inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold transition active:scale-95 ${
+                  className={`flex-shrink-0 inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold transition active:scale-95 whitespace-nowrap ${
                     isActive
                       ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200/80 hover:text-emerald-700'
@@ -451,7 +451,7 @@ export default function App() {
       </div>
 
       {/* 5. PRODUCT CATALOG: DEDICATED SECTIONS PER CATEGORY */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-24 sm:py-8 flex-1">
         
         {/* Loading state */}
         {loadingProducts ? (
@@ -551,23 +551,23 @@ export default function App() {
                   className="scroll-mt-36"
                 >
                   {/* Category Section Header & AI Banner */}
-                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-4 sm:mb-6 border border-gray-200 bg-white shadow-2xs">
+                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-3.5 sm:mb-6 border border-gray-200 bg-white shadow-2xs">
                     <div className="flex flex-col md:flex-row items-stretch justify-between">
-                      <div className="p-4 sm:p-5 flex-1 flex items-center justify-between gap-4">
-                        <div className="flex items-center space-x-3.5">
-                          <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${section.colorClass} border shadow-xs shrink-0`}>
-                            <SectionIcon className="w-6 h-6" />
+                      <div className="p-3.5 sm:p-5 flex-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                        <div className="flex items-center space-x-3 min-w-0">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center ${section.colorClass} border shadow-xs shrink-0`}>
+                            <SectionIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                              <h2 className="text-base sm:text-2xl font-black text-gray-900 tracking-tight">
                                 {section.label}
                               </h2>
-                              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                              <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
                                 {sectionProducts.length} Items
                               </span>
                             </div>
-                            <p className="text-xs text-gray-500 font-medium mt-0.5">
+                            <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate mt-0.5">
                               {section.description}
                             </p>
                           </div>
@@ -578,24 +578,24 @@ export default function App() {
                             setSelectedCategory(section.id);
                             window.scrollTo({ top: 350, behavior: 'smooth' });
                           }}
-                          className="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition active:scale-95"
+                          className="self-end sm:self-auto shrink-0 inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-emerald-200 transition active:scale-95"
                         >
                           <span>View All</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRight className="w-3 h-3" />
                         </button>
                       </div>
 
                       {/* AI Category Showcase Thumbnail */}
                       {section.bannerImage && (
-                        <div className="w-full md:w-56 h-28 sm:h-32 md:h-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
+                        <div className="w-full md:w-56 h-24 sm:h-32 md:h-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
                           <img
                             src={section.bannerImage}
                             alt={`${section.label} Showcase`}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/50 via-transparent to-transparent flex items-end md:items-center p-2.5 text-white">
-                            <span className="bg-black/60 px-2 py-0.5 rounded text-[10px] font-bold backdrop-blur-xs flex items-center gap-1">
+                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 via-transparent to-transparent flex items-end md:items-center p-2 text-white">
+                            <span className="bg-black/60 px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold backdrop-blur-xs flex items-center gap-1">
                               <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
                               <span>Showcase</span>
                             </span>
@@ -704,33 +704,39 @@ export default function App() {
 
       </main>
 
-      {/* 6. FLOATING CART BAR (Mobile friendly) */}
+      {/* 6. FLOATING CART BAR (Mobile optimized) */}
       {cartCount > 0 && !cartDrawerOpen && (
-        <div className="fixed bottom-4 inset-x-4 max-w-md mx-auto z-30">
+        <div className="fixed bottom-3 inset-x-3 sm:bottom-5 sm:inset-x-4 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom duration-300">
           <div
             onClick={() => setCartDrawerOpen(true)}
-            className="bg-emerald-700 hover:bg-emerald-800 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer border border-emerald-500 transition transform hover:-translate-y-0.5 active:scale-98"
+            className="bg-emerald-700 hover:bg-emerald-800 text-white p-2.5 sm:p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer border border-emerald-500/60 transition active:scale-98"
           >
-            <div className="flex items-center space-x-3">
-              <span className="w-7 h-7 bg-white text-emerald-800 rounded-xl flex items-center justify-center font-black text-xs">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              <span className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-emerald-800 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
                 {cartCount}
               </span>
-              <div>
-                <p className="text-xs font-extrabold leading-tight">
-                  {cartCount} item{cartCount > 1 ? 's' : ''} in cart
-                </p>
-                <p className="text-[11px] text-emerald-200">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-black truncate">
+                    {cartCount} {cartCount === 1 ? 'item' : 'items'}
+                  </span>
+                  <span className="text-white/60">•</span>
+                  <span className="text-xs sm:text-sm font-black text-yellow-300 shrink-0">
+                    ₹{cartTotal}
+                  </span>
+                </div>
+                <p className="text-[10px] sm:text-[11px] text-emerald-200 truncate">
                   {cartTotal < (shopSettings?.minOrderAmount || 100)
-                    ? `Add ₹${(shopSettings?.minOrderAmount || 100) - cartTotal} more for Min Order ₹100`
-                    : 'Min Order Met • Strictly ≤5km Delivery'}
+                    ? `Add ₹${(shopSettings?.minOrderAmount || 100) - cartTotal} more for Min ₹100`
+                    : 'Free 5km Delivery • Ready'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-black">₹{cartTotal}</span>
-              <span className="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-xl flex items-center gap-1">
-                View Cart & Checkout &rarr;
+            <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 ml-2">
+              <span className="text-xs font-black bg-white text-emerald-900 px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-xs">
+                <span>View Cart</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>

@@ -127,7 +127,7 @@ export default function ProductCard({
       </div>
 
       {/* Product Details */}
-      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
+      <div className="p-2.5 sm:p-4 flex-1 flex flex-col justify-between">
         <div>
           <h3
             className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition line-clamp-2 leading-snug mb-1"
@@ -136,7 +136,7 @@ export default function ProductCard({
             {product.name}
           </h3>
 
-          <p className="text-[11px] text-gray-500 mb-1.5 sm:mb-2">
+          <p className="text-[10px] sm:text-[11px] text-gray-500 mb-1 sm:mb-2 truncate">
             Unit: <span className="font-semibold text-gray-700">{product.unit}</span>
           </p>
 
@@ -148,9 +148,9 @@ export default function ProductCard({
         </div>
 
         {/* Pricing and Cart Stepper */}
-        <div className="pt-2 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
-          <div>
-            <span className="text-base sm:text-lg font-black text-emerald-700">
+        <div className="pt-1.5 sm:pt-2 border-t border-gray-50 flex items-center justify-between gap-1.5 sm:gap-2 mt-auto">
+          <div className="min-w-0">
+            <span className="text-sm sm:text-lg font-black text-emerald-700">
               ₹{product.price}
             </span>
             <span className="hidden sm:inline-block text-[10px] text-gray-400 font-medium ml-1">
@@ -162,34 +162,34 @@ export default function ProductCard({
           {isOutOfStock ? (
             <button
               disabled
-              className="px-2.5 py-1 text-[11px] font-semibold text-gray-400 bg-gray-100 rounded-xl cursor-not-allowed"
+              className="px-2 py-1 text-[10px] sm:text-[11px] font-semibold text-gray-400 bg-gray-100 rounded-xl cursor-not-allowed whitespace-nowrap"
             >
-              Unavailable
+              Out of Stock
             </button>
           ) : cartQty > 0 ? (
-            <div className="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-50 border border-emerald-300 rounded-xl p-0.5 sm:p-1">
+            <div className="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-50 border border-emerald-300 rounded-xl p-0.5 sm:p-1 shrink-0">
               <button
                 onClick={() => onUpdateQty(product.id, cartQty - 1)}
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white text-emerald-800 flex items-center justify-center hover:bg-emerald-100 active:scale-90 shadow-2xs transition"
+                className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-white text-emerald-800 flex items-center justify-center hover:bg-emerald-100 active:scale-90 shadow-2xs transition"
                 title="Decrease quantity"
               >
-                <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <Minus className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
               </button>
               <span className="w-4 sm:w-5 text-center text-xs font-black text-emerald-900">
                 {cartQty}
               </span>
               <button
                 onClick={() => onUpdateQty(product.id, cartQty + 1)}
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 active:scale-90 shadow-2xs transition"
+                className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 active:scale-90 shadow-2xs transition"
                 title="Increase quantity"
               >
-                <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <Plus className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
               </button>
             </div>
           ) : (
             <button
               onClick={() => onAddToCart(product)}
-              className="flex items-center space-x-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl shadow-xs hover:shadow active:scale-95 transition"
+              className="flex items-center space-x-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] sm:text-xs font-bold px-2 py-1 sm:px-3 sm:py-2 rounded-xl shadow-xs hover:shadow active:scale-95 transition shrink-0"
             >
               <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span>Add</span>
@@ -199,25 +199,25 @@ export default function ProductCard({
 
         {/* Direct Admin In-Stock / Out of Stock Control */}
         {isAdmin && (
-          <div className="mt-3 pt-2 border-t border-dashed border-purple-200 flex items-center justify-between gap-1 bg-purple-50/50 -mx-3 -mb-3 sm:-mx-4 sm:-mb-4 p-2.5 rounded-b-2xl">
-            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700">
+          <div className="mt-2 pt-1.5 border-t border-dashed border-purple-200 flex flex-col xs:flex-row items-center justify-between gap-1 bg-purple-50/70 -mx-2.5 -mb-2.5 sm:-mx-4 sm:-mb-4 p-1.5 sm:p-2 rounded-b-2xl">
+            <span className="text-[9px] font-black uppercase tracking-wider text-purple-700">
               Admin:
             </span>
-            <div className="inline-flex rounded-lg bg-white p-0.5 border border-purple-200 shadow-2xs">
+            <div className="inline-flex w-full xs:w-auto rounded-lg bg-white p-0.5 border border-purple-200 shadow-2xs justify-center">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleStock?.(product.id, true);
                 }}
-                className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold transition ${
+                className={`flex-1 xs:flex-initial px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-extrabold transition whitespace-nowrap ${
                   !isOutOfStock
                     ? 'bg-emerald-600 text-white shadow-xs'
                     : 'text-gray-500 hover:text-emerald-700'
                 }`}
                 title="Directly mark In Stock"
               >
-                In Stock
+                ✓ In Stock
               </button>
               <button
                 type="button"
@@ -225,14 +225,14 @@ export default function ProductCard({
                   e.stopPropagation();
                   onToggleStock?.(product.id, false);
                 }}
-                className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold transition ${
+                className={`flex-1 xs:flex-initial px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-extrabold transition whitespace-nowrap ${
                   isOutOfStock
                     ? 'bg-red-600 text-white shadow-xs'
                     : 'text-gray-500 hover:text-red-700'
                 }`}
                 title="Directly mark Out of Stock"
               >
-                Out of Stock
+                ✕ Out
               </button>
             </div>
           </div>

@@ -237,6 +237,8 @@ export default function AuthModal({
                     </span>
                     <input
                       type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength="10"
                       placeholder="98765 43210"
                       value={phone}
@@ -272,6 +274,8 @@ export default function AuthModal({
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     maxLength="6"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}

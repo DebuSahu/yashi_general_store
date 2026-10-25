@@ -175,9 +175,9 @@ export default function LocationPicker({
   return (
     <div className="space-y-3">
       {/* Location Actions & Status */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
-          <MapPin className="w-4 h-4 text-emerald-600" />
+          <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>Set Delivery Point (Shop has a strict 5km limit)</span>
         </div>
 
@@ -185,7 +185,7 @@ export default function LocationPicker({
           type="button"
           onClick={handleDetectLocation}
           disabled={isLocating}
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition active:scale-95 disabled:opacity-50"
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition active:scale-95 disabled:opacity-50"
         >
           <Navigation className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
           <span>{isLocating ? 'Detecting GPS...' : '📍 Use My GPS Location'}</span>
