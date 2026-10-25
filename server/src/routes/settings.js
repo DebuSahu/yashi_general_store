@@ -45,6 +45,7 @@ router.put('/', authenticateAdmin, (req, res) => {
     address,
     latitude,
     longitude,
+    mapsUrl,
     maxDeliveryRadiusKm,
     minOrderAmount
   } = req.body;
@@ -61,6 +62,7 @@ router.put('/', authenticateAdmin, (req, res) => {
     address: address !== undefined ? address.trim() : existing.address,
     latitude: latitude !== undefined ? parseFloat(latitude) : existing.latitude,
     longitude: longitude !== undefined ? parseFloat(longitude) : existing.longitude,
+    mapsUrl: mapsUrl !== undefined ? mapsUrl.trim() : (existing.mapsUrl || 'https://maps.app.goo.gl/36DwR1dGU2bfv7KD9'),
     maxDeliveryRadiusKm: maxDeliveryRadiusKm !== undefined ? parseFloat(maxDeliveryRadiusKm) : existing.maxDeliveryRadiusKm,
     minOrderAmount: minOrderAmount !== undefined ? parseFloat(minOrderAmount) : existing.minOrderAmount
   };

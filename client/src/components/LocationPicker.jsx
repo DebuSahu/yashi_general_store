@@ -18,8 +18,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 export default function LocationPicker({
-  shopLat = 21.2514,
-  shopLon = 81.6296,
+  shopLat = 26.4519124,
+  shopLon = 80.3537057,
   maxRadiusKm = 5,
   initialUserLat,
   initialUserLon,
@@ -78,7 +78,7 @@ export default function LocationPicker({
       // Shop Marker
       L.marker([shopLat, shopLon], { icon: shopIcon })
         .addTo(map)
-        .bindPopup(`<b>Yashi General Store (Shop)</b><br/>Shop Location<br/>5km Delivery Radius Origin`)
+        .bindPopup(`<b>Yashi General Store (YGS)</b><br/>510, Elliot Lane, Mirpur Cantt, Kanpur<br/><b>5 km Delivery Zone Origin</b><br/><a href="https://maps.app.goo.gl/36DwR1dGU2bfv7KD9" target="_blank" rel="noopener noreferrer" style="color:#16a34a;font-weight:bold;text-decoration:underline;">Open in Google Maps &rarr;</a>`)
         .openPopup();
 
       // 5km Delivery Radius Circle

@@ -381,7 +381,7 @@ export default function CheckoutModal({
                 <textarea
                   required
                   rows="2"
-                  placeholder="e.g. Flat 401, Rosewood Heights, Near Gandhi Chowk"
+                  placeholder="e.g. House No. 24, Near Cantt Railway Crossing / Harris Ganj, Kanpur"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
@@ -395,7 +395,7 @@ export default function CheckoutModal({
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Opposite Water Tank"
+                    placeholder="e.g. Opposite Water Tank / Near Station"
                     value={landmark}
                     onChange={(e) => setLandmark(e.target.value)}
                     className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
@@ -419,8 +419,8 @@ export default function CheckoutModal({
               {/* Interactive Location Picker & Haversine Distance Check */}
               <div className="pt-2 border-t border-gray-100">
                 <LocationPicker
-                  shopLat={shopSettings?.latitude || 21.2514}
-                  shopLon={shopSettings?.longitude || 81.6296}
+                  shopLat={shopSettings?.latitude || 26.4519124}
+                  shopLon={shopSettings?.longitude || 80.3537057}
                   maxRadiusKm={shopSettings?.maxDeliveryRadiusKm || 5}
                   initialUserLat={locationData?.latitude}
                   initialUserLon={locationData?.longitude}

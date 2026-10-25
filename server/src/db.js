@@ -29,10 +29,11 @@ export const initialData = {
     tagline: "Your Daily Grocery, Fresh Vegetables, Amul & Namaste India Dairy & Household Essentials",
     phone: "+91 98765 43210",
     email: "contact@yashigeneralstore.com",
-    address: "Shop No. 12, Main Market Road, City Center, PIN - 492001",
-    // Default shop coordinates (central coordinates for reference)
-    latitude: 21.2514,
-    longitude: 81.6296,
+    address: "510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004",
+    // Shop coordinates from Google Maps (26.4519124, 80.3537057)
+    latitude: 26.4519124,
+    longitude: 80.3537057,
+    mapsUrl: "https://maps.app.goo.gl/36DwR1dGU2bfv7KD9",
     maxDeliveryRadiusKm: 5,
     minOrderAmount: 100,
     deliveryFee: 0, // Free delivery within 5km!

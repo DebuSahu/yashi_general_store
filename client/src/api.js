@@ -40,6 +40,7 @@ function setLocalStore(key, value) {
 }
 
 const CURRENT_CATALOG_VERSION = 'v5_73_ai_products';
+const CURRENT_SETTINGS_VERSION = 'v2_kanpur_cantt_location';
 
 // Initialize local mock data
 function initLocalData() {
@@ -51,8 +52,13 @@ function initLocalData() {
     setLocalStore('products', defaultData.products || []);
     setLocalStore('catalog_version', CURRENT_CATALOG_VERSION);
   }
-  if (!getLocalStore('settings', null)) {
+
+  // Auto-upgrade settings with updated store location & Google Maps link
+  const currentSettingsVersion = getLocalStore('settings_version', null);
+  const existingSettings = getLocalStore('settings', null);
+  if (currentSettingsVersion !== CURRENT_SETTINGS_VERSION || !existingSettings || !existingSettings.latitude || existingSettings.latitude < 25) {
     setLocalStore('settings', defaultData.settings || {});
+    setLocalStore('settings_version', CURRENT_SETTINGS_VERSION);
   }
   if (!getLocalStore('orders', null)) {
     setLocalStore('orders', []);
@@ -112,9 +118,10 @@ export const api = {
       tagline: settings.tagline || 'Your Daily Grocery, Fresh Vegetables, Amul & Namaste India Dairy & Household Essentials',
       phone: settings.phone || '+91 98765 43210',
       email: settings.email || 'contact@yashigeneralstore.com',
-      address: settings.address || 'Shop No. 12, Main Market Road, City Center, PIN - 492001',
-      latitude: settings.latitude || 21.2514,
-      longitude: settings.longitude || 81.6296,
+      address: settings.address || '510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004',
+      latitude: settings.latitude || 26.4519124,
+      longitude: settings.longitude || 80.3537057,
+      mapsUrl: settings.mapsUrl || 'https://maps.app.goo.gl/36DwR1dGU2bfv7KD9',
       maxDeliveryRadiusKm: settings.maxDeliveryRadiusKm || 5,
       minOrderAmount: settings.minOrderAmount || 100,
       deliveryFee: settings.deliveryFee || 0,

@@ -113,9 +113,10 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   const [settingsForm, setSettingsForm] = useState({
     storeName: shopSettings?.storeName || 'Yashi General Store',
     phone: shopSettings?.phone || '',
-    address: shopSettings?.address || '',
-    latitude: shopSettings?.latitude || 21.2514,
-    longitude: shopSettings?.longitude || 81.6296,
+    address: shopSettings?.address || '510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004',
+    latitude: shopSettings?.latitude || 26.4519124,
+    longitude: shopSettings?.longitude || 80.3537057,
+    mapsUrl: shopSettings?.mapsUrl || 'https://maps.app.goo.gl/36DwR1dGU2bfv7KD9',
     maxDeliveryRadiusKm: shopSettings?.maxDeliveryRadiusKm || 5,
     minOrderAmount: shopSettings?.minOrderAmount || 100
   });
@@ -1170,6 +1171,29 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   onChange={(e) => setSettingsForm({ ...settingsForm, address: e.target.value })}
                   className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Google Maps Location Link
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={settingsForm.mapsUrl || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, mapsUrl: e.target.value })}
+                    placeholder="https://maps.app.goo.gl/..."
+                    className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-mono text-xs"
+                  />
+                  <a
+                    href={settingsForm.mapsUrl || 'https://maps.app.goo.gl/36DwR1dGU2bfv7KD9'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition whitespace-nowrap shadow-xs"
+                  >
+                    <span>View on Maps ↗</span>
+                  </a>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

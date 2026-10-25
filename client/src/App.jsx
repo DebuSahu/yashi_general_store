@@ -371,7 +371,7 @@ export default function App() {
                       Delivery Perimeter
                     </span>
                     <span className="text-xs text-white/90">
-                      Deliveries available only up to <strong>5km</strong> from our shop
+                      Deliveries available only up to <strong>5km</strong> from Mirpur Cantt, Kanpur
                     </span>
                   </div>
                 </div>
@@ -757,8 +757,17 @@ export default function App() {
 
             <div>
               <span className="text-sm font-bold text-white block mb-1">Store Address & Contact</span>
-              <p className="text-gray-400">{shopSettings?.address}</p>
-              <p className="mt-1 font-semibold text-gray-300">Call: {shopSettings?.phone}</p>
+              <p className="text-gray-400 font-medium">{shopSettings?.address || '510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004'}</p>
+              <a
+                href={shopSettings?.mapsUrl || "https://maps.app.goo.gl/36DwR1dGU2bfv7KD9"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-semibold mt-1.5 text-xs transition underline"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                <span>View on Google Maps (Directions & Location) &rarr;</span>
+              </a>
+              <p className="mt-1.5 font-semibold text-gray-300">Call: {shopSettings?.phone}</p>
               <p className="text-emerald-400 font-semibold mt-0.5">Admin: admin@yashigeneralstore.com</p>
             </div>
 
@@ -868,8 +877,8 @@ export default function App() {
             </p>
 
             <LocationPicker
-              shopLat={shopSettings?.latitude || 21.2514}
-              shopLon={shopSettings?.longitude || 81.6296}
+              shopLat={shopSettings?.latitude || 26.4519124}
+              shopLon={shopSettings?.longitude || 80.3537057}
               maxRadiusKm={shopSettings?.maxDeliveryRadiusKm || 5}
             />
 
