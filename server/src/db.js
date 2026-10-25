@@ -580,12 +580,36 @@ export const initialData = {
 
 export function getDatabase() {
   try {
+    let data;
     if (!fs.existsSync(DATA_FILE)) {
+      data = initialData;
       fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
-      return initialData;
+    } else {
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      data = JSON.parse(raw);
     }
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(raw);
+
+    // Ensure admins list exists and is populated
+    if (!data.admins || !Array.isArray(data.admins) || data.admins.length === 0) {
+      data.admins = [
+        {
+          id: 'admin-primary',
+          username: data.settings?.adminUsername || 'admin',
+          name: 'Store Owner',
+          role: 'superadmin',
+          passwordHash: data.settings?.adminPasswordHash || '$2a$10$w3.G3rO8gJ2m0yQhC.y2aOK6k0ZkO/99jIe8wRsl4W0wX2Z3A5eE2',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      // Clean sensitive credentials from public settings
+      if (data.settings) {
+        delete data.settings.adminPasswordHash;
+        delete data.settings.adminUsername;
+      }
+      saveDatabase(data);
+    }
+
+    return data;
   } catch (err) {
     console.error("Error reading database file, using in-memory:", err);
     return initialData;

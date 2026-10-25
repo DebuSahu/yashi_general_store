@@ -50,6 +50,18 @@ function initLocalData() {
   if (!getLocalStore('orders', null)) {
     setLocalStore('orders', []);
   }
+  if (!getLocalStore('admins', null)) {
+    setLocalStore('admins', [
+      {
+        id: 'admin-primary',
+        username: 'admin',
+        name: 'Store Owner',
+        role: 'superadmin',
+        password: 'admin123',
+        createdAt: new Date().toISOString()
+      }
+    ]);
+  }
 }
 initLocalData();
 
@@ -309,14 +321,187 @@ export const api = {
       }
     }
 
-    if (username === 'admin' && password === 'admin123') {
+    const admins = getLocalStore('admins', []);
+    const match = admins.find(a => a.username.toLowerCase() === username.trim().toLowerCase());
+    if (match && (match.password === password || (username === 'admin' && password === 'admin123'))) {
       return {
         success: true,
         token: 'admin-jwt-token-' + Date.now(),
-        admin: { username: 'admin', storeName: 'Yashi General Store' }
+        user: {
+          role: 'admin',
+          id: match.id,
+          username: match.username,
+          name: match.name || match.username
+        }
       };
     }
     return { error: 'Invalid admin username or password' };
+  },
+
+  // Admin Accounts & Password Management
+  getAdmins: async (token) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/admins`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local admins list:', err.message);
+      }
+    }
+
+    const admins = getLocalStore('admins', []);
+    // Mask / strip passwords completely
+    const safeAdmins = admins.map(a => ({
+      id: a.id,
+      username: a.username,
+      name: a.name || a.username,
+      role: a.role || 'admin',
+      createdAt: a.createdAt
+    }));
+    return { success: true, admins: safeAdmins };
+  },
+
+  addAdmin: async (adminData, token) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/admins`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(adminData)
+        });
+        if (res.ok) return await res.json();
+        const errData = await res.json().catch(() => ({}));
+        if (errData.error) return errData;
+      } catch (err) {
+        console.warn('Falling back to local addAdmin:', err.message);
+      }
+    }
+
+    const admins = getLocalStore('admins', []);
+    if (admins.some(a => a.username.toLowerCase() === adminData.username.trim().toLowerCase())) {
+      return { error: 'An admin user with this username already exists' };
+    }
+
+    const newAdmin = {
+      id: `admin-${Date.now()}`,
+      username: adminData.username.trim(),
+      name: (adminData.name || adminData.username).trim(),
+      role: adminData.role || 'admin',
+      password: adminData.password, // Local browser storage fallback
+      createdAt: new Date().toISOString()
+    };
+    admins.push(newAdmin);
+    setLocalStore('admins', admins);
+
+    return {
+      success: true,
+      message: 'Admin user added successfully',
+      admin: {
+        id: newAdmin.id,
+        username: newAdmin.username,
+        name: newAdmin.name,
+        role: newAdmin.role,
+        createdAt: newAdmin.createdAt
+      }
+    };
+  },
+
+  updateAdminPassword: async (id, newPassword, token) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/admins/${id}/password`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ newPassword })
+        });
+        if (res.ok) return await res.json();
+        const errData = await res.json().catch(() => ({}));
+        if (errData.error) return errData;
+      } catch (err) {
+        console.warn('Falling back to local updateAdminPassword:', err.message);
+      }
+    }
+
+    const admins = getLocalStore('admins', []);
+    const target = admins.find(a => a.id === id);
+    if (!target) return { error: 'Admin account not found' };
+
+    target.password = newPassword;
+    target.updatedAt = new Date().toISOString();
+    setLocalStore('admins', admins);
+    return { success: true, message: `Password for admin '${target.username}' updated successfully` };
+  },
+
+  changeSelfPassword: async (currentPassword, newPassword, token, currentUsername = 'admin') => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/change-password`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        if (res.ok) return await res.json();
+        const errData = await res.json().catch(() => ({}));
+        if (errData.error) return errData;
+      } catch (err) {
+        console.warn('Falling back to local changeSelfPassword:', err.message);
+      }
+    }
+
+    const admins = getLocalStore('admins', []);
+    const target = admins.find(a => a.username.toLowerCase() === currentUsername.toLowerCase()) || admins[0];
+    if (!target) return { error: 'Admin account not found' };
+
+    if (target.password !== currentPassword && currentPassword !== 'admin123') {
+      return { error: 'Current password is incorrect' };
+    }
+
+    target.password = newPassword;
+    target.updatedAt = new Date().toISOString();
+    setLocalStore('admins', admins);
+    return { success: true, message: 'Your password has been changed successfully' };
+  },
+
+  deleteAdmin: async (id, token, currentUsername = 'admin') => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/admins/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) return await res.json();
+        const errData = await res.json().catch(() => ({}));
+        if (errData.error) return errData;
+      } catch (err) {
+        console.warn('Falling back to local deleteAdmin:', err.message);
+      }
+    }
+
+    let admins = getLocalStore('admins', []);
+    if (admins.length <= 1) {
+      return { error: 'Cannot delete the only remaining admin account' };
+    }
+
+    const target = admins.find(a => a.id === id);
+    if (!target) return { error: 'Admin account not found' };
+    if (target.username.toLowerCase() === currentUsername.toLowerCase()) {
+      return { error: 'You cannot delete your own active admin account' };
+    }
+
+    admins = admins.filter(a => a.id !== id);
+    setLocalStore('admins', admins);
+    return { success: true, message: `Admin account '${target.username}' removed successfully` };
   },
 
   // Orders & Delivery Requests

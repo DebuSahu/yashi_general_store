@@ -33,21 +33,28 @@ router.post('/admin-login', async (req, res) => {
   }
 
   const db = getDatabase();
-  const settings = db.settings;
+  const admins = db.admins || [];
+  
+  // Find matching admin (case-insensitive)
+  const targetAdmin = admins.find(a => a.username.toLowerCase() === username.trim().toLowerCase()) 
+    || (db.settings?.adminUsername?.toLowerCase() === username.trim().toLowerCase() 
+        ? { username: db.settings.adminUsername, passwordHash: db.settings.adminPasswordHash, id: 'admin-primary', name: 'Store Owner' }
+        : null);
 
-  // Verify username
-  if (username !== settings.adminUsername) {
+  if (!targetAdmin) {
     return res.status(401).json({ error: 'Invalid admin username or password' });
   }
 
   // Verify password (supports hashed or fallback admin123)
-  const isMatch = (password === 'admin123') || (await bcrypt.compare(password, settings.adminPasswordHash).catch(() => false));
+  const isMatch = (password === 'admin123' && targetAdmin.username === 'admin') 
+    || (targetAdmin.passwordHash ? await bcrypt.compare(password, targetAdmin.passwordHash).catch(() => false) : false);
+
   if (!isMatch) {
     return res.status(401).json({ error: 'Invalid admin username or password' });
   }
 
   const token = jwt.sign(
-    { role: 'admin', username: settings.adminUsername },
+    { role: 'admin', username: targetAdmin.username, id: targetAdmin.id },
     JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -58,8 +65,178 @@ router.post('/admin-login', async (req, res) => {
     token,
     user: {
       role: 'admin',
-      username: settings.adminUsername
+      id: targetAdmin.id,
+      username: targetAdmin.username,
+      name: targetAdmin.name || targetAdmin.username
     }
+  });
+});
+
+// 2. Admin Accounts Management
+// GET /api/auth/admins - List all admin accounts (NEVER returns passwords or hashes)
+router.get('/admins', authenticateAdmin, (req, res) => {
+  const db = getDatabase();
+  const safeAdmins = (db.admins || []).map(a => ({
+    id: a.id,
+    username: a.username,
+    name: a.name || a.username,
+    role: a.role || 'admin',
+    createdAt: a.createdAt
+  }));
+  return res.json({ success: true, admins: safeAdmins });
+});
+
+// POST /api/auth/admins - Add a new admin user
+router.post('/admins', authenticateAdmin, async (req, res) => {
+  try {
+    const { username, password, name, role } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const cleanUsername = username.trim();
+    if (cleanUsername.length < 3) {
+      return res.status(400).json({ error: 'Username must be at least 3 characters' });
+    }
+    if (password.length < 4) {
+      return res.status(400).json({ error: 'Password must be at least 4 characters' });
+    }
+
+    const db = getDatabase();
+    db.admins = db.admins || [];
+
+    // Check duplicate
+    if (db.admins.some(a => a.username.toLowerCase() === cleanUsername.toLowerCase())) {
+      return res.status(400).json({ error: 'An admin user with this username already exists' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newAdmin = {
+      id: `admin-${Date.now()}`,
+      username: cleanUsername,
+      name: (name || cleanUsername).trim(),
+      role: role === 'superadmin' ? 'superadmin' : 'admin',
+      passwordHash,
+      createdAt: new Date().toISOString()
+    };
+
+    db.admins.push(newAdmin);
+    saveDatabase(db);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Admin user created successfully',
+      admin: {
+        id: newAdmin.id,
+        username: newAdmin.username,
+        name: newAdmin.name,
+        role: newAdmin.role,
+        createdAt: newAdmin.createdAt
+      }
+    });
+  } catch (err) {
+    console.error('Error creating admin:', err);
+    return res.status(500).json({ error: 'Failed to create admin user' });
+  }
+});
+
+// PUT /api/auth/admins/:id/password - Reset an admin user's password
+router.put('/admins/:id/password', authenticateAdmin, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 4) {
+      return res.status(400).json({ error: 'New password must be at least 4 characters' });
+    }
+
+    const db = getDatabase();
+    db.admins = db.admins || [];
+    const targetAdmin = db.admins.find(a => a.id === req.params.id);
+
+    if (!targetAdmin) {
+      return res.status(404).json({ error: 'Admin account not found' });
+    }
+
+    targetAdmin.passwordHash = await bcrypt.hash(newPassword, 10);
+    targetAdmin.updatedAt = new Date().toISOString();
+    saveDatabase(db);
+
+    return res.json({
+      success: true,
+      message: `Password for admin '${targetAdmin.username}' updated successfully`
+    });
+  } catch (err) {
+    console.error('Error updating admin password:', err);
+    return res.status(500).json({ error: 'Failed to update admin password' });
+  }
+});
+
+// PUT /api/auth/change-password - Change self account password
+router.put('/change-password', authenticateAdmin, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+    if (newPassword.length < 4) {
+      return res.status(400).json({ error: 'New password must be at least 4 characters' });
+    }
+
+    const db = getDatabase();
+    db.admins = db.admins || [];
+    const currentUsername = req.user.username;
+    const currentAdmin = db.admins.find(a => a.username.toLowerCase() === currentUsername?.toLowerCase());
+
+    if (!currentAdmin) {
+      return res.status(404).json({ error: 'Logged in admin account not found' });
+    }
+
+    // Verify current password
+    const isMatch = (currentPassword === 'admin123' && currentAdmin.username === 'admin')
+      || (currentAdmin.passwordHash ? await bcrypt.compare(currentPassword, currentAdmin.passwordHash).catch(() => false) : false);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
+    }
+
+    currentAdmin.passwordHash = await bcrypt.hash(newPassword, 10);
+    currentAdmin.updatedAt = new Date().toISOString();
+    saveDatabase(db);
+
+    return res.json({
+      success: true,
+      message: 'Your password has been changed successfully'
+    });
+  } catch (err) {
+    console.error('Error changing self password:', err);
+    return res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
+// DELETE /api/auth/admins/:id - Delete admin account
+router.delete('/admins/:id', authenticateAdmin, (req, res) => {
+  const db = getDatabase();
+  db.admins = db.admins || [];
+
+  if (db.admins.length <= 1) {
+    return res.status(400).json({ error: 'Cannot delete the only remaining admin account' });
+  }
+
+  const targetIndex = db.admins.findIndex(a => a.id === req.params.id);
+  if (targetIndex === -1) {
+    return res.status(404).json({ error: 'Admin account not found' });
+  }
+
+  const target = db.admins[targetIndex];
+  if (target.username.toLowerCase() === req.user.username?.toLowerCase()) {
+    return res.status(400).json({ error: 'You cannot delete your own active admin account' });
+  }
+
+  db.admins.splice(targetIndex, 1);
+  saveDatabase(db);
+
+  return res.json({
+    success: true,
+    message: `Admin '${target.username}' deleted successfully`
   });
 });
 

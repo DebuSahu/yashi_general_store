@@ -10,9 +10,7 @@
     "longitude": 81.6296,
     "maxDeliveryRadiusKm": 5,
     "minOrderAmount": 100,
-    "deliveryFee": 0,
-    "adminUsername": "admin",
-    "adminPasswordHash": "$2a$10$w3.G3rO8gJ2m0yQhC.y2aOK6k0ZkO/99jIe8wRsl4W0wX2Z3A5eE2"
+    "deliveryFee": 0
   },
   "products": [
     {
@@ -628,5 +626,14 @@
       ]
     }
   ],
-  "otps": {}
+  "otps": {},
+  "admins": [
+    {
+      "id": "admin-primary",
+      "username": "admin",
+      "name": "Store Owner",
+      "role": "superadmin",
+      "createdAt": "2026-10-25T13:21:35.346Z"
+    }
+  ]
 }

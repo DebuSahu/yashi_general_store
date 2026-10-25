@@ -23,20 +23,59 @@ import {
   Image as ImageIcon,
   Camera,
   X,
-  Check
+  Check,
+  Shield,
+  KeyRound,
+  UserPlus,
+  Lock,
+  Eye,
+  EyeOff,
+  UserCheck,
+  Users
 } from 'lucide-react';
 import YGSLogo from '../components/YGSLogo';
 import { api } from '../api';
 
 export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated }) {
   const [token, setToken] = useState(localStorage.getItem('gs_admin_token') || '');
+  const [currentAdminUser, setCurrentAdminUser] = useState(localStorage.getItem('gs_admin_user') || 'admin');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Tabs: 'orders', 'products', 'settings'
+  // Tabs: 'orders', 'products', 'settings', 'admins'
   const [activeTab, setActiveTab] = useState('orders');
+
+  // Admin Accounts states
+  const [adminsList, setAdminsList] = useState([]);
+  const [loadingAdmins, setLoadingAdmins] = useState(false);
+  const [adminActionMsg, setAdminActionMsg] = useState({ type: '', text: '' });
+
+  // Self password change form
+  const [selfPwdForm, setSelfPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [showSelfCurrent, setShowSelfCurrent] = useState(false);
+  const [showSelfNew, setShowSelfNew] = useState(false);
+  const [showSelfConfirm, setShowSelfConfirm] = useState(false);
+  const [selfPwdLoading, setSelfPwdLoading] = useState(false);
+  const [selfPwdMsg, setSelfPwdMsg] = useState({ type: '', text: '' });
+
+  // Add new admin modal
+  const [addAdminModalOpen, setAddAdminModalOpen] = useState(false);
+  const [newAdminForm, setNewAdminForm] = useState({ username: '', name: '', role: 'admin', password: '', confirmPassword: '' });
+  const [showNewAdminPwd, setShowNewAdminPwd] = useState(false);
+  const [showNewAdminConfirm, setShowNewAdminConfirm] = useState(false);
+  const [addAdminLoading, setAddAdminLoading] = useState(false);
+  const [addAdminError, setAddAdminError] = useState('');
+
+  // Reset another admin password modal
+  const [resetPwdModalOpen, setResetPwdModalOpen] = useState(false);
+  const [targetAdminToReset, setTargetAdminToReset] = useState(null);
+  const [resetPwdForm, setResetPwdForm] = useState({ newPassword: '', confirmPassword: '' });
+  const [showResetPwd, setShowResetPwd] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetPwdLoading, setResetPwdLoading] = useState(false);
+  const [resetPwdError, setResetPwdError] = useState('');
 
   // Data states
   const [orders, setOrders] = useState([]);
@@ -89,6 +128,9 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
       const res = await api.adminLogin(username, password);
       if (res.success && res.token) {
         localStorage.setItem('gs_admin_token', res.token);
+        const loggedUser = res.user?.username || res.admin?.username || username;
+        localStorage.setItem('gs_admin_user', loggedUser);
+        setCurrentAdminUser(loggedUser);
         setToken(res.token);
       } else {
         setLoginError(res.error || 'Invalid credentials');
@@ -102,7 +144,159 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
   const handleLogout = () => {
     localStorage.removeItem('gs_admin_token');
+    localStorage.removeItem('gs_admin_user');
     setToken('');
+  };
+
+  // Fetch Admins
+  const loadAdmins = async () => {
+    if (!token) return;
+    setLoadingAdmins(true);
+    try {
+      const res = await api.getAdmins(token);
+      if (res.success && res.admins) {
+        setAdminsList(res.admins);
+      }
+    } catch (err) {
+      console.error('Failed to load admins:', err);
+    } finally {
+      setLoadingAdmins(false);
+    }
+  };
+
+  // Change Self Password
+  const handleChangeSelfPassword = async (e) => {
+    e.preventDefault();
+    setSelfPwdMsg({ type: '', text: '' });
+
+    if (!selfPwdForm.currentPassword || !selfPwdForm.newPassword) {
+      setSelfPwdMsg({ type: 'error', text: 'Please fill in all password fields.' });
+      return;
+    }
+    if (selfPwdForm.newPassword.length < 4) {
+      setSelfPwdMsg({ type: 'error', text: 'New password must be at least 4 characters long.' });
+      return;
+    }
+    if (selfPwdForm.newPassword !== selfPwdForm.confirmPassword) {
+      setSelfPwdMsg({ type: 'error', text: 'New password and confirmation do not match.' });
+      return;
+    }
+
+    setSelfPwdLoading(true);
+    try {
+      const res = await api.changeSelfPassword(
+        selfPwdForm.currentPassword,
+        selfPwdForm.newPassword,
+        token,
+        currentAdminUser
+      );
+      if (res.success) {
+        setSelfPwdMsg({ type: 'success', text: 'Your password was changed successfully! Please use your new password next time you sign in.' });
+        setSelfPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        setSelfPwdMsg({ type: 'error', text: res.error || 'Failed to update password.' });
+      }
+    } catch (err) {
+      setSelfPwdMsg({ type: 'error', text: 'Error connecting to server.' });
+    } finally {
+      setSelfPwdLoading(false);
+    }
+  };
+
+  // Create New Admin User
+  const handleCreateAdmin = async (e) => {
+    e.preventDefault();
+    setAddAdminError('');
+
+    if (!newAdminForm.username || !newAdminForm.password) {
+      setAddAdminError('Username and password are required.');
+      return;
+    }
+    if (newAdminForm.username.length < 3) {
+      setAddAdminError('Username must be at least 3 characters.');
+      return;
+    }
+    if (newAdminForm.password.length < 4) {
+      setAddAdminError('Password must be at least 4 characters.');
+      return;
+    }
+    if (newAdminForm.password !== newAdminForm.confirmPassword) {
+      setAddAdminError('Passwords do not match.');
+      return;
+    }
+
+    setAddAdminLoading(true);
+    try {
+      const res = await api.addAdmin({
+        username: newAdminForm.username,
+        name: newAdminForm.name,
+        role: newAdminForm.role,
+        password: newAdminForm.password
+      }, token);
+
+      if (res.success) {
+        setAddAdminModalOpen(false);
+        setNewAdminForm({ username: '', name: '', role: 'admin', password: '', confirmPassword: '' });
+        setAdminActionMsg({ type: 'success', text: `Admin user '${res.admin?.username}' created successfully!` });
+        loadAdmins();
+      } else {
+        setAddAdminError(res.error || 'Failed to create admin user.');
+      }
+    } catch (err) {
+      setAddAdminError('Error connecting to server.');
+    } finally {
+      setAddAdminLoading(false);
+    }
+  };
+
+  // Reset Another Admin's Password
+  const handleResetAdminPassword = async (e) => {
+    e.preventDefault();
+    setResetPwdError('');
+
+    if (!targetAdminToReset) return;
+    if (!resetPwdForm.newPassword || resetPwdForm.newPassword.length < 4) {
+      setResetPwdError('New password must be at least 4 characters.');
+      return;
+    }
+    if (resetPwdForm.newPassword !== resetPwdForm.confirmPassword) {
+      setResetPwdError('Passwords do not match.');
+      return;
+    }
+
+    setResetPwdLoading(true);
+    try {
+      const res = await api.updateAdminPassword(targetAdminToReset.id, resetPwdForm.newPassword, token);
+      if (res.success) {
+        setResetPwdModalOpen(false);
+        setResetPwdForm({ newPassword: '', confirmPassword: '' });
+        setAdminActionMsg({ type: 'success', text: `Password for admin '${targetAdminToReset.username}' updated successfully!` });
+        setTargetAdminToReset(null);
+      } else {
+        setResetPwdError(res.error || 'Failed to update password.');
+      }
+    } catch (err) {
+      setResetPwdError('Error connecting to server.');
+    } finally {
+      setResetPwdLoading(false);
+    }
+  };
+
+  // Delete Admin User
+  const handleDeleteAdmin = async (adminId, adminUsername) => {
+    if (!window.confirm(`Are you sure you want to remove admin user '${adminUsername}'?`)) return;
+
+    try {
+      const res = await api.deleteAdmin(adminId, token, currentAdminUser);
+      if (res.success) {
+        setAdminActionMsg({ type: 'success', text: `Admin user '${adminUsername}' removed successfully.` });
+        loadAdmins();
+      } else {
+        alert(res.error || 'Failed to delete admin.');
+      }
+    } catch (err) {
+      alert('Error connecting to server.');
+    }
   };
 
   // Fetch Orders
@@ -140,8 +334,15 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     if (token) {
       loadOrders();
       loadProducts();
+      loadAdmins();
     }
   }, [token, orderFilter, productCategoryFilter]);
+
+  useEffect(() => {
+    if (token && activeTab === 'admins') {
+      loadAdmins();
+    }
+  }, [activeTab]);
 
   // Update Order Status
   const handleStatusChange = async (orderId, newStatus) => {
@@ -506,6 +707,21 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
           >
             <Sliders className="w-4 h-4" />
             <span>Shop GPS & 5km Radius</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('admins');
+              loadAdmins();
+            }}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition ${
+              activeTab === 'admins'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-gray-600 hover:text-purple-700'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span>Admins & Security</span>
           </button>
         </div>
 
@@ -947,6 +1163,290 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
           </div>
         )}
 
+        {/* TAB 4: ADMIN USERS & SECURITY */}
+        {activeTab === 'admins' && (
+          <div className="space-y-6 max-w-4xl">
+            {/* Action Feedback Banner */}
+            {adminActionMsg.text && (
+              <div
+                className={`p-4 rounded-2xl text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 ${
+                  adminActionMsg.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {adminActionMsg.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                  )}
+                  <span>{adminActionMsg.text}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAdminActionMsg({ type: '', text: '' })}
+                  className="text-xs hover:opacity-75 font-bold p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* CARD 1: CHANGE SELF PASSWORD */}
+            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-2xs">
+              <div className="flex items-start justify-between flex-wrap gap-2 pb-4 border-b border-gray-100 mb-5">
+                <div>
+                  <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                    <KeyRound className="w-5 h-5 text-purple-600" />
+                    <span>Change My Account Password</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Logged in as: <strong className="text-purple-700">@{currentAdminUser}</strong>. Update your login credentials. Passwords are encrypted with bcrypt and are strictly never shown to visitors.
+                  </p>
+                </div>
+                <span className="px-3 py-1 bg-purple-50 text-purple-700 font-bold text-xs rounded-full border border-purple-200 flex items-center gap-1">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Hidden & Encrypted</span>
+                </span>
+              </div>
+
+              {selfPwdMsg.text && (
+                <div
+                  className={`mb-4 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                    selfPwdMsg.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}
+                >
+                  {selfPwdMsg.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                  )}
+                  <span>{selfPwdMsg.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleChangeSelfPassword} className="space-y-4 max-w-lg">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    Current Password *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showSelfCurrent ? 'text' : 'password'}
+                      required
+                      placeholder="Enter your current password"
+                      value={selfPwdForm.currentPassword}
+                      onChange={(e) => setSelfPwdForm({ ...selfPwdForm, currentPassword: e.target.value })}
+                      className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSelfCurrent(!showSelfCurrent)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                      title={showSelfCurrent ? 'Hide password' : 'Show password'}
+                    >
+                      {showSelfCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      New Password *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showSelfNew ? 'text' : 'password'}
+                        required
+                        minLength={4}
+                        placeholder="At least 4 characters"
+                        value={selfPwdForm.newPassword}
+                        onChange={(e) => setSelfPwdForm({ ...selfPwdForm, newPassword: e.target.value })}
+                        className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSelfNew(!showSelfNew)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                      >
+                        {showSelfNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Confirm New Password *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showSelfConfirm ? 'text' : 'password'}
+                        required
+                        minLength={4}
+                        placeholder="Repeat new password"
+                        value={selfPwdForm.confirmPassword}
+                        onChange={(e) => setSelfPwdForm({ ...selfPwdForm, confirmPassword: e.target.value })}
+                        className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSelfConfirm(!showSelfConfirm)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                      >
+                        {showSelfConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={selfPwdLoading}
+                    className="px-5 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {selfPwdLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                    <span>{selfPwdLoading ? 'Updating Password...' : 'Update My Password'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* CARD 2: MANAGE STORE ADMIN ACCOUNTS */}
+            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-2xs">
+              <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-gray-100 mb-5">
+                <div>
+                  <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-600" />
+                    <span>Store Administrator Accounts</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Authorized staff and store managers who can accept delivery requests, manage stock, and add items.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAddAdminError('');
+                    setNewAdminForm({ username: '', name: '', role: 'admin', password: '', confirmPassword: '' });
+                    setAddAdminModalOpen(true);
+                  }}
+                  className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>+ Add New Admin User</span>
+                </button>
+              </div>
+
+              {loadingAdmins ? (
+                <div className="py-10 text-center text-xs text-gray-500 flex items-center justify-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin text-purple-600" />
+                  <span>Loading admin accounts...</span>
+                </div>
+              ) : adminsList.length === 0 ? (
+                <div className="py-8 text-center text-xs text-gray-500">
+                  No additional admin accounts found.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-gray-500 font-bold uppercase tracking-wider">
+                        <th className="py-3 px-3">Admin User</th>
+                        <th className="py-3 px-3">Role</th>
+                        <th className="py-3 px-3">Password Security</th>
+                        <th className="py-3 px-3">Created</th>
+                        <th className="py-3 px-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {adminsList.map((adm) => {
+                        const isSelf = adm.username.toLowerCase() === currentAdminUser.toLowerCase();
+                        return (
+                          <tr key={adm.id} className="hover:bg-gray-50/70 transition">
+                            <td className="py-3 px-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-black flex items-center justify-center text-xs">
+                                  {adm.username.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                  <div className="font-extrabold text-gray-900 flex items-center gap-1.5">
+                                    <span>@{adm.username}</span>
+                                    {isSelf && (
+                                      <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
+                                        You
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-gray-500 text-[11px]">{adm.name || 'Store Admin'}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1 ${
+                                  adm.role === 'superadmin'
+                                    ? 'bg-purple-100 text-purple-800'
+                                    : 'bg-blue-100 text-blue-800'
+                                }`}
+                              >
+                                <ShieldCheck className="w-3 h-3" />
+                                <span>{adm.role === 'superadmin' ? 'Super Admin' : 'Store Admin'}</span>
+                              </span>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="font-mono text-gray-400 font-bold tracking-widest text-xs flex items-center gap-1.5">
+                                <Lock className="w-3.5 h-3.5 text-gray-400" />
+                                <span>••••••••</span>
+                                <span className="text-[10px] text-gray-400 font-sans tracking-normal">(Encrypted)</span>
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-gray-500 text-[11px]">
+                              {adm.createdAt ? new Date(adm.createdAt).toLocaleDateString() : 'Active'}
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setTargetAdminToReset(adm);
+                                    setResetPwdError('');
+                                    setResetPwdForm({ newPassword: '', confirmPassword: '' });
+                                    setResetPwdModalOpen(true);
+                                  }}
+                                  className="px-2.5 py-1.5 bg-gray-100 hover:bg-purple-50 text-gray-700 hover:text-purple-700 font-bold rounded-lg transition text-[11px] flex items-center gap-1"
+                                  title="Change this admin's password"
+                                >
+                                  <KeyRound className="w-3 h-3" />
+                                  <span>Change Password</span>
+                                </button>
+                                {!isSelf && adminsList.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteAdmin(adm.id, adm.username)}
+                                    className="p-1.5 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-lg transition"
+                                    title="Delete admin account"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* ADD / EDIT PRODUCT MODAL */}
@@ -1238,6 +1738,243 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       ? 'Update Product'
                       : 'Add to Catalog'}
                   </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ADD NEW ADMIN MODAL */}
+      {addAdminModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 p-6">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+              <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-purple-600" />
+                <span>Add New Admin User</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setAddAdminModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {addAdminError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{addAdminError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateAdmin} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. manager_ravi"
+                  value={newAdminForm.username}
+                  onChange={(e) => setNewAdminForm({ ...newAdminForm, username: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Display / Full Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Store Manager Ravi"
+                  value={newAdminForm.name}
+                  onChange={(e) => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Role
+                </label>
+                <select
+                  value={newAdminForm.role}
+                  onChange={(e) => setNewAdminForm({ ...newAdminForm, role: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-bold"
+                >
+                  <option value="admin">Store Admin (Orders & Inventory)</option>
+                  <option value="superadmin">Super Admin (Full Access)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Initial Password *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewAdminPwd ? 'text' : 'password'}
+                    required
+                    minLength={4}
+                    placeholder="Min 4 characters"
+                    value={newAdminForm.password}
+                    onChange={(e) => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
+                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewAdminPwd(!showNewAdminPwd)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                  >
+                    {showNewAdminPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Confirm Password *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewAdminConfirm ? 'text' : 'password'}
+                    required
+                    minLength={4}
+                    placeholder="Confirm initial password"
+                    value={newAdminForm.confirmPassword}
+                    onChange={(e) => setNewAdminForm({ ...newAdminForm, confirmPassword: e.target.value })}
+                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewAdminConfirm(!showNewAdminConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                  >
+                    {showNewAdminConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setAddAdminModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addAdminLoading}
+                  className="px-5 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl shadow-md disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {addAdminLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{addAdminLoading ? 'Creating...' : 'Create Admin Account'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RESET ADMIN PASSWORD MODAL */}
+      {resetPwdModalOpen && targetAdminToReset && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 p-6">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+              <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-purple-600" />
+                <span>Reset Admin Password</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setResetPwdModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl text-xs text-purple-900">
+              Resetting password for admin account: <strong>@{targetAdminToReset.username}</strong> ({targetAdminToReset.name || 'Store Admin'})
+            </div>
+
+            {resetPwdError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{resetPwdError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleResetAdminPassword} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  New Password *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showResetPwd ? 'text' : 'password'}
+                    required
+                    minLength={4}
+                    placeholder="Enter new password (min 4 chars)"
+                    value={resetPwdForm.newPassword}
+                    onChange={(e) => setResetPwdForm({ ...resetPwdForm, newPassword: e.target.value })}
+                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPwd(!showResetPwd)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                  >
+                    {showResetPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Confirm New Password *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showResetConfirm ? 'text' : 'password'}
+                    required
+                    minLength={4}
+                    placeholder="Confirm new password"
+                    value={resetPwdForm.confirmPassword}
+                    onChange={(e) => setResetPwdForm({ ...resetPwdForm, confirmPassword: e.target.value })}
+                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetConfirm(!showResetConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                  >
+                    {showResetConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setResetPwdModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetPwdLoading}
+                  className="px-5 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl shadow-md disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {resetPwdLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{resetPwdLoading ? 'Saving...' : 'Save New Password'}</span>
                 </button>
               </div>
             </form>

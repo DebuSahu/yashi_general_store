@@ -8,7 +8,9 @@ const router = express.Router();
 router.get('/', (req, res) => {
   const db = getDatabase();
   const settings = { ...db.settings };
-  delete settings.adminPasswordHash; // Never expose password hash
+  delete settings.adminPasswordHash;
+  delete settings.adminUsername;
+  delete settings.admins;
 
   const { lat, lon } = req.query;
   let eligibility = null;
