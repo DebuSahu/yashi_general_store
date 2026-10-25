@@ -39,10 +39,17 @@ function setLocalStore(key, value) {
   }
 }
 
+const CURRENT_CATALOG_VERSION = 'v3_73_ai_products';
+
 // Initialize local mock data
 function initLocalData() {
-  if (!getLocalStore('products', null)) {
+  const currentVersion = getLocalStore('catalog_version', null);
+  const existingProducts = getLocalStore('products', null);
+
+  // Auto-upgrade catalog if version changed or missing
+  if (currentVersion !== CURRENT_CATALOG_VERSION || !existingProducts || existingProducts.length < (defaultData.products || []).length) {
     setLocalStore('products', defaultData.products || []);
+    setLocalStore('catalog_version', CURRENT_CATALOG_VERSION);
   }
   if (!getLocalStore('settings', null)) {
     setLocalStore('settings', defaultData.settings || {});

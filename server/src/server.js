@@ -39,6 +39,12 @@ app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 // Static uploads directory for local product images
 app.use('/uploads', express.static(UPLOADS_DIR));
 
+// Static images directory for AI generated product and showcase images
+const PUBLIC_IMAGES_DIR = path.join(__dirname, '..', '..', 'client', 'public', 'images');
+if (fs.existsSync(PUBLIC_IMAGES_DIR)) {
+  app.use('/images', express.static(PUBLIC_IMAGES_DIR));
+}
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
