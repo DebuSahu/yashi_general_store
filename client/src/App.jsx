@@ -394,7 +394,7 @@ export default function App() {
                 <img
                   src="./images/hero_banner.jpg"
                   alt="Yashi General Store (YGS) Fresh Catalog"
-                  className="w-full h-44 sm:h-72 object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full aspect-[16/9] sm:aspect-auto sm:h-72 object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
                     e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80';
                   }}
@@ -595,15 +595,15 @@ export default function App() {
 
                       {/* AI Category Showcase Thumbnail */}
                       {section.bannerImage && (
-                        <div className="w-full md:w-56 h-28 sm:h-36 md:h-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
+                        <div className="w-full md:w-64 lg:w-72 aspect-[4/3] md:aspect-auto relative overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-gray-100 group">
                           <img
                             src={section.bannerImage}
                             alt={`${section.label} Showcase`}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 via-transparent to-transparent flex items-end md:items-center p-2 text-white">
-                            <span className="bg-black/60 px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold backdrop-blur-xs flex items-center gap-1">
+                          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/60 via-transparent to-transparent flex items-end md:items-center p-2.5 sm:p-3 text-white">
+                            <span className="bg-black/60 px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold backdrop-blur-xs flex items-center gap-1 shadow-sm">
                               <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
                               <span>{section.label} Showcase</span>
                             </span>
