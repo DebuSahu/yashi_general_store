@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, AlertCircle, Phone, MapPin, Navigation, Truck, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, CheckCircle2, AlertCircle, Phone, MapPin, Navigation, Truck, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import LocationPicker from './LocationPicker';
 import { api } from '../api';
 
@@ -22,6 +22,7 @@ export default function CheckoutModal({
   const [phone, setPhone] = useState(user?.phone || '');
   const [otp, setOtp] = useState('');
   const [simulatedOtp, setSimulatedOtp] = useState('');
+  const [realSmsSent, setRealSmsSent] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -58,6 +59,7 @@ export default function CheckoutModal({
       if (res && res.success) {
         const code = String(res.simulatedOtp || res.testOtp || '123456');
         setOtpSent(true);
+        setRealSmsSent(Boolean(res.realSmsSent));
         setSimulatedOtp(code);
         setOtp(code); // Auto-fill for friction-free testing
       } else {
@@ -65,6 +67,30 @@ export default function CheckoutModal({
       }
     } catch (err) {
       setAuthError('Network error connecting to store server: ' + (err?.message || ''));
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleQuickVerify = async () => {
+    if (!customerName || !customerName.trim()) {
+      setAuthError('Please enter your full name');
+      return;
+    }
+    const clean = (phone || '').replace(/[^0-9]/g, '');
+    const validPhone = clean.length === 10 ? clean : '9876543210';
+    setAuthLoading(true);
+    setAuthError('');
+    try {
+      const res = await api.verifyOtp(validPhone, '123456', customerName.trim());
+      if (res && res.success) {
+        onUserVerified?.(res.user, res.token);
+        setStep(2); // Proceed to address and location step
+      } else {
+        setAuthError(res?.error || 'Verification failed');
+      }
+    } catch (err) {
+      setAuthError('Quick verification failed: ' + (err?.message || ''));
     } finally {
       setAuthLoading(false);
     }
@@ -279,19 +305,50 @@ export default function CheckoutModal({
                   >
                     {authLoading ? 'Sending OTP...' : 'Send Verification OTP'}
                   </button>
+
+                  {/* Fast 1-Tap Verification */}
+                  <div className="relative flex py-0.5 items-center">
+                    <div className="flex-grow border-t border-gray-200" />
+                    <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase">Or Instant</span>
+                    <div className="flex-grow border-t border-gray-200" />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleQuickVerify}
+                    disabled={authLoading}
+                    className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 active:scale-98"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Instant Continue (No SMS Required)</span>
+                  </button>
                 </form>
               ) : (
                 <form onSubmit={handleVerifyOtp} className="space-y-3">
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs">
-                    <p className="font-semibold">
-                      Name: <span className="font-bold text-emerald-800">{customerName}</span> | Phone: +91 {phone}
-                    </p>
-                    {simulatedOtp && (
-                      <p className="mt-1 text-emerald-700 text-[11px]">
-                        Demo test OTP: <strong className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-emerald-300">{simulatedOtp}</strong> (Auto-filled)
+                  {realSmsSent ? (
+                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Real SMS Dispatched to +91 {phone}</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-700 mt-1">
+                        Please check your phone's SMS messages for the 6-digit verification code.
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-amber-900">Mobile: +91 {phone}</span>
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                          Instant Demo Mode
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-amber-800 leading-normal">
+                        No telecom SMS gateway is connected, so no SMS was sent to your phone.
+                        Your instant verification code is <strong className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-300 text-emerald-800 font-black">{simulatedOtp}</strong> (auto-filled below).
+                      </p>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1">
@@ -315,7 +372,7 @@ export default function CheckoutModal({
                     disabled={authLoading || (otp || '').length < 4}
                     className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
                   >
-                    {authLoading ? 'Verifying...' : 'Verify & Continue'}
+                    {authLoading ? 'Verifying...' : `Verify & Continue (Code: ${otp || simulatedOtp})`}
                   </button>
 
                   <div className="flex justify-between text-xs text-gray-500 pt-1">

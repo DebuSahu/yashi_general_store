@@ -316,6 +316,7 @@ export const api = {
           const otpVal = data.simulatedOtp || data.testOtp || '123456';
           return {
             ...data,
+            realSmsSent: Boolean(data.realSmsSent),
             simulatedOtp: otpVal,
             testOtp: otpVal
           };
@@ -327,7 +328,8 @@ export const api = {
 
     return {
       success: true,
-      message: 'OTP sent successfully to ' + phone,
+      realSmsSent: false,
+      message: 'Demo mode: instant verification OTP generated',
       simulatedOtp: '123456',
       testOtp: '123456',
       phone

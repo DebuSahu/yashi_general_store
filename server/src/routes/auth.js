@@ -240,8 +240,69 @@ router.delete('/admins/:id', authenticateAdmin, (req, res) => {
   });
 });
 
+// Helper: Dispatch real SMS if an SMS gateway (Fast2SMS or Twilio) is configured
+async function dispatchRealSms(phone, otp, settings = {}) {
+  const tenDigit = String(phone).replace(/[^0-9]/g, '').slice(-10);
+  const fast2smsKey = process.env.FAST2SMS_API_KEY || settings?.fast2smsApiKey;
+  const twilioSid = process.env.TWILIO_ACCOUNT_SID || settings?.twilioAccountSid;
+  const twilioAuth = process.env.TWILIO_AUTH_TOKEN || settings?.twilioAuthToken;
+  const twilioFrom = process.env.TWILIO_PHONE_NUMBER || settings?.twilioPhoneNumber;
+
+  // 1. Try Fast2SMS (Preferred Indian SMS gateway for Quick OTP)
+  if (fast2smsKey) {
+    try {
+      const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${encodeURIComponent(fast2smsKey)}&variables_values=${encodeURIComponent(otp)}&route=otp&numbers=${tenDigit}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'cache-control': 'no-cache' }
+      });
+      const data = await response.json();
+      if (data && data.return) {
+        console.log(`✅ [Fast2SMS] Real SMS dispatched to +91 ${tenDigit}`);
+        return { sent: true, provider: 'Fast2SMS', message: `SMS sent to +91 ${tenDigit}` };
+      } else {
+        console.warn(`⚠️ [Fast2SMS] Error response:`, data?.message || data);
+      }
+    } catch (err) {
+      console.error(`❌ [Fast2SMS] Network failed:`, err.message);
+    }
+  }
+
+  // 2. Try Twilio
+  if (twilioSid && twilioAuth && twilioFrom) {
+    try {
+      const url = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
+      const basic = Buffer.from(`${twilioSid}:${twilioAuth}`).toString('base64');
+      const params = new URLSearchParams();
+      params.append('To', `+91${tenDigit}`);
+      params.append('From', twilioFrom);
+      params.append('Body', `Your Yashi General Store OTP is ${otp}. Valid for 10 minutes.`);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${basic}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      });
+      const data = await response.json();
+      if (response.ok && data.sid) {
+        console.log(`✅ [Twilio] Real SMS dispatched to +91 ${tenDigit}`);
+        return { sent: true, provider: 'Twilio', message: `SMS sent to +91 ${tenDigit}` };
+      } else {
+        console.warn(`⚠️ [Twilio] Error response:`, data?.message || data);
+      }
+    } catch (err) {
+      console.error(`❌ [Twilio] Network failed:`, err.message);
+    }
+  }
+
+  return { sent: false, provider: 'demo', message: 'No SMS gateway configured' };
+}
+
 // 2. User Mobile - Send OTP
-router.post('/send-otp', (req, res) => {
+router.post('/send-otp', async (req, res) => {
   const { phone } = req.body;
   const cleanPhone = String(phone || '').replace(/[^0-9]/g, '');
 
@@ -249,7 +310,7 @@ router.post('/send-otp', (req, res) => {
     return res.status(400).json({ error: 'Please enter a valid 10-digit mobile number' });
   }
 
-  // Generate 6 digit OTP (for testing convenience, we use deterministic or random OTP and return it)
+  // Generate 6 digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
   const db = getDatabase();
@@ -260,10 +321,19 @@ router.post('/send-otp', (req, res) => {
   };
   saveDatabase(db);
 
+  // Attempt real telecom SMS delivery if gateway credentials are provided
+  const smsResult = await dispatchRealSms(cleanPhone, otp, db.settings);
+
   return res.json({
     success: true,
-    message: `OTP sent to +91 ${cleanPhone}`,
-    simulatedOtp: otp // Returned for easy testing and display in UI
+    realSmsSent: smsResult.sent,
+    provider: smsResult.provider,
+    message: smsResult.sent
+      ? `Real SMS sent to +91 ${cleanPhone.slice(-10)} via ${smsResult.provider}`
+      : `Demo mode: No SMS gateway configured. Use instant OTP ${otp}`,
+    simulatedOtp: otp,
+    testOtp: otp,
+    phone: cleanPhone
   });
 });
 

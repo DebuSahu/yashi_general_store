@@ -118,7 +118,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     longitude: shopSettings?.longitude || 80.3537057,
     mapsUrl: shopSettings?.mapsUrl || 'https://maps.app.goo.gl/36DwR1dGU2bfv7KD9',
     maxDeliveryRadiusKm: shopSettings?.maxDeliveryRadiusKm || 5,
-    minOrderAmount: shopSettings?.minOrderAmount || 100
+    minOrderAmount: shopSettings?.minOrderAmount || 100,
+    fast2smsApiKey: shopSettings?.fast2smsApiKey || '',
+    twilioAccountSid: shopSettings?.twilioAccountSid || '',
+    twilioAuthToken: shopSettings?.twilioAuthToken || '',
+    twilioPhoneNumber: shopSettings?.twilioPhoneNumber || ''
   });
   const [settingsSaved, setSettingsSaved] = useState(false);
 
@@ -1368,6 +1372,74 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   <span className="text-xs text-gray-500 font-semibold">
                     ₹ (Required: Min ₹100 order value for delivery)
                   </span>
+                </div>
+              </div>
+
+              {/* SMS Gateway Configuration */}
+              <div className="pt-4 border-t border-gray-100">
+                <h4 className="text-sm font-black text-gray-900 mb-1 flex items-center gap-1.5">
+                  <Phone className="w-4 h-4 text-emerald-600" />
+                  <span>Real SMS Gateway (Customer Mobile OTP Delivery)</span>
+                </h4>
+                <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                  By default, the store operates in <strong>Free Demo Mode</strong> with instant on-screen OTP verification (123456). To dispatch real SMS text messages to customer mobile phones, configure your Fast2SMS or Twilio API key below.
+                </p>
+
+                <div className="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Fast2SMS API Key (Recommended for Indian Mobile Numbers)
+                    </label>
+                    <input
+                      type="password"
+                      value={settingsForm.fast2smsApiKey || ''}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, fast2smsApiKey: e.target.value })}
+                      placeholder="Paste your Fast2SMS authorization key..."
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-white border border-gray-300 rounded-xl font-mono"
+                    />
+                    <p className="text-[11px] text-gray-500 mt-1">
+                      Supports instant Quick OTP route across India. Get an API key from <a href="https://www.fast2sms.com" target="_blank" rel="noreferrer" className="text-emerald-700 font-bold underline">fast2sms.com</a>.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                        Twilio Account SID (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={settingsForm.twilioAccountSid || ''}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, twilioAccountSid: e.target.value })}
+                        placeholder="ACxxxxxxxx..."
+                        className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                        Twilio Auth Token
+                      </label>
+                      <input
+                        type="password"
+                        value={settingsForm.twilioAuthToken || ''}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, twilioAuthToken: e.target.value })}
+                        placeholder="Twilio Auth Token..."
+                        className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                        Twilio Phone Number
+                      </label>
+                      <input
+                        type="text"
+                        value={settingsForm.twilioPhoneNumber || ''}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, twilioPhoneNumber: e.target.value })}
+                        placeholder="+1xxxxxxxxxx"
+                        className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl font-mono"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 

@@ -9,7 +9,8 @@ import {
   Lock,
   Eye,
   EyeOff,
-  ArrowRight
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
 import { api } from '../api';
 
@@ -29,6 +30,7 @@ export default function AuthModal({
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [simulatedOtp, setSimulatedOtp] = useState('');
+  const [realSmsSent, setRealSmsSent] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -71,6 +73,7 @@ export default function AuthModal({
       if (res && res.success) {
         const code = String(res.simulatedOtp || res.testOtp || '123456');
         setOtpSent(true);
+        setRealSmsSent(Boolean(res.realSmsSent));
         setSimulatedOtp(code);
         setOtp(code); // Auto-fill for convenience
       } else {
@@ -78,6 +81,27 @@ export default function AuthModal({
       }
     } catch (err) {
       setError('Failed to connect to server: ' + (err?.message || 'unknown error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickGuestLogin = async () => {
+    const guestName = (name && name.trim()) || 'Guest Customer';
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const guestPhone = cleanPhone.length === 10 ? cleanPhone : '9876543210';
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.verifyOtp(guestPhone, '123456', guestName);
+      if (res && res.success) {
+        onLoginSuccess(res.user, res.token);
+        onClose();
+      } else {
+        setError(res?.error || 'Failed to login');
+      }
+    } catch (err) {
+      setError('Quick login failed: ' + (err?.message || 'unknown error'));
     } finally {
       setLoading(false);
     }
@@ -258,17 +282,51 @@ export default function AuthModal({
                   <span>{loading ? 'Sending OTP...' : 'Send OTP & Login'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
+
+                {/* Instant 1-Tap Guest Access */}
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-gray-200" />
+                  <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase">Or Fast Login</span>
+                  <div className="flex-grow border-t border-gray-200" />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleQuickGuestLogin}
+                  disabled={loading}
+                  className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 active:scale-98"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Instant 1-Tap Login (No Waiting for SMS)</span>
+                </button>
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs">
-                  <p className="font-semibold">Name: <strong>{name}</strong> | Phone: +91 {phone}</p>
-                  {simulatedOtp && (
-                    <p className="mt-1 text-emerald-700 text-[11px]">
-                      Testing OTP: <strong className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-emerald-300">{simulatedOtp}</strong>
+                {/* Real SMS vs Demo Mode Clear Feedback */}
+                {realSmsSent ? (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs">
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Real SMS Dispatched to +91 {phone}</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-700 mt-1">
+                      An SMS with your 6-digit OTP was sent to your phone. Please check your SMS inbox.
                     </p>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-amber-900">Mobile: +91 {phone}</span>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                        Instant Demo Mode
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-amber-800 leading-normal">
+                      No telecom SMS gateway is connected, so no SMS was sent to your phone.
+                      Your verification OTP is <strong className="font-mono text-sm bg-white px-2 py-0.5 rounded-lg border border-amber-300 text-emerald-800 font-black">{simulatedOtp}</strong> (auto-filled below).
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">
@@ -292,7 +350,7 @@ export default function AuthModal({
                   disabled={loading || (otp || '').length < 4}
                   className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
                 >
-                  {loading ? 'Verifying...' : 'Verify Mobile & Login'}
+                  {loading ? 'Verifying...' : `Verify Mobile & Login (Code: ${otp || simulatedOtp})`}
                 </button>
 
                 <div className="flex justify-between text-xs text-gray-500 pt-1">
