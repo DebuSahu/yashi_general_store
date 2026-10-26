@@ -15,6 +15,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import YGSLogo from './YGSLogo';
+import { GoogleGLogo } from './GoogleAuthModal';
 
 export default function Navbar({
   searchTerm,
@@ -26,6 +27,7 @@ export default function Navbar({
   onOpenWishlist,
   onOpenOrderHistory,
   onOpenAuth,
+  onOpenGoogleAuth,
   onOpenOrders,
   onOpenAdmin,
   user,
@@ -248,15 +250,29 @@ export default function Navbar({
               <span>Track Orders</span>
             </button>
 
-            {/* Customer Login / Profile Badge */}
+            {/* Customer Profile / Login Badge */}
             {user ? (
               <div className="flex items-center space-x-1.5 sm:space-x-2 bg-emerald-50 border border-emerald-200 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl">
-                <User className="h-3.5 w-3.5 text-emerald-700" />
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-5 h-5 rounded-full object-cover shrink-0 border border-emerald-300"
+                  />
+                ) : user.authProvider === 'google' ? (
+                  <div className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
+                    {(user.name || 'G').charAt(0).toUpperCase()}
+                  </div>
+                ) : (
+                  <User className="h-3.5 w-3.5 text-emerald-700" />
+                )}
                 <div className="text-left hidden sm:block">
                   <p className="text-[11px] font-black text-emerald-950 leading-tight">
                     {user.name || 'Customer'}
                   </p>
-                  <p className="text-[10px] text-emerald-700 font-bold">+91 {user.phone}</p>
+                  <p className="text-[10px] text-emerald-700 font-bold truncate max-w-[120px]">
+                    {user.email || `+91 ${user.phone}`}
+                  </p>
                 </div>
                 <button
                   onClick={onLogoutUser}
@@ -266,13 +282,26 @@ export default function Navbar({
                 </button>
               </div>
             ) : !adminUser ? (
-              <button
-                onClick={onOpenAuth}
-                className="flex items-center space-x-1 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-black text-emerald-900 bg-emerald-100/90 hover:bg-emerald-200 rounded-xl transition"
-              >
-                <User className="h-3.5 w-3.5" />
-                <span>Login</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                {/* 1-Click Google Sign In */}
+                <button
+                  type="button"
+                  onClick={onOpenGoogleAuth}
+                  className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-2xs hover:border-slate-300 active:scale-95"
+                  title="Sign in instantly with Gmail (No password)"
+                >
+                  <GoogleGLogo className="w-3.5 h-3.5" />
+                  <span>Google</span>
+                </button>
+
+                <button
+                  onClick={onOpenAuth}
+                  className="flex items-center space-x-1 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-black text-emerald-900 bg-emerald-100/90 hover:bg-emerald-200 rounded-xl transition"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  <span>Login</span>
+                </button>
+              </div>
             ) : null}
 
             {/* Admin Portal Section: Visible when admin is logged in */}

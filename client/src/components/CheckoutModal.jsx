@@ -19,6 +19,7 @@ import {
 import LocationPicker from './LocationPicker';
 import { api } from '../api';
 import confetti from 'canvas-confetti';
+import GoogleAuthModal, { GoogleGLogo } from './GoogleAuthModal';
 
 export default function CheckoutModal({
   isOpen,
@@ -60,6 +61,7 @@ export default function CheckoutModal({
   const [otpSent, setOtpSent] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
   // Delivery details state
   const [customerName, setCustomerName] = useState(user?.name || '');
@@ -121,6 +123,22 @@ export default function CheckoutModal({
   const [submitting, setSubmitting] = useState(false);
   const [orderError, setOrderError] = useState('');
 
+  // Handle Google passwordless login success
+  const handleGoogleSuccess = (userData, token) => {
+    onUserVerified?.(userData, token);
+    setCustomerName(userData.name || 'Customer');
+    if (userData.phone && userData.phone !== '9876543210') {
+      setPhone(userData.phone);
+    }
+    setStep(2); // Instantly advances to delivery details
+    setGoogleModalOpen(false);
+    onShowToast?.({
+      type: 'success',
+      title: 'Verified with Google! 🎉',
+      message: `Signed in as ${userData.name}. Choose your delivery address.`
+    });
+  };
+
   // 1. Send OTP
   const handleSendOtp = async (e) => {
     e?.preventDefault();
@@ -144,7 +162,7 @@ export default function CheckoutModal({
         setOtpSent(true);
         setRealSmsSent(Boolean(res.realSmsSent));
         setSimulatedOtp(code);
-        setOtp(code); // Auto-fill for friction-free testing
+        setOtp(code);
       } else {
         setAuthError(res?.error || 'Failed to send OTP');
       }
@@ -168,7 +186,7 @@ export default function CheckoutModal({
       const res = await api.verifyOtp(validPhone, '123456', customerName.trim());
       if (res && res.success) {
         onUserVerified?.(res.user, res.token);
-        setStep(2); // Proceed to address and location step
+        setStep(2);
       } else {
         setAuthError(res?.error || 'Verification failed');
       }
@@ -258,7 +276,8 @@ export default function CheckoutModal({
 
       const orderPayload = {
         customerName: customerName.trim(),
-        customerPhone: user?.phone || phone,
+        customerPhone: user?.phone || phone || '9876543210',
+        customerEmail: user?.email || null,
         address: fullAddress,
         latitude: locationData.latitude,
         longitude: locationData.longitude,
@@ -306,79 +325,225 @@ export default function CheckoutModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white p-4 sm:p-5 flex items-center justify-between">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="p-1 rounded-xl bg-white/20">
-                <Truck className="w-5 h-5 text-yellow-300" />
-              </span>
-              <h2 className="text-base sm:text-xl font-black">
-                {step === 1 ? 'Verify Phone Number' : 'Checkout & Delivery Details'}
-              </h2>
-            </div>
-            <p className="text-xs text-white/90 mt-1">
-              Yashi General Store • 5 km Superfast Neighborhood Delivery
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/20 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Step Indicator */}
-        <div className="bg-emerald-50 px-6 py-2.5 border-b border-emerald-100 flex items-center justify-between text-xs font-bold">
-          <div className={`flex items-center gap-1.5 ${step === 1 ? 'text-emerald-800' : 'text-slate-400'}`}>
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
-              1
-            </span>
-            <span>Mobile Verification</span>
-          </div>
-          <div className="h-0.5 w-12 bg-slate-200" />
-          <div className={`flex items-center gap-1.5 ${step === 2 ? 'text-emerald-800' : 'text-slate-400'}`}>
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
-              2
-            </span>
-            <span>Slot, Payment & Location</span>
-          </div>
-        </div>
-
-        {/* Content Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
+    <>
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+        <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
           
-          {/* STEP 1: MOBILE OTP VERIFICATION */}
-          {step === 1 && (
-            <div className="space-y-4 max-w-md mx-auto py-2">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-2">
-                  <Phone className="w-6 h-6" />
-                </div>
-                <h3 className="text-base font-black text-slate-900">
-                  Enter mobile number to order
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  We use your phone number for live delivery status updates and delivery rider coordination.
-                </p>
+          {/* Header */}
+          <div className="bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white p-4 sm:p-5 flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="p-1 rounded-xl bg-white/20">
+                  <Truck className="w-5 h-5 text-yellow-300" />
+                </span>
+                <h2 className="text-base sm:text-xl font-black">
+                  {step === 1 ? 'Customer Sign In & Verification' : 'Checkout & Delivery Details'}
+                </h2>
               </div>
+              <p className="text-xs text-white/90 mt-1">
+                Yashi General Store • 5 km Superfast Neighborhood Delivery
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/20 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-              {authError && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{authError}</span>
+          {/* Step Indicator */}
+          <div className="bg-emerald-50 px-6 py-2.5 border-b border-emerald-100 flex items-center justify-between text-xs font-bold">
+            <div className={`flex items-center gap-1.5 ${step === 1 ? 'text-emerald-800' : 'text-slate-400'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                1
+              </span>
+              <span>Identification</span>
+            </div>
+            <div className="h-0.5 w-12 bg-slate-200" />
+            <div className={`flex items-center gap-1.5 ${step === 2 ? 'text-emerald-800' : 'text-slate-400'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                2
+              </span>
+              <span>Slot, Payment & Location</span>
+            </div>
+          </div>
+
+          {/* Content Body */}
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
+            
+            {/* STEP 1: VERIFICATION (GOOGLE GMAIL + MOBILE OTP) */}
+            {step === 1 && (
+              <div className="space-y-4 max-w-md mx-auto py-2">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                    <Phone className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-black text-slate-900">
+                    Sign in to complete your delivery
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Choose 1-click Google sign in (no password needed) or enter your mobile number.
+                  </p>
                 </div>
-              )}
 
-              {!otpSent ? (
-                <form onSubmit={handleSendOtp} className="space-y-3">
+                {authError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{authError}</span>
+                  </div>
+                )}
+
+                {/* Primary Google Sign-in Button */}
+                <button
+                  type="button"
+                  onClick={() => setGoogleModalOpen(true)}
+                  className="w-full py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 font-black text-xs sm:text-sm rounded-2xl border-2 border-slate-200 hover:border-slate-300 shadow-sm flex items-center justify-center gap-3 transition active:scale-98 group"
+                >
+                  <GoogleGLogo className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
+                  <span>Continue with Google / Gmail (No Password)</span>
+                </button>
+
+                <div className="relative flex py-0.5 items-center">
+                  <div className="flex-grow border-t border-slate-200" />
+                  <span className="flex-shrink mx-3 text-[10px] text-slate-400 font-bold uppercase">
+                    Or Mobile Phone OTP
+                  </span>
+                  <div className="flex-grow border-t border-slate-200" />
+                </div>
+
+                {!otpSent ? (
+                  <form onSubmit={handleSendOtp} className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-black text-slate-700 mb-1">
+                        Your Full Name * (Required for delivery)
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Ramesh Kumar"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
+                        autoFocus
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-black text-slate-700 mb-1">
+                        Mobile Number *
+                      </label>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-black text-slate-500 pointer-events-none">
+                          +91
+                        </span>
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength="10"
+                          placeholder="98765 43210"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                          className="w-full pl-12 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={authLoading || !customerName.trim() || phone.length < 10}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
+                    >
+                      {authLoading ? 'Sending OTP...' : 'Send Verification OTP'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleQuickVerify}
+                      disabled={authLoading}
+                      className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-black text-xs rounded-xl transition flex items-center justify-center gap-1.5 active:scale-98"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Instant Continue (No SMS Required)</span>
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleVerifyOtp} className="space-y-3">
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-black text-amber-900">Mobile: +91 {phone}</span>
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                          Demo Mode
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-amber-800 leading-normal">
+                        Your instant verification code is <strong className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-300 text-emerald-800 font-black">{simulatedOtp}</strong> (auto-filled).
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-black text-slate-700 mb-1">
+                        Enter 6-Digit OTP
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength="6"
+                        value={otp || ''}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="123456"
+                        className="w-full px-4 py-2.5 text-center text-lg tracking-widest font-mono font-black bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                        autoFocus
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={authLoading || (otp || '').length < 4}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
+                    >
+                      {authLoading ? 'Verifying...' : `Verify & Continue (Code: ${otp || simulatedOtp})`}
+                    </button>
+
+                    <div className="flex justify-between text-xs text-slate-500 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setOtpSent(false)}
+                        className="hover:text-emerald-700 underline font-bold"
+                      >
+                        Change Phone Number
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        className="hover:text-emerald-700 underline font-bold"
+                      >
+                        Resend OTP
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* STEP 2: ADDRESS, SLOTS, PAYMENT & MAP */}
+            {step === 2 && (
+              <form onSubmit={handleSubmitDelivery} className="space-y-4">
+                
+                {orderError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <span>{orderError}</span>
+                  </div>
+                )}
+
+                {/* Customer Contact & Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-black text-slate-700 mb-1">
-                      Your Full Name * (Required for delivery)
+                      Customer Name *
                     </label>
                     <input
                       type="text"
@@ -386,343 +551,219 @@ export default function CheckoutModal({
                       placeholder="e.g. Ramesh Kumar"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
-                      autoFocus
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-black text-slate-700 mb-1">
-                      Mobile Number *
+                      Account / Contact
                     </label>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-black text-slate-500 pointer-events-none">
-                        +91
+                    <div className="flex items-center px-3.5 py-2 text-xs sm:text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-700 font-bold justify-between">
+                      <span className="truncate">
+                        {user?.email ? user.email : `+91 ${user?.phone || phone}`}
                       </span>
-                      <input
-                        type="tel"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength="10"
-                        placeholder="98765 43210"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-full pl-12 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={authLoading || !customerName.trim() || phone.length < 10}
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
-                  >
-                    {authLoading ? 'Sending OTP...' : 'Send Verification OTP'}
-                  </button>
-
-                  {/* Fast 1-Tap Verification */}
-                  <div className="relative flex py-0.5 items-center">
-                    <div className="flex-grow border-t border-slate-200" />
-                    <span className="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase">Or Instant</span>
-                    <div className="flex-grow border-t border-slate-200" />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleQuickVerify}
-                    disabled={authLoading}
-                    className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-black text-xs rounded-xl transition flex items-center justify-center gap-1.5 active:scale-98"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Instant Continue (No SMS Required)</span>
-                  </button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-3">
-                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-black text-amber-900">Mobile: +91 {phone}</span>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
-                        Demo Mode
+                      <span className="text-[10px] text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-black shrink-0">
+                        {user?.authProvider === 'google' ? 'Google' : 'Verified'} ✅
                       </span>
                     </div>
-                    <p className="text-[11px] text-amber-800 leading-normal">
-                      Your instant verification code is <strong className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-amber-300 text-emerald-800 font-black">{simulatedOtp}</strong> (auto-filled).
-                    </p>
                   </div>
+                </div>
 
+                {/* Delivery Slots Selection */}
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Choose Delivery Slot *</span>
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {deliverySlots.map((slot) => {
+                      const isSelected = deliverySlot === slot.id;
+                      return (
+                        <div
+                          key={slot.id}
+                          onClick={() => setDeliverySlot(slot.id)}
+                          className={`p-2.5 rounded-xl border text-center cursor-pointer transition select-none ${
+                            isSelected
+                              ? 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-2xs'
+                              : 'bg-slate-50 border-slate-200 hover:border-emerald-300'
+                          }`}
+                        >
+                          <p className="text-xs font-black">{slot.title}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5 font-medium">
+                            {slot.time}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Delivery Address fields */}
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">
+                    Complete House/Street Address *
+                  </label>
+                  <textarea
+                    required
+                    rows="2"
+                    placeholder="e.g. House No. 24, Near Cantt Railway Crossing / Harris Ganj, Kanpur"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-medium"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-black text-slate-700 mb-1">
-                      Enter 6-Digit OTP
+                      Nearby Landmark
                     </label>
                     <input
                       type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength="6"
-                      value={otp || ''}
-                      onChange={(e) => setOtp(e.target.value)}
-                      placeholder="123456"
-                      className="w-full px-4 py-2.5 text-center text-lg tracking-widest font-mono font-black bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
-                      autoFocus
+                      placeholder="e.g. Opposite Water Tank"
+                      value={landmark}
+                      onChange={(e) => setLandmark(e.target.value)}
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-xs font-black text-slate-700 mb-1">
+                      Special Notes / Doorstep Instructions
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Ring bell twice, leave at door"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Payment Method Selector */}
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1">
+                    <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Select Payment Method *</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {paymentMethods.map((pm) => {
+                      const Icon = pm.icon;
+                      const isSelected = paymentMethod === pm.id;
+                      return (
+                        <div
+                          key={pm.id}
+                          onClick={() => setPaymentMethod(pm.id)}
+                          className={`p-2.5 rounded-xl border cursor-pointer transition select-none flex items-center gap-2.5 ${
+                            isSelected
+                              ? 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-2xs'
+                              : 'bg-slate-50 border-slate-200 hover:border-emerald-300'
+                          }`}
+                        >
+                          <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-black leading-tight truncate">{pm.title}</p>
+                            <p className="text-[10px] text-slate-500 leading-tight truncate mt-0.5">{pm.desc}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {paymentMethod === 'upi' && (
+                    <div className="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                      <div className="space-y-0.5">
+                        <span className="font-bold text-slate-800">Scan & Pay via any UPI App</span>
+                        <p className="text-[11px] text-slate-500">Pay directly upon delivery or to Store UPI: <strong>yashistore@upi</strong></p>
+                      </div>
+                      <span className="px-2 py-1 bg-white border border-slate-300 rounded font-mono text-[10px] font-bold text-emerald-700">
+                        QR READY
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Interactive Location Picker & Haversine Distance Check */}
+                <div className="pt-2 border-t border-slate-100">
+                  <LocationPicker
+                    shopLat={shopSettings?.latitude || 26.4519124}
+                    shopLon={shopSettings?.longitude || 80.3537057}
+                    maxRadiusKm={shopSettings?.maxDeliveryRadiusKm || 5}
+                    initialUserLat={locationData?.latitude}
+                    initialUserLon={locationData?.longitude}
+                    onLocationSelected={(loc) => setLocationData(loc)}
+                  />
+                </div>
+
+                {/* Order Cost Breakdown in Checkout */}
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                  <div className="flex justify-between text-slate-600">
+                    <span>Subtotal ({items.length} items):</span>
+                    <span className="font-bold text-slate-800">₹{totalAmount}</span>
+                  </div>
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-emerald-700 font-bold">
+                      <span>Coupon Discount ({appliedCoupon.code}):</span>
+                      <span>-₹{couponDiscount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-slate-600">
+                    <span>Local Delivery (≤ 5km):</span>
+                    <span className="font-black text-emerald-700 uppercase">FREE</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-black text-slate-900 pt-1.5 border-t border-slate-200">
+                    <span>Payable Amount:</span>
+                    <span className="text-emerald-700 text-base">₹{finalPayable}</span>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="pt-1">
                   <button
                     type="submit"
-                    disabled={authLoading || (otp || '').length < 4}
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition disabled:opacity-50"
+                    disabled={submitting || !locationData || !locationData.isEligible}
+                    className={`w-full py-3.5 px-4 rounded-2xl font-black text-sm text-white shadow-lg flex items-center justify-center space-x-2 transition active:scale-[0.99] ${
+                      locationData?.isEligible
+                        ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
+                        : 'bg-slate-400 cursor-not-allowed opacity-75'
+                    }`}
                   >
-                    {authLoading ? 'Verifying...' : `Verify & Continue (Code: ${otp || simulatedOtp})`}
+                    <Truck className="w-5 h-5 text-yellow-300" />
+                    <span>
+                      {submitting
+                        ? 'Dispatching Delivery Request...'
+                        : locationData?.isEligible
+                        ? `Place Delivery Request (₹${finalPayable})`
+                        : 'Delivery Blocked (> 5km from shop)'}
+                    </span>
                   </button>
 
-                  <div className="flex justify-between text-xs text-slate-500 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setOtpSent(false)}
-                      className="hover:text-emerald-700 underline font-bold"
-                    >
-                      Change Phone Number
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSendOtp}
-                      className="hover:text-emerald-700 underline font-bold"
-                    >
-                      Resend OTP
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          )}
-
-          {/* STEP 2: ADDRESS, SLOTS, PAYMENT & MAP */}
-          {step === 2 && (
-            <form onSubmit={handleSubmitDelivery} className="space-y-4">
-              
-              {orderError && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 shrink-0" />
-                  <span>{orderError}</span>
-                </div>
-              )}
-
-              {/* Customer Contact & Name */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">
-                    Customer Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Ramesh Kumar"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
-                  />
+                  {!locationData?.isEligible && locationData && (
+                    <p className="text-[11px] text-rose-600 font-bold text-center mt-2">
+                      ⚠️ Delivery disabled: Your selected GPS coordinates are {locationData.distanceKm} km away. We strictly deliver up to 5 km of Yashi General Store!
+                    </p>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">
-                    Contact Phone
-                  </label>
-                  <div className="flex items-center px-3.5 py-2 text-xs sm:text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-700 font-bold justify-between">
-                    <span>+91 {user?.phone || phone}</span>
-                    <span className="text-[10px] text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-black">
-                      Verified ✅
-                    </span>
-                  </div>
-                </div>
-              </div>
+              </form>
+            )}
 
-              {/* Delivery Slots Selection */}
-              <div>
-                <label className="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Choose Delivery Slot *</span>
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {deliverySlots.map((slot) => {
-                    const isSelected = deliverySlot === slot.id;
-                    return (
-                      <div
-                        key={slot.id}
-                        onClick={() => setDeliverySlot(slot.id)}
-                        className={`p-2.5 rounded-xl border text-center cursor-pointer transition select-none ${
-                          isSelected
-                            ? 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-2xs'
-                            : 'bg-slate-50 border-slate-200 hover:border-emerald-300'
-                        }`}
-                      >
-                        <p className="text-xs font-black">{slot.title}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5 font-medium">
-                          {slot.time}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Delivery Address fields */}
-              <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">
-                  Complete House/Street Address *
-                </label>
-                <textarea
-                  required
-                  rows="2"
-                  placeholder="e.g. House No. 24, Near Cantt Railway Crossing / Harris Ganj, Kanpur"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-medium"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">
-                    Nearby Landmark
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Opposite Water Tank"
-                    value={landmark}
-                    onChange={(e) => setLandmark(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">
-                    Special Notes / Doorstep Instructions
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Ring bell twice, leave at door"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-              </div>
-
-              {/* Payment Method Selector */}
-              <div>
-                <label className="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1">
-                  <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Select Payment Method *</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {paymentMethods.map((pm) => {
-                    const Icon = pm.icon;
-                    const isSelected = paymentMethod === pm.id;
-                    return (
-                      <div
-                        key={pm.id}
-                        onClick={() => setPaymentMethod(pm.id)}
-                        className={`p-2.5 rounded-xl border cursor-pointer transition select-none flex items-center gap-2.5 ${
-                          isSelected
-                            ? 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-2xs'
-                            : 'bg-slate-50 border-slate-200 hover:border-emerald-300'
-                        }`}
-                      >
-                        <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-black leading-tight truncate">{pm.title}</p>
-                          <p className="text-[10px] text-slate-500 leading-tight truncate mt-0.5">{pm.desc}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* If UPI chosen, show demo QR code badge */}
-                {paymentMethod === 'upi' && (
-                  <div className="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                    <div className="space-y-0.5">
-                      <span className="font-bold text-slate-800">Scan & Pay via any UPI App</span>
-                      <p className="text-[11px] text-slate-500">Pay directly upon delivery or to Store UPI: <strong>yashistore@upi</strong></p>
-                    </div>
-                    <span className="px-2 py-1 bg-white border border-slate-300 rounded font-mono text-[10px] font-bold text-emerald-700">
-                      QR READY
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Interactive Location Picker & Haversine Distance Check */}
-              <div className="pt-2 border-t border-slate-100">
-                <LocationPicker
-                  shopLat={shopSettings?.latitude || 26.4519124}
-                  shopLon={shopSettings?.longitude || 80.3537057}
-                  maxRadiusKm={shopSettings?.maxDeliveryRadiusKm || 5}
-                  initialUserLat={locationData?.latitude}
-                  initialUserLon={locationData?.longitude}
-                  onLocationSelected={(loc) => setLocationData(loc)}
-                />
-              </div>
-
-              {/* Order Cost Breakdown in Checkout */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-                <div className="flex justify-between text-slate-600">
-                  <span>Subtotal ({items.length} items):</span>
-                  <span className="font-bold text-slate-800">₹{totalAmount}</span>
-                </div>
-                {couponDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-bold">
-                    <span>Coupon Discount ({appliedCoupon.code}):</span>
-                    <span>-₹{couponDiscount}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-slate-600">
-                  <span>Local Delivery (≤ 5km):</span>
-                  <span className="font-black text-emerald-700 uppercase">FREE</span>
-                </div>
-                <div className="flex justify-between text-sm font-black text-slate-900 pt-1.5 border-t border-slate-200">
-                  <span>Payable Amount:</span>
-                  <span className="text-emerald-700 text-base">₹{finalPayable}</span>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-1">
-                <button
-                  type="submit"
-                  disabled={submitting || !locationData || !locationData.isEligible}
-                  className={`w-full py-3.5 px-4 rounded-2xl font-black text-sm text-white shadow-lg flex items-center justify-center space-x-2 transition active:scale-[0.99] ${
-                    locationData?.isEligible
-                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
-                      : 'bg-slate-400 cursor-not-allowed opacity-75'
-                  }`}
-                >
-                  <Truck className="w-5 h-5 text-yellow-300" />
-                  <span>
-                    {submitting
-                      ? 'Dispatching Delivery Request...'
-                      : locationData?.isEligible
-                      ? `Place Delivery Request (₹${finalPayable})`
-                      : 'Delivery Blocked (> 5km from shop)'}
-                  </span>
-                </button>
-
-                {!locationData?.isEligible && locationData && (
-                  <p className="text-[11px] text-rose-600 font-bold text-center mt-2">
-                    ⚠️ Delivery disabled: Your selected GPS coordinates are {locationData.distanceKm} km away. We strictly deliver up to 5 km of Yashi General Store!
-                  </p>
-                )}
-              </div>
-
-            </form>
-          )}
+          </div>
 
         </div>
-
       </div>
-    </div>
+
+      {/* Google Sign-in Modal */}
+      <GoogleAuthModal
+        isOpen={googleModalOpen}
+        onClose={() => setGoogleModalOpen(false)}
+        onLoginSuccess={handleGoogleSuccess}
+        onShowToast={onShowToast}
+      />
+    </>
   );
 }

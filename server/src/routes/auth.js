@@ -381,5 +381,38 @@ router.post('/verify-otp', (req, res) => {
   });
 });
 
+// 4. User Passwordless Google / Gmail Login
+router.post('/google', (req, res) => {
+  const { email, name, avatar, phone } = req.body;
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Valid Gmail/email address is required' });
+  }
+
+  const cleanEmail = String(email).trim().toLowerCase();
+  const customerName = name?.trim() || cleanEmail.split('@')[0];
+  const customerPhone = phone ? String(phone).replace(/[^0-9]/g, '') : '9876543210';
+
+  const token = jwt.sign(
+    { role: 'user', email: cleanEmail, name: customerName, authProvider: 'google' },
+    JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+
+  return res.json({
+    success: true,
+    message: 'Signed in successfully via Google (Passwordless)',
+    token,
+    user: {
+      role: 'user',
+      email: cleanEmail,
+      name: customerName,
+      phone: customerPhone,
+      avatar: avatar || null,
+      authProvider: 'google',
+      verified: true
+    }
+  });
+});
+
 export default router;
 

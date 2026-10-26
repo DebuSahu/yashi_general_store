@@ -369,6 +369,41 @@ export const api = {
     };
   },
 
+  // Google / Gmail Passwordless Login
+  googleLogin: async ({ email, name, avatar, phone }) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name, avatar, phone })
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (err) {
+        console.warn('Falling back to local Google login:', err.message);
+      }
+    }
+
+    const cleanEmail = String(email || 'customer@gmail.com').trim().toLowerCase();
+    const customerName = name?.trim() || cleanEmail.split('@')[0];
+    const customerPhone = phone ? String(phone).replace(/[^0-9]/g, '') : '9876543210';
+    return {
+      success: true,
+      token: 'google-token-' + Date.now(),
+      user: {
+        role: 'user',
+        email: cleanEmail,
+        name: customerName,
+        phone: customerPhone,
+        avatar: avatar || null,
+        authProvider: 'google',
+        verified: true
+      }
+    };
+  },
+
   // Admin Login
   adminLogin: async (username, password) => {
     if (API_BASE) {

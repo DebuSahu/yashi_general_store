@@ -11,6 +11,7 @@ import Toast from './components/Toast';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import AuthModal from './components/AuthModal';
+import GoogleAuthModal from './components/GoogleAuthModal';
 import OrderTrackerModal from './components/OrderTrackerModal';
 import LocationPicker from './components/LocationPicker';
 import AdminDashboard from './pages/AdminDashboard';
@@ -123,6 +124,7 @@ export default function App() {
   const [orderHistoryModalOpen, setOrderHistoryModalOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [googleAuthModalOpen, setGoogleAuthModalOpen] = useState(false);
   const [orderTrackerOpen, setOrderTrackerOpen] = useState(false);
   const [targetTrackerOrder, setTargetTrackerOrder] = useState(null);
   const [eligibilityModalOpen, setEligibilityModalOpen] = useState(false);
@@ -566,6 +568,7 @@ export default function App() {
           setAuthInitialTab('user');
           setAuthModalOpen(true);
         }}
+        onOpenGoogleAuth={() => setGoogleAuthModalOpen(true)}
         onOpenOrders={() => {
           setTargetTrackerOrder(null);
           setOrderTrackerOpen(true);
@@ -1181,6 +1184,14 @@ export default function App() {
         onLoginSuccess={handleUserVerified}
         onAdminLoginSuccess={handleAdminLoginSuccess}
         initialTab={authInitialTab}
+      />
+
+      {/* GOOGLE PASSWORDLESS GMAIL AUTH MODAL */}
+      <GoogleAuthModal
+        isOpen={googleAuthModalOpen}
+        onClose={() => setGoogleAuthModalOpen(false)}
+        onLoginSuccess={handleUserVerified}
+        onShowToast={(t) => setToast(t)}
       />
 
       {/* USER ORDER TRACKER MODAL */}
