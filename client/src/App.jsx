@@ -519,8 +519,9 @@ export default function App() {
     // Hot Deals Only filter (>= 15% discount)
     if (filterDealsOnly) {
       list = list.filter((p) => {
-        const mrp = p.mrp || Math.round(p.price * 1.15);
-        const disc = Math.round(((mrp - p.price) / mrp) * 100);
+        if (!p) return false;
+        const mrp = p?.mrp || Math.round((p?.price || 0) * 1.15);
+        const disc = Math.round(((mrp - (p?.price || 0)) / (mrp || 1)) * 100);
         return disc >= 15;
       });
     }
@@ -550,8 +551,11 @@ export default function App() {
       list.sort((a, b) => (b.rating || 4.8) - (a.rating || 4.8));
     } else if (sortBy === 'discount') {
       list.sort((a, b) => {
-        const discA = a.discountPercent || Math.round((((a.mrp || a.price * 1.15) - a.price) / (a.mrp || a.price * 1.15)) * 100);
-        const discB = b.discountPercent || Math.round((((b.mrp || b.price * 1.15) - b.price) / (b.mrp || b.price * 1.15)) * 100);
+        if (!a || !b) return 0;
+        const mrpA = a?.mrp || Math.round((a?.price || 0) * 1.15);
+        const mrpB = b?.mrp || Math.round((b?.price || 0) * 1.15);
+        const discA = a?.discountPercent || Math.round(((mrpA - (a?.price || 0)) / (mrpA || 1)) * 100);
+        const discB = b?.discountPercent || Math.round(((mrpB - (b?.price || 0)) / (mrpB || 1)) * 100);
         return discB - discA;
       });
     } else if (sortBy === 'name') {
@@ -1160,9 +1164,10 @@ export default function App() {
       <Toast toast={toast} onClose={() => setToast(null)} />
 
       {/* PRODUCT QUICK VIEW MODAL */}
-      <ProductDetailModal
-        product={quickViewProduct}
-        isOpen={Boolean(quickViewProduct)}
+      {quickViewProduct && (
+        <ProductDetailModal
+          product={quickViewProduct}
+          isOpen={Boolean(quickViewProduct)}
         onClose={() => setQuickViewProduct(null)}
         cartQty={quickViewProduct ? cart[quickViewProduct.id]?.quantity || 0 : 0}
         onAddToCart={handleAddToCart}
@@ -1171,7 +1176,8 @@ export default function App() {
         onToggleWishlist={handleToggleWishlist}
         onShowToast={(t) => setToast(t)}
         allProducts={products}
-      />
+        />
+      )}
 
       {/* WISHLIST DRAWER */}
       <WishlistDrawer

@@ -102,7 +102,7 @@ export default function ProductCard({
     }
   };
 
-  const mrp = product.mrp || Math.round(product.price * 1.15);
+  const mrp = product?.mrp || Math.round((product?.price || 0) * 1.15);
   const discount = Math.round(((mrp - product.price) / mrp) * 100);
   const savings = mrp - product.price;
 

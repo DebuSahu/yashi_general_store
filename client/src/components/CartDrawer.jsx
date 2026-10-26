@@ -40,7 +40,7 @@ export default function CartDrawer({
   const items = Object.values(cart);
   const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalMrp = items.reduce((sum, item) => {
-    const mrp = item.mrp || Math.round(item.price * 1.15);
+    const mrp = item?.mrp || Math.round((item?.price || 0) * 1.15);
     return sum + mrp * item.quantity;
   }, 0);
   const totalProductSavings = Math.max(0, totalMrp - totalAmount);

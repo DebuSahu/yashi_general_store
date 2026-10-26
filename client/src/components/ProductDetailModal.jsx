@@ -61,14 +61,16 @@ export default function ProductDetailModal({
     ];
   });
 
-  const mrp = product.mrp || Math.round(product.price * 1.15);
-  const discount = Math.round(((mrp - product.price) / mrp) * 100);
-  const savings = mrp - product.price;
-  const isOutOfStock = product.inStock === false || product.stock === 0;
+  if (!isOpen || !product) return null;
+
+  const mrp = product?.mrp || Math.round((product?.price || 0) * 1.15);
+  const discount = Math.round(((mrp - (product?.price || 0)) / (mrp || 1)) * 100);
+  const savings = mrp - (product?.price || 0);
+  const isOutOfStock = product?.inStock === false || product?.stock === 0;
 
   // Cross-sell items from same or other category
   const companionProducts = allProducts
-    .filter((p) => p.id !== product.id)
+    .filter((p) => p && p.id !== product?.id)
     .slice(0, 2);
 
   const handleAddReview = (e) => {
