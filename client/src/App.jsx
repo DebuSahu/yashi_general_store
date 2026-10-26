@@ -838,8 +838,48 @@ export default function App() {
 
       {/* 4. CATEGORY SELECTOR & FILTER TABS */}
       <div className="sticky top-16 sm:top-20 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-2 sm:py-3 shadow-xs w-full max-w-full overflow-hidden transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full overflow-hidden">
-          <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full">
+          
+          {/* Mobile Category Dropdown Selector (Clean Menu Format - No Horizontal Slide!) */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-1.5 px-3 shadow-2xs">
+              <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">
+                Category:
+              </span>
+              <div className="flex-1 min-w-0">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => {
+                    setSelectedCategory(e.target.value);
+                    setSelectedBrand('all');
+                  }}
+                  className="w-full text-xs font-extrabold bg-transparent text-emerald-800 dark:text-emerald-300 focus:outline-none cursor-pointer py-1"
+                >
+                  {categoryPills.map((pill) => {
+                    const count = pill.id === 'all'
+                      ? (products || []).length
+                      : (products || []).filter(
+                          (p) =>
+                            (p?.category || '').toLowerCase().replace(/[\s-_]+/g, '') ===
+                            pill.id.replace(/[\s-_]+/g, '')
+                        ).length;
+                    return (
+                      <option
+                        key={pill.id}
+                        value={pill.id}
+                        className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
+                      >
+                        {pill.label} ({count} items)
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Category Tabs Bar */}
+          <div className="hidden md:flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
             {categoryPills.map((pill) => {
               const Icon = pill.icon;
               const isActive = selectedCategory === pill.id;
@@ -879,6 +919,7 @@ export default function App() {
               );
             })}
           </div>
+
         </div>
       </div>
 

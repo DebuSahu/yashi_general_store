@@ -15,7 +15,9 @@ import {
   ArrowRight,
   Sun,
   Moon,
-  Mail
+  Mail,
+  LogOut,
+  X
 } from 'lucide-react';
 import YGSLogo from './YGSLogo';
 import { GoogleGLogo } from './GoogleAuthModal';
@@ -46,7 +48,9 @@ export default function Navbar({
   toggleTheme
 }) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchContainerRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const storePhone = shopSettings?.phone || '+91 98765 43210';
   const storeEmail = shopSettings?.email || 'contact@yashigeneralstore.com';
@@ -57,6 +61,9 @@ export default function Navbar({
     const handleClickOutside = (e) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
         setIsSearchFocused(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -225,8 +232,158 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Action Buttons Toolbar */}
-          <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+          {/* Mobile Right: Single Clean Profile / Settings Trigger (Leaves Store Title Uncluttered!) */}
+          <div ref={mobileMenuRef} className="sm:hidden relative shrink-0">
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="flex items-center gap-1.5 p-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/80 active:scale-95 transition shadow-2xs"
+                title="Account & Settings Menu"
+              >
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={userFirstName}
+                    className="w-7 h-7 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">
+                    {userFirstName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={onOpenGoogleAuth}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-black text-slate-800 dark:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xs active:scale-95"
+                >
+                  <GoogleGLogo className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-1.5 text-slate-600 dark:text-amber-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
+                  title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                >
+                  {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                </button>
+              </div>
+            )}
+
+            {/* Mobile Profile & Actions Dropdown Menu */}
+            {mobileMenuOpen && user && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 space-y-2.5">
+                {/* User Header */}
+                <div className="flex items-center gap-2.5 p-2 bg-emerald-50 dark:bg-emerald-950/60 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={userFirstName}
+                      className="w-9 h-9 rounded-full object-cover border border-emerald-300"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-emerald-600 text-white font-black text-sm flex items-center justify-center">
+                      {userFirstName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-xs font-black text-slate-900 dark:text-white truncate">
+                      {userFirstName}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                      {user?.email || 'Logged in via Gmail'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Menu Actions */}
+                <div className="space-y-1 text-xs font-bold text-slate-700 dark:text-slate-300">
+                  {/* Theme Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => toggleTheme?.()}
+                    className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  >
+                    <span className="flex items-center gap-2">
+                      {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                      <span>Appearance Theme</span>
+                    </span>
+                    <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400">
+                      {theme === 'dark' ? 'Dark' : 'Light'}
+                    </span>
+                  </button>
+
+                  {/* Admin Portal if admin */}
+                  {adminUser && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        onOpenAdmin?.();
+                      }}
+                      className="w-full flex items-center justify-between p-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/60 transition"
+                    >
+                      <span className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span>Admin Portal</span>
+                      </span>
+                      <span className="text-[10px] bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-1.5 py-0.5 rounded-full font-black">
+                        Store Owner
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Past Orders */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenOrderHistory?.();
+                    }}
+                    className="w-full flex items-center gap-2 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  >
+                    <History className="w-4 h-4 text-slate-500" />
+                    <span>Past Orders & Reorder</span>
+                  </button>
+
+                  {/* Track Delivery */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenOrders?.();
+                    }}
+                    className="w-full flex items-center gap-2 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  >
+                    <PackageCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Track Live Orders</span>
+                  </button>
+
+                  {/* Logout */}
+                  <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        onLogoutUser?.();
+                      }}
+                      className="w-full flex items-center gap-2 p-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition font-bold"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out of Account</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Only: Action Buttons Toolbar */}
+          <div className="hidden sm:flex items-center space-x-1 sm:space-x-1.5 shrink-0">
             
             {/* DARK THEME TOGGLE BUTTON */}
             <button

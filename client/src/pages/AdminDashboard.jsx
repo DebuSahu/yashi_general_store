@@ -686,11 +686,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
           </div>
         </div>
 
-        {/* Navigation Tabs (Smooth horizontal scroll on mobile) */}
-        <div className="flex overflow-x-auto no-scrollbar scroll-smooth gap-1.5 sm:gap-2 mb-5 sm:mb-6 bg-white dark:bg-slate-900 rounded-2xl p-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
+        {/* Navigation Tabs (Responsive 2x2 Grid on Mobile, Full Bar on Desktop) */}
+        <div className="grid grid-cols-2 sm:flex gap-1.5 sm:gap-2 mb-5 sm:mb-6 bg-white dark:bg-slate-900 rounded-2xl p-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <button
             onClick={() => setActiveTab('orders')}
-            className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
+            className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'orders'
                 ? 'bg-purple-600 text-white shadow-sm'
                 : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -702,7 +702,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
           <button
             onClick={() => setActiveTab('products')}
-            className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
+            className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'products'
                 ? 'bg-purple-600 text-white shadow-sm'
                 : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -714,14 +714,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
           <button
             onClick={() => setActiveTab('settings')}
-            className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
+            className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'settings'
                 ? 'bg-purple-600 text-white shadow-sm'
                 : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
             }`}
           >
             <Sliders className="w-4 h-4 shrink-0" />
-            <span>Location & 5km Radius</span>
+            <span>Radius & Location</span>
           </button>
 
           <button
@@ -729,7 +729,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               setActiveTab('admins');
               loadAdmins();
             }}
-            className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
+            className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'admins'
                 ? 'bg-purple-600 text-white shadow-sm'
                 : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -746,7 +746,23 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             
             {/* Filter and Refresh */}
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center space-x-2">
+              {/* Mobile: Clean Dropdown Menu */}
+              <div className="sm:hidden flex-1 min-w-[140px]">
+                <select
+                  value={orderFilter}
+                  onChange={(e) => setOrderFilter(e.target.value)}
+                  className="w-full text-xs font-bold bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-gray-800 dark:text-slate-200 focus:ring-2 focus:ring-purple-600 cursor-pointer shadow-2xs"
+                >
+                  <option value="all">All Orders</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Accepted">Accepted</option>
+                  <option value="Out for Delivery">Out for Delivery</option>
+                  <option value="Delivered">Delivered</option>
+                </select>
+              </div>
+
+              {/* Desktop: Button pills */}
+              <div className="hidden sm:flex items-center space-x-2">
                 <span className="text-xs font-bold text-gray-500 dark:text-slate-400">Filter Status:</span>
                 {['all', 'Pending', 'Accepted', 'Out for Delivery', 'Delivered'].map((st) => (
                   <button
@@ -925,7 +941,25 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             
             {/* Header controls */}
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+              {/* Mobile: Category Select Dropdown */}
+              <div className="sm:hidden flex-1 min-w-[140px]">
+                <select
+                  value={productCategoryFilter}
+                  onChange={(e) => setProductCategoryFilter(e.target.value)}
+                  className="w-full text-xs font-bold bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-gray-800 dark:text-slate-200 focus:ring-2 focus:ring-purple-600 cursor-pointer shadow-2xs"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="dairy">Dairy Products</option>
+                  <option value="icecream">Ice Cream</option>
+                  <option value="vegetables">Vegetables</option>
+                  <option value="grocery">Grocery</option>
+                  <option value="stationery">Stationery</option>
+                  <option value="general store">General Store</option>
+                </select>
+              </div>
+
+              {/* Desktop: Horizontal Pill Bar */}
+              <div className="hidden sm:flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
                 <span className="text-xs font-bold text-gray-500 dark:text-slate-400 whitespace-nowrap">Category:</span>
                 {[
                   { id: 'all', label: 'All Items' },
