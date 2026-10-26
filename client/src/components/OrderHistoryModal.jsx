@@ -43,7 +43,7 @@ export default function OrderHistoryModal({
   };
 
   const handleReorderClick = (order) => {
-    if (!order.items || order.items.length === 0) return;
+    if (!order || !order.items || order.items.length === 0) return;
     onReorder(order.items);
     try {
       confetti({
@@ -55,7 +55,7 @@ export default function OrderHistoryModal({
     onShowToast?.({
       type: 'cart',
       title: 'Items Reordered! 🛒',
-      message: `${order.items.length} items added back to your cart.`
+      message: `${order?.items?.length || 0} items added back to your cart.`
     });
     onClose();
   };

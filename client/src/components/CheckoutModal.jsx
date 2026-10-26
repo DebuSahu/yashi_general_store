@@ -589,7 +589,7 @@ export default function CheckoutModal({
 
                   {!locationData?.isEligible && locationData && (
                     <p className="text-[11px] text-rose-600 dark:text-rose-400 font-bold text-center mt-2">
-                      ⚠️ Delivery disabled: Your selected GPS coordinates are {locationData.distanceKm} km away. We strictly deliver up to 5 km of Yashi General Store!
+                      ⚠️ Delivery disabled: Your selected GPS coordinates are {locationData?.distanceKm} km away. We strictly deliver up to 5 km of Yashi General Store!
                     </p>
                   )}
                 </div>

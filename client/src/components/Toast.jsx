@@ -4,16 +4,17 @@ import { CheckCircle2, AlertCircle, Heart, ShoppingBag, Sparkles, X } from 'luci
 export default function Toast({ toast, onClose }) {
 
   useEffect(() => {
+    if (!toast) return;
     const timer = setTimeout(() => {
-      onClose();
-    }, toast.duration || 3200);
+      onClose?.();
+    }, toast?.duration || 3200);
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
   if (!toast) return null;
 
   const getIcon = () => {
-    switch (toast.type) {
+    switch (toast?.type) {
       case 'cart':
         return <ShoppingBag className="w-5 h-5 text-emerald-500 animate-bounce" />;
       case 'wishlist':
@@ -29,7 +30,7 @@ export default function Toast({ toast, onClose }) {
   };
 
   const getBorderColor = () => {
-    switch (toast.type) {
+    switch (toast?.type) {
       case 'wishlist': return 'border-rose-200 bg-rose-50/95 text-rose-950';
       case 'coupon': return 'border-amber-200 bg-amber-50/95 text-amber-950';
       case 'error': return 'border-red-200 bg-red-50/95 text-red-950';
@@ -48,13 +49,13 @@ export default function Toast({ toast, onClose }) {
             {getIcon()}
           </div>
           <div className="min-w-0">
-            {toast.title && (
+            {toast?.title && (
               <p className="text-xs font-black tracking-tight leading-tight truncate">
                 {toast.title}
               </p>
             )}
             <p className="text-xs font-semibold opacity-90 leading-tight mt-0.5">
-              {toast.message}
+              {toast?.message}
             </p>
           </div>
         </div>

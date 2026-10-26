@@ -277,13 +277,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
       return;
     }
 
+    if (!targetAdminToReset) return;
     setResetPwdLoading(true);
     try {
-      const res = await api.updateAdminPassword(targetAdminToReset.id, resetPwdForm.newPassword, token);
+      const res = await api.updateAdminPassword(targetAdminToReset?.id, resetPwdForm.newPassword, token);
       if (res.success) {
         setResetPwdModalOpen(false);
         setResetPwdForm({ newPassword: '', confirmPassword: '' });
-        setAdminActionMsg({ type: 'success', text: `Password for admin '${targetAdminToReset.username}' updated successfully!` });
+        setAdminActionMsg({ type: 'success', text: `Password for admin '${targetAdminToReset?.username || 'admin'}' updated successfully!` });
         setTargetAdminToReset(null);
       } else {
         setResetPwdError(res.error || 'Failed to update password.');
@@ -457,7 +458,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     if (selectedFile && imagePreview && imagePreview.startsWith('data:image')) {
       setUploadingImage(true);
       try {
-        const uploadRes = await api.uploadImage(imagePreview, selectedFile.name, token);
+        const uploadRes = await api.uploadImage(imagePreview, selectedFile?.name || 'photo.jpg', token);
         if (uploadRes.success && uploadRes.url) {
           finalImageUrl = uploadRes.url;
         } else {
@@ -490,7 +491,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
     try {
       if (editingProduct) {
-        const res = await api.updateProduct(editingProduct.id, payload, token);
+        const res = await api.updateProduct(editingProduct?.id, payload, token);
         if (res.success) {
           setProductModalOpen(false);
           loadProducts();
@@ -840,31 +841,35 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                 </p>
               </div>
             ) : (
-              orders.map((order) => {
-                const mapUrl = `https://www.google.com/maps?q=${order.latitude},${order.longitude}`;
-                const waUrl = `https://wa.me/91${order.customerPhone}?text=Hello%20${encodeURIComponent(order.customerName)},%20regarding%20your%20Yashi%20General%20Store%20YGS%20order%20${order.id}`;
+              (orders || []).filter(Boolean).map((order) => {
+                const latNum = Number(order?.latitude);
+                const lonNum = Number(order?.longitude);
+                const latStr = !isNaN(latNum) && latNum !== 0 ? latNum.toFixed(4) : (order?.latitude || '-');
+                const lonStr = !isNaN(lonNum) && lonNum !== 0 ? lonNum.toFixed(4) : (order?.longitude || '-');
+                const mapUrl = `https://www.google.com/maps?q=${order?.latitude || ''},${order?.longitude || ''}`;
+                const waUrl = `https://wa.me/91${order?.customerPhone || ''}?text=Hello%20${encodeURIComponent(order?.customerName || 'Customer')},%20regarding%20your%20Yashi%20General%20Store%20YGS%20order%20${order?.id || ''}`;
 
                 return (
                   <div
-                    key={order.id}
+                    key={order?.id}
                     className="bg-white rounded-2xl border border-gray-200 p-3.5 sm:p-5 shadow-sm hover:border-purple-300 transition"
                   >
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-gray-100">
                       <div>
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                           <span className="text-xs sm:text-sm font-black text-purple-900 bg-purple-100 px-2.5 py-0.5 rounded-md">
-                            {order.id}
+                            {order?.id}
                           </span>
                           <span className="text-[11px] sm:text-xs text-gray-500">
-                            {new Date(order.createdAt).toLocaleString()}
+                            {new Date(order?.createdAt || Date.now()).toLocaleString()}
                           </span>
                           <span className="text-[11px] sm:text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                            📍 {order.distanceKm} km (≤5km)
+                            📍 {order?.distanceKm || '≤ 5.0'} km (≤5km)
                           </span>
                         </div>
 
                         <h3 className="text-base font-bold text-gray-900 mt-2">
-                          Customer: {order.customerName}
+                          Customer: {order?.customerName || 'Valued Customer'}
                         </h3>
                       </div>
 
@@ -938,7 +943,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                           className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold underline text-xs pt-1"
                         >
                           <MapPin className="w-3.5 h-3.5" />
-                          <span>Open in Google Maps ({order.latitude.toFixed(4)}, {order.longitude.toFixed(4)})</span>
+                          <span>Open in Google Maps ({latStr}, {lonStr})</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
@@ -947,13 +952,13 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       <div className="space-y-1.5 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <div className="flex justify-between font-bold text-gray-700 uppercase tracking-wider text-[11px]">
                           <span>Ordered Items</span>
-                          <span>₹{order.totalAmount}</span>
+                          <span>₹{order?.totalAmount || 0}</span>
                         </div>
                         <ul className="space-y-1 text-gray-600 text-[11px]">
-                          {order.items.map((i, idx) => (
+                          {(order?.items || []).map((i, idx) => (
                             <li key={idx} className="flex justify-between">
-                              <span>{i.quantity}x {i.name} ({i.unit})</span>
-                              <span className="font-semibold text-gray-900">₹{i.price * i.quantity}</span>
+                              <span>{i?.quantity || 1}x {i?.name || 'Item'} ({i?.unit || 'unit'})</span>
+                              <span className="font-semibold text-gray-900">₹{(i?.price || 0) * (i?.quantity || 1)}</span>
                             </li>
                           ))}
                         </ul>
@@ -1946,11 +1951,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                           {selectedFile ? 'Local Photo Selected' : 'Product Photo'}
                         </span>
                         <p className="text-xs font-bold text-gray-800 truncate">
-                          {selectedFile ? selectedFile.name : 'Image loaded'}
+                          {selectedFile ? selectedFile?.name : 'Image loaded'}
                         </p>
                         {selectedFile && (
                           <p className="text-[10px] text-gray-500">
-                            Size: {(selectedFile.size / 1024).toFixed(1)} KB
+                            Size: {((selectedFile?.size || 0) / 1024).toFixed(1)} KB
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
@@ -2250,7 +2255,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             </div>
 
             <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl text-xs text-purple-900">
-              Resetting password for admin account: <strong>@{targetAdminToReset.username}</strong> ({targetAdminToReset.name || 'Store Admin'})
+              Resetting password for admin account: <strong>@{targetAdminToReset?.username || 'admin'}</strong> ({targetAdminToReset?.name || 'Store Admin'})
             </div>
 
             {resetPwdError && (

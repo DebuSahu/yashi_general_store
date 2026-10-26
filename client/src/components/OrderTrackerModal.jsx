@@ -350,8 +350,8 @@ export default function OrderTrackerModal({
                         <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>Delivery Address</span>
                       </p>
-                      <p className="mt-0.5 text-slate-700 dark:text-slate-300">{order.address}</p>
-                      {order.distanceKm && (
+                      <p className="mt-0.5 text-slate-700 dark:text-slate-300">{order?.address}</p>
+                      {order?.distanceKm && (
                         <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">
                           Perimeter Distance: {order.distanceKm} km (Verified ≤5km)
                         </p>
@@ -361,16 +361,16 @@ export default function OrderTrackerModal({
                     <div>
                       <p className="font-bold text-slate-800 dark:text-slate-200">Order Items Summary</p>
                       <div className="mt-0.5 space-y-1">
-                        {(order.items || []).map((item, idx) => (
+                        {(order?.items || []).map((item, idx) => (
                           <div key={idx} className="flex justify-between text-slate-700 dark:text-slate-300">
-                            <span>{item.quantity}x {item.name || item.id}</span>
-                            <span className="font-bold text-slate-900 dark:text-white">₹{item.itemTotal || (item.price * item.quantity) || 0}</span>
+                            <span>{item?.quantity || 1}x {item?.name || item?.id || 'Item'}</span>
+                            <span className="font-bold text-slate-900 dark:text-white">₹{item?.itemTotal || ((item?.price || 0) * (item?.quantity || 1)) || 0}</span>
                           </div>
                         ))}
                       </div>
                       <div className="flex justify-between font-black text-slate-900 dark:text-white pt-1.5 border-t border-slate-100 dark:border-slate-700 mt-1">
                         <span>Total Paid / Payable:</span>
-                        <span className="text-emerald-700 dark:text-emerald-400 font-black text-sm">₹{order.totalAmount}</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 font-black text-sm">₹{order?.totalAmount || 0}</span>
                       </div>
                     </div>
                   </div>

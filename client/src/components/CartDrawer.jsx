@@ -37,11 +37,11 @@ export default function CartDrawer({
 
   if (!isOpen) return null;
 
-  const items = Object.values(cart);
-  const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const items = Object.values(cart || {}).filter(Boolean);
+  const totalAmount = items.reduce((sum, item) => sum + (Number(item?.price) || 0) * (Number(item?.quantity) || 1), 0);
   const totalMrp = items.reduce((sum, item) => {
-    const mrp = item?.mrp || Math.round((item?.price || 0) * 1.15);
-    return sum + mrp * item.quantity;
+    const mrp = Number(item?.mrp) || Math.round((Number(item?.price) || 0) * 1.15);
+    return sum + mrp * (Number(item?.quantity) || 1);
   }, 0);
   const totalProductSavings = Math.max(0, totalMrp - totalAmount);
 
@@ -73,12 +73,12 @@ export default function CartDrawer({
 
   let couponDiscount = 0;
   if (appliedCoupon) {
-    if (appliedCoupon.type === 'flat') {
-      couponDiscount = appliedCoupon.value;
-    } else if (appliedCoupon.type === 'percent') {
+    if (appliedCoupon?.type === 'flat') {
+      couponDiscount = appliedCoupon?.value || 0;
+    } else if (appliedCoupon?.type === 'percent') {
       couponDiscount = Math.min(
-        appliedCoupon.maxDiscount || 100,
-        Math.round((totalAmount * appliedCoupon.value) / 100)
+        appliedCoupon?.maxDiscount || 100,
+        Math.round((totalAmount * (appliedCoupon?.value || 0)) / 100)
       );
     }
   }
@@ -88,8 +88,9 @@ export default function CartDrawer({
 
   const handleApplyCoupon = (coupon) => {
     setCouponError('');
-    if (totalAmount < coupon.minOrder) {
-      setCouponError(`Min order of ₹${coupon.minOrder} required for ${coupon.code}`);
+    if (!coupon) return;
+    if (totalAmount < (coupon?.minOrder || 0)) {
+      setCouponError(`Min order of ₹${coupon?.minOrder} required for ${coupon?.code}`);
       return;
     }
     setAppliedCoupon(coupon);
@@ -197,15 +198,15 @@ export default function CartDrawer({
             ) : (
               <>
                 {items.map((item) => {
-                  const mrp = item.mrp || Math.round(item.price * 1.15);
+                  const mrp = item?.mrp || Math.round((item?.price || 0) * 1.15);
                   return (
                     <div
-                      key={item.id}
+                      key={item?.id}
                       className="flex items-center space-x-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 transition bg-white dark:bg-slate-850 shadow-2xs group"
                     >
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item?.image}
+                        alt={item?.name || 'Item'}
                         className="w-14 h-14 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-700"
                         onError={(e) => {
                           e.currentTarget.src = './images/hero_banner.jpg';
@@ -214,21 +215,21 @@ export default function CartDrawer({
 
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">
-                          {item.name}
+                          {item?.name}
                         </h4>
                         <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
-                          {item.unit}
+                          {item?.unit}
                         </p>
                         <div className="flex items-baseline gap-1.5 mt-0.5">
                           <span className="text-xs sm:text-sm font-black text-emerald-700 dark:text-emerald-400">
-                            ₹{item.price * item.quantity}
+                            ₹{(item?.price || 0) * (item?.quantity || 1)}
                           </span>
                           <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                            (₹{item.price} each)
+                            (₹{item?.price} each)
                           </span>
-                          {mrp > item.price && (
+                          {mrp > (item?.price || 0) && (
                             <span className="text-[10px] text-slate-400 line-through">
-                              ₹{mrp * item.quantity}
+                              ₹{mrp * (item?.quantity || 1)}
                             </span>
                           )}
                         </div>
@@ -237,17 +238,17 @@ export default function CartDrawer({
                       {/* Quantity Stepper */}
                       <div className="flex items-center space-x-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 shrink-0">
                         <button
-                          onClick={() => onUpdateQty(item.id, item.quantity - 1)}
+                          onClick={() => onUpdateQty(item?.id, (item?.quantity || 1) - 1)}
                           className="w-6 h-6 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-600 transition font-bold"
                           title="Decrease"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
                         <span className="w-5 text-center text-xs font-black text-slate-800 dark:text-white">
-                          {item.quantity}
+                          {item?.quantity || 1}
                         </span>
                         <button
-                          onClick={() => onUpdateQty(item.id, item.quantity + 1)}
+                          onClick={() => onUpdateQty(item?.id, (item?.quantity || 1) + 1)}
                           className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 transition font-bold"
                           title="Increase"
                         >
@@ -256,7 +257,7 @@ export default function CartDrawer({
                       </div>
 
                       <button
-                        onClick={() => onRemoveItem(item.id)}
+                        onClick={() => onRemoveItem(item?.id)}
                         className="text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 p-1 transition"
                         title="Remove"
                       >

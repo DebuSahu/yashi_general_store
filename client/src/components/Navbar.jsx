@@ -62,12 +62,14 @@ export default function Navbar({
   }, []);
 
   // Filter products for autocomplete dropdown
-  const autocompleteSuggestions = searchTerm.trim().length >= 2
-    ? products
+  const autocompleteSuggestions = (searchTerm || '').trim().length >= 2
+    ? (products || [])
         .filter((p) =>
-          p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          p.category.toLowerCase().includes(searchTerm.toLowerCase())
+          p && (
+            (p?.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+            (p?.brand && p.brand.toLowerCase().includes((searchTerm || '').toLowerCase())) ||
+            (p?.category || '').toLowerCase().includes((searchTerm || '').toLowerCase())
+          )
         )
         .slice(0, 5)
     : [];
@@ -289,15 +291,15 @@ export default function Navbar({
             {/* Customer Profile / Gmail Login */}
             {user ? (
               <div className="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-1.5 sm:px-2.5 py-1 rounded-xl">
-                {user.avatar ? (
+                {user?.avatar ? (
                   <img
                     src={user.avatar}
-                    alt={user.name}
+                    alt={user?.name || 'Customer'}
                     className="w-5 h-5 rounded-full object-cover shrink-0 border border-emerald-300"
                   />
                 ) : (
                   <div className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
-                    {(user.name || 'G').charAt(0).toUpperCase()}
+                    {(user?.name || 'G').charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div className="text-left hidden sm:block">

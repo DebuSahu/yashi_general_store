@@ -471,8 +471,8 @@ export default function App() {
   // Compute available unique brands
   const availableBrands = useMemo(() => {
     const bSet = new Set();
-    products.forEach((p) => {
-      if (p.brand && p.brand.trim()) {
+    (products || []).forEach((p) => {
+      if (p?.brand && p.brand.trim()) {
         bSet.add(p.brand.trim());
       }
     });
@@ -481,13 +481,13 @@ export default function App() {
 
   // Comprehensive filtered and sorted products list
   const filteredAndSortedProducts = useMemo(() => {
-    let list = [...products];
+    let list = (products || []).filter(Boolean);
 
     // Category filter
     if (selectedCategory !== 'all') {
       list = list.filter(
         (p) =>
-          p.category.toLowerCase().replace(/[\s-_]+/g, '') ===
+          (p?.category || '').toLowerCase().replace(/[\s-_]+/g, '') ===
           selectedCategory.replace(/[\s-_]+/g, '')
       );
     }
@@ -497,23 +497,23 @@ export default function App() {
       const q = searchTerm.toLowerCase();
       list = list.filter(
         (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.brand && p.brand.toLowerCase().includes(q)) ||
-          p.category.toLowerCase().includes(q) ||
-          (p.description && p.description.toLowerCase().includes(q))
+          (p?.name || '').toLowerCase().includes(q) ||
+          (p?.brand && p.brand.toLowerCase().includes(q)) ||
+          (p?.category || '').toLowerCase().includes(q) ||
+          (p?.description && p.description.toLowerCase().includes(q))
       );
     }
 
     // Brand filter
     if (selectedBrand !== 'all') {
       list = list.filter(
-        (p) => p.brand && p.brand.toLowerCase() === selectedBrand.toLowerCase()
+        (p) => p?.brand && p.brand.toLowerCase() === selectedBrand.toLowerCase()
       );
     }
 
     // Pure Veg filter
     if (filterVegOnly) {
-      list = list.filter((p) => p.isVeg !== false);
+      list = list.filter((p) => p?.isVeg !== false);
     }
 
     // Hot Deals Only filter (>= 15% discount)
@@ -528,27 +528,27 @@ export default function App() {
 
     // In Stock Only
     if (filterInStockOnly) {
-      list = list.filter((p) => p.inStock !== false && p.stock > 0);
+      list = list.filter((p) => p?.inStock !== false && (p?.stock ?? 1) > 0);
     }
 
     // Price range
     if (selectedPriceRange === 'under-50') {
-      list = list.filter((p) => p.price < 50);
+      list = list.filter((p) => (p?.price || 0) < 50);
     } else if (selectedPriceRange === '50-150') {
-      list = list.filter((p) => p.price >= 50 && p.price <= 150);
+      list = list.filter((p) => (p?.price || 0) >= 50 && (p?.price || 0) <= 150);
     } else if (selectedPriceRange === '150-300') {
-      list = list.filter((p) => p.price > 150 && p.price <= 300);
+      list = list.filter((p) => (p?.price || 0) > 150 && (p?.price || 0) <= 300);
     } else if (selectedPriceRange === '300-plus') {
-      list = list.filter((p) => p.price > 300);
+      list = list.filter((p) => (p?.price || 0) > 300);
     }
 
     // Sorting
     if (sortBy === 'price-asc') {
-      list.sort((a, b) => a.price - b.price);
+      list.sort((a, b) => (a?.price || 0) - (b?.price || 0));
     } else if (sortBy === 'price-desc') {
-      list.sort((a, b) => b.price - a.price);
+      list.sort((a, b) => (b?.price || 0) - (a?.price || 0));
     } else if (sortBy === 'rating') {
-      list.sort((a, b) => (b.rating || 4.8) - (a.rating || 4.8));
+      list.sort((a, b) => (b?.rating || 4.8) - (a?.rating || 4.8));
     } else if (sortBy === 'discount') {
       list.sort((a, b) => {
         if (!a || !b) return 0;
@@ -758,10 +758,10 @@ export default function App() {
               const Icon = pill.icon;
               const isActive = selectedCategory === pill.id;
               const count = pill.id === 'all'
-                ? products.length
-                : products.filter(
+                ? (products || []).length
+                : (products || []).filter(
                     (p) =>
-                      p.category.toLowerCase().replace(/[\s-_]+/g, '') ===
+                      (p?.category || '').toLowerCase().replace(/[\s-_]+/g, '') ===
                       pill.id.replace(/[\s-_]+/g, '')
                   ).length;
 
@@ -921,9 +921,9 @@ export default function App() {
 
             {/* Sections for Each Category */}
             {mainCategorySections.map((section) => {
-              const sectionProducts = products.filter(
+              const sectionProducts = (products || []).filter(
                 (p) =>
-                  p.category.toLowerCase().replace(/[\s-_]+/g, '') ===
+                  (p?.category || '').toLowerCase().replace(/[\s-_]+/g, '') ===
                   section.id.replace(/[\s-_]+/g, '')
               );
               if (sectionProducts.length === 0) return null;
@@ -1161,21 +1161,21 @@ export default function App() {
       </footer>
 
       {/* TOAST NOTIFICATION */}
-      <Toast toast={toast} onClose={() => setToast(null)} />
+      {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
 
       {/* PRODUCT QUICK VIEW MODAL */}
       {quickViewProduct && (
         <ProductDetailModal
           product={quickViewProduct}
           isOpen={Boolean(quickViewProduct)}
-        onClose={() => setQuickViewProduct(null)}
-        cartQty={quickViewProduct ? cart[quickViewProduct.id]?.quantity || 0 : 0}
-        onAddToCart={handleAddToCart}
-        onUpdateQty={handleUpdateQty}
-        isWishlisted={quickViewProduct ? Boolean(wishlist[quickViewProduct.id]) : false}
-        onToggleWishlist={handleToggleWishlist}
-        onShowToast={(t) => setToast(t)}
-        allProducts={products}
+          onClose={() => setQuickViewProduct(null)}
+          cartQty={quickViewProduct ? cart[quickViewProduct?.id]?.quantity || 0 : 0}
+          onAddToCart={handleAddToCart}
+          onUpdateQty={handleUpdateQty}
+          isWishlisted={quickViewProduct ? Boolean(wishlist[quickViewProduct?.id]) : false}
+          onToggleWishlist={handleToggleWishlist}
+          onShowToast={(t) => setToast(t)}
+          allProducts={products}
         />
       )}
 
@@ -1326,25 +1326,25 @@ export default function App() {
             <div className="bg-emerald-50 dark:bg-emerald-950/50 rounded-2xl p-4 my-4 text-left border border-emerald-100 dark:border-emerald-800/80 space-y-1.5 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-600 dark:text-slate-400">Order ID:</span>
-                <span className="font-black text-emerald-950">{orderPlacedSuccess.id}</span>
+                <span className="font-black text-emerald-950">{orderPlacedSuccess?.id}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600 dark:text-slate-400">Customer:</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200">{orderPlacedSuccess.customerName}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{orderPlacedSuccess?.customerName}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600 dark:text-slate-400">Mobile:</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200">+91 {orderPlacedSuccess.customerPhone}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">+91 {orderPlacedSuccess?.customerPhone}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-600 dark:text-slate-400">Distance from Shop:</span>
                 <span className="font-bold text-emerald-700">
-                  {orderPlacedSuccess.distanceKm || '≤ 5.0'} km (Verified ≤ 5km)
+                  {orderPlacedSuccess?.distanceKm || '≤ 5.0'} km (Verified ≤ 5km)
                 </span>
               </div>
               <div className="flex justify-between font-bold text-slate-900 dark:text-white pt-1.5 border-t border-emerald-200 dark:border-emerald-800">
                 <span>Total Amount:</span>
-                <span className="text-emerald-700 font-black text-sm">₹{orderPlacedSuccess.totalAmount}</span>
+                <span className="text-emerald-700 font-black text-sm">₹{orderPlacedSuccess?.totalAmount}</span>
               </div>
             </div>
 

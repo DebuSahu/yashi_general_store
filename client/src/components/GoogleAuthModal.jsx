@@ -86,8 +86,8 @@ export default function GoogleAuthModal({
 
         onShowToast?.({
           type: 'success',
-          title: `Welcome, ${account.name.split(' ')[0]}! 🎉`,
-          message: `Signed in instantly via Google (${account.email})`
+          title: `Welcome, ${(account?.name || 'Customer').split(' ')[0]}! 🎉`,
+          message: `Signed in instantly via Google (${account?.email || ''})`
         });
 
         onLoginSuccess(res.user, res.token);

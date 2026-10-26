@@ -30,16 +30,19 @@ export default function ProductCard({
   onOpenQuickView,
   onShowToast
 }) {
-  const isOutOfStock = product.inStock === false || product.stock === 0;
-  const [imgSrc, setImgSrc] = useState(product.image);
+  const isOutOfStock = product?.inStock === false || product?.stock === 0;
+  const [imgSrc, setImgSrc] = useState(product?.image || '');
   const [isHovered, setIsHovered] = useState(false);
 
   React.useEffect(() => {
-    setImgSrc(product.image);
-  }, [product.image]);
+    if (!product) return;
+    setImgSrc(product?.image || '');
+  }, [product?.image]);
+
+  if (!product) return null;
 
   const handleImageError = () => {
-    const cat = (product.category || '').toLowerCase().replace(/\s+/g, '');
+    const cat = (product?.category || '').toLowerCase().replace(/\s+/g, '');
     if (cat.includes('dairy')) {
       setImgSrc('./images/dairy_showcase.jpg');
     } else if (cat.includes('ice')) {
@@ -103,11 +106,13 @@ export default function ProductCard({
   };
 
   const mrp = product?.mrp || Math.round((product?.price || 0) * 1.15);
-  const discount = Math.round(((mrp - product.price) / mrp) * 100);
-  const savings = mrp - product.price;
+  const price = product?.price || 0;
+  const discount = mrp > price ? Math.round(((mrp - price) / (mrp || 1)) * 100) : 0;
+  const savings = Math.max(0, mrp - price);
 
   const handleAddToCartWithCelebration = (e) => {
     e.stopPropagation();
+    if (!product) return;
     onAddToCart(product);
     try {
       confetti({
@@ -119,7 +124,7 @@ export default function ProductCard({
     onShowToast?.({
       type: 'cart',
       title: 'Added to Basket! 🛒',
-      message: `${product.name} (₹${product.price})`
+      message: `${product?.name || 'Item'} (₹${product?.price || 0})`
     });
   };
 
@@ -133,7 +138,7 @@ export default function ProductCard({
       <div className="relative aspect-square w-full overflow-hidden bg-slate-50 dark:bg-slate-800">
         <img
           src={imgSrc}
-          alt={product.name}
+          alt={product?.name || 'Product'}
           onError={handleImageError}
           className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out cursor-pointer ${
             isOutOfStock ? 'grayscale opacity-60' : ''
@@ -145,17 +150,17 @@ export default function ProductCard({
         {/* Top Badges Bar: Category on left, Wishlist on right */}
         <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none">
           <div className="flex items-center gap-1 flex-wrap pointer-events-auto">
-            {getCategoryBadge(product.category)}
+            {getCategoryBadge(product?.category)}
 
-            {product.brand && (
+            {product?.brand && (
               <span
                 className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full shadow-xs ${
-                  product.brand.toLowerCase() === 'amul'
+                  (product?.brand || '').toLowerCase() === 'amul'
                     ? 'bg-blue-600 text-white'
                     : 'bg-red-600 text-white'
                 }`}
               >
-                {product.brand}
+                {product?.brand}
               </span>
             )}
           </div>
@@ -206,10 +211,10 @@ export default function ProductCard({
               Out of Stock
             </span>
           </div>
-        ) : product.stock <= 5 ? (
+        ) : (product?.stock ?? 10) <= 5 ? (
           <span className="absolute top-10 left-2 bg-amber-500 text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-xs flex items-center gap-0.5">
             <Zap className="w-2.5 h-2.5" />
-            <span>Only {product.stock} left</span>
+            <span>Only {product?.stock} left</span>
           </span>
         ) : null}
       </div>
@@ -222,8 +227,8 @@ export default function ProductCard({
           <div className="flex items-center justify-between gap-1 mb-1">
             <div className="inline-flex items-center gap-0.5 text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded font-black text-[10px] border border-emerald-200/80 dark:border-emerald-800">
               <Star className="w-2.5 h-2.5 fill-current text-emerald-600 dark:text-emerald-400" />
-              <span>{product.rating || 4.8}</span>
-              <span className="text-slate-400 dark:text-slate-500 font-normal">({product.reviewCount || 42})</span>
+              <span>{product?.rating || 4.8}</span>
+              <span className="text-slate-400 dark:text-slate-500 font-normal">({product?.reviewCount || 42})</span>
             </div>
 
             {/* Pure Veg Pill Indicator */}
@@ -240,14 +245,14 @@ export default function ProductCard({
           <h3
             onClick={() => onOpenQuickView?.(product)}
             className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 transition line-clamp-2 leading-snug mb-1 cursor-pointer"
-            title={product.name}
+            title={product?.name}
           >
-            {product.name}
+            {product?.name}
           </h3>
 
           {/* Unit */}
           <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mb-1.5 truncate">
-            Unit: <span className="font-bold text-slate-700 dark:text-slate-300">{product.unit}</span>
+            Unit: <span className="font-bold text-slate-700 dark:text-slate-300">{product?.unit}</span>
           </p>
         </div>
 
@@ -258,9 +263,9 @@ export default function ProductCard({
           <div className="min-w-0">
             <div className="flex items-baseline gap-1 sm:gap-1.5">
               <span className="text-sm sm:text-lg font-black text-emerald-700 dark:text-emerald-400">
-                ₹{product.price}
+                ₹{product?.price}
               </span>
-              {mrp > product.price && (
+              {mrp > (product?.price || 0) && (
                 <span className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 font-bold line-through">
                   ₹{mrp}
                 </span>
@@ -281,7 +286,7 @@ export default function ProductCard({
           ) : cartQty > 0 ? (
             <div className="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-400 dark:border-emerald-700 rounded-xl p-0.5 sm:p-1 shrink-0 shadow-2xs">
               <button
-                onClick={() => onUpdateQty(product.id, cartQty - 1)}
+                onClick={() => onUpdateQty(product?.id, cartQty - 1)}
                 className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-white dark:bg-slate-850 text-emerald-800 dark:text-emerald-300 flex items-center justify-center hover:bg-emerald-100 active:scale-90 shadow-2xs transition font-black"
                 title="Decrease quantity"
               >
@@ -291,7 +296,7 @@ export default function ProductCard({
                 {cartQty}
               </span>
               <button
-                onClick={() => onUpdateQty(product.id, cartQty + 1)}
+                onClick={() => onUpdateQty(product?.id, cartQty + 1)}
                 className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 active:scale-90 shadow-2xs transition font-black"
                 title="Increase quantity"
               >
@@ -325,7 +330,7 @@ export default function ProductCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onToggleStock?.(product.id, true);
+                  onToggleStock?.(product?.id, true);
                 }}
                 className={`w-full py-1 rounded text-[9px] sm:text-[10px] font-extrabold transition text-center ${
                   !isOutOfStock
@@ -340,7 +345,7 @@ export default function ProductCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onToggleStock?.(product.id, false);
+                  onToggleStock?.(product?.id, false);
                 }}
                 className={`w-full py-1 rounded text-[9px] sm:text-[10px] font-extrabold transition text-center ${
                   isOutOfStock

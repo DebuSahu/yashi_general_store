@@ -13,12 +13,12 @@ export default function WishlistDrawer({
 }) {
   if (!isOpen) return null;
 
-  const items = Object.values(wishlist);
+  const items = Object.values(wishlist || {}).filter(Boolean);
 
   const handleMoveAllToCart = () => {
     if (items.length === 0) return;
     items.forEach((item) => {
-      onAddToCart(item);
+      if (item) onAddToCart(item);
     });
     try {
       confetti({
@@ -96,12 +96,12 @@ export default function WishlistDrawer({
 
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item?.id}
                     className="flex items-center space-x-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 transition bg-white dark:bg-slate-850 shadow-2xs group"
                   >
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={item?.image}
+                      alt={item?.name || 'Item'}
                       className="w-14 h-14 rounded-xl object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-700"
                       onError={(e) => {
                         e.currentTarget.src = './images/hero_banner.jpg';
@@ -110,13 +110,13 @@ export default function WishlistDrawer({
 
                     <div className="flex-1 min-w-0">
                       <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">
-                        {item.name}
+                        {item?.name}
                       </h4>
                       <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
-                        {item.unit}
+                        {item?.unit}
                       </p>
                       <p className="text-xs sm:text-sm font-black text-emerald-700 dark:text-emerald-400 mt-0.5">
-                        ₹{item.price}
+                        ₹{item?.price}
                       </p>
                     </div>
 
@@ -127,7 +127,7 @@ export default function WishlistDrawer({
                           onShowToast?.({
                             type: 'cart',
                             title: 'Added to Basket! 🛒',
-                            message: `${item.name} added.`
+                            message: `${item?.name || 'Item'} added.`
                           });
                         }}
                         className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs transition active:scale-95 shadow-2xs flex items-center gap-1"
@@ -138,7 +138,7 @@ export default function WishlistDrawer({
                       </button>
 
                       <button
-                        onClick={() => onRemoveFromWishlist(item.id)}
+                        onClick={() => onRemoveFromWishlist(item?.id)}
                         className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition"
                         title="Remove from wishlist"
                       >

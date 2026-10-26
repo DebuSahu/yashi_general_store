@@ -99,8 +99,8 @@ export default function ProductDetailModal({
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: product.name,
-        text: `Buy ${product.name} at Yashi General Store (₹${product.price}) with 5km delivery!`,
+        title: product?.name || 'Product',
+        text: `Buy ${product?.name || 'Product'} at Yashi General Store (₹${product?.price || 0}) with 5km delivery!`,
         url: window.location.href
       }).catch(() => {});
     } else {
@@ -114,6 +114,7 @@ export default function ProductDetailModal({
   };
 
   const handleTriggerAddToCart = () => {
+    if (!product) return;
     onAddToCart(product);
     try {
       confetti({
@@ -125,7 +126,7 @@ export default function ProductDetailModal({
     onShowToast?.({
       type: 'cart',
       title: 'Added to Cart 🛒',
-      message: `${product.name} added to your basket!`
+      message: `${product?.name || 'Item'} added to your basket!`
     });
   };
 
@@ -137,11 +138,11 @@ export default function ProductDetailModal({
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-850 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              {product.category}
+              {product?.category}
             </span>
-            {product.brand && (
+            {product?.brand && (
               <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-900 dark:bg-slate-700 text-white">
-                {product.brand}
+                {product?.brand}
               </span>
             )}
             <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
@@ -188,8 +189,8 @@ export default function ProductDetailModal({
             <div className="md:col-span-5 flex flex-col items-center">
               <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shadow-inner group">
                 <img
-                  src={product.image}
-                  alt={product.name}
+                  src={product?.image}
+                  alt={product?.name || 'Product'}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     e.currentTarget.src = './images/hero_banner.jpg';
@@ -200,7 +201,7 @@ export default function ProductDetailModal({
                     {discount}% OFF
                   </span>
                 )}
-                {product.badge && (
+                {product?.badge && (
                   <span className="absolute top-3 right-3 bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-lg shadow-xs flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
                     <span>{product.badge}</span>
@@ -229,20 +230,20 @@ export default function ProductDetailModal({
             <div className="md:col-span-7 space-y-4">
               <div>
                 <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white leading-snug">
-                  {product.name}
+                  {product?.name}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Unit: <span className="font-bold text-slate-800 dark:text-slate-200">{product.unit}</span>
+                  Unit: <span className="font-bold text-slate-800 dark:text-slate-200">{product?.unit}</span>
                 </p>
 
                 {/* Rating Bar */}
                 <div className="flex items-center gap-2 mt-2">
                   <div className="inline-flex items-center gap-1 bg-emerald-600 text-white text-xs font-black px-2 py-0.5 rounded-lg">
-                    <span>{product.rating || 4.8}</span>
+                    <span>{product?.rating || 4.8}</span>
                     <Star className="w-3 h-3 fill-current" />
                   </div>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    ({product.reviewCount || 92} Customer Ratings & Reviews)
+                    ({product?.reviewCount || 92} Customer Ratings & Reviews)
                   </span>
                 </div>
               </div>
@@ -252,9 +253,9 @@ export default function ProductDetailModal({
                 <div>
                   <div className="flex items-baseline gap-2.5">
                     <span className="text-2xl sm:text-3xl font-black text-emerald-800 dark:text-emerald-300">
-                      ₹{product.price}
+                      ₹{product?.price}
                     </span>
-                    {mrp > product.price && (
+                    {mrp > (product?.price || 0) && (
                       <span className="text-sm font-bold text-slate-400 line-through">
                         MRP ₹{mrp}
                       </span>
@@ -276,13 +277,13 @@ export default function ProductDetailModal({
                     <span className="px-2.5 py-1 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 font-black text-xs">
                       Out of Stock
                     </span>
-                  ) : product.stock <= 5 ? (
+                  ) : (product?.stock ?? 10) <= 5 ? (
                     <span className="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 font-bold text-[11px] animate-pulse">
-                      Only {product.stock} left!
+                      Only {product?.stock} left!
                     </span>
                   ) : (
                     <span className="px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
-                      In Stock ({product.stock} units)
+                      In Stock ({product?.stock} units)
                     </span>
                   )}
                 </div>
@@ -294,8 +295,8 @@ export default function ProductDetailModal({
                   Product Description
                 </h4>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {product.description ||
-                    `Premium quality ${product.name} sourced directly for Yashi General Store. Fresh, authentic, and inspected for absolute hygiene and customer satisfaction.`}
+                  {product?.description ||
+                    `Premium quality ${product?.name || 'Item'} sourced directly for Yashi General Store. Fresh, authentic, and inspected for absolute hygiene and customer satisfaction.`}
                 </p>
               </div>
 
@@ -312,7 +313,7 @@ export default function ProductDetailModal({
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-950/60 border-2 border-emerald-500 rounded-2xl p-1.5 px-4 shadow-sm">
                       <button
-                        onClick={() => onUpdateQty(product.id, cartQty - 1)}
+                        onClick={() => onUpdateQty(product?.id, cartQty - 1)}
                         className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 text-emerald-900 dark:text-emerald-200 flex items-center justify-center font-black shadow-xs hover:bg-emerald-100 active:scale-90 transition"
                       >
                         <Minus className="w-4 h-4" />
@@ -321,7 +322,7 @@ export default function ProductDetailModal({
                         {cartQty}
                       </span>
                       <button
-                        onClick={() => onUpdateQty(product.id, cartQty + 1)}
+                        onClick={() => onUpdateQty(product?.id, cartQty + 1)}
                         className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-xs hover:bg-emerald-700 active:scale-90 transition"
                       >
                         <Plus className="w-4 h-4" />
@@ -329,7 +330,7 @@ export default function ProductDetailModal({
                     </div>
 
                     <div className="flex-1 text-xs font-bold text-slate-600 dark:text-slate-400">
-                      Total in Cart: <strong className="text-emerald-700 dark:text-emerald-400">₹{cartQty * product.price}</strong>
+                      Total in Cart: <strong className="text-emerald-700 dark:text-emerald-400">₹{cartQty * (product?.price || 0)}</strong>
                     </div>
                   </div>
                 ) : (
@@ -339,7 +340,7 @@ export default function ProductDetailModal({
                       className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition"
                     >
                       <ShoppingCart className="w-4 h-4" />
-                      <span>Add to Cart (₹{product.price})</span>
+                      <span>Add to Cart (₹{product?.price})</span>
                     </button>
                   </div>
                 )}
