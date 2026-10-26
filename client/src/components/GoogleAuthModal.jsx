@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, ShieldCheck, User, Plus, ArrowRight, Sparkles } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, User, Plus, ArrowRight, Sparkles, Lock, Eye, EyeOff } from 'lucide-react';
 import { api } from '../api';
 import confetti from 'canvas-confetti';
 import { getUserFirstName, extractFullNameFromEmail } from '../utils/userHelper';
@@ -33,37 +33,46 @@ export default function GoogleAuthModal({
   onLoginSuccess,
   onShowToast
 }) {
-
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState(null);
-  const [isCustomMode, setIsCustomMode] = useState(false);
-  const [customName, setCustomName] = useState('');
-  const [customEmail, setCustomEmail] = useState('');
-  const [error, setError] = useState('');
-
-  if (!isOpen) return null;
-
-  // Primary detected account
+  // Detected previously authenticated account strictly from local session
   const savedGoogleUser = (() => {
     try {
-      const u = JSON.parse(localStorage.getItem('gs_user') || 'null');
-      if (u && u.authProvider === 'google') return u;
+      const stored = sessionStorage.getItem('gs_user') || localStorage.getItem('gs_user');
+      const u = JSON.parse(stored || 'null');
+      if (u && u.authProvider === 'google' && u.email) return u;
     } catch (e) {}
     return null;
   })();
 
-  const defaultAccounts = [
+  const defaultAccounts = savedGoogleUser ? [
     {
-      name: savedGoogleUser?.name || 'Divyanshu Sahu',
-      email: savedGoogleUser?.email || 'debusahu121@gmail.com',
-      avatar: savedGoogleUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
-      initials: 'D',
+      name: savedGoogleUser.name || 'Customer',
+      email: savedGoogleUser.email,
+      avatar: savedGoogleUser.avatar || null,
+      initials: (savedGoogleUser.name || savedGoogleUser.email || 'U').charAt(0).toUpperCase(),
       color: 'bg-emerald-600',
-      phone: savedGoogleUser?.phone || null
+      phone: savedGoogleUser.phone || null
     }
-  ];
+  ] : [];
 
-  const handleSignInWithAccount = async (account) => {
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [isCustomMode, setIsCustomMode] = useState(!savedGoogleUser);
+  const [customName, setCustomName] = useState('');
+  const [customEmail, setCustomEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showPasswordEye, setShowPasswordEye] = useState(false);
+  const [requiresAdminPassword, setRequiresAdminPassword] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!isOpen) return null;
+
+  const isEmailAdmin = (emailStr) => {
+    if (!emailStr) return false;
+    const clean = String(emailStr).trim().toLowerCase();
+    return clean === 'debusahu121@gmail.com' || api.isAuthorizedAdminEmail(clean);
+  };
+
+  const handleSignInWithAccount = async (account, passwordToVerify = '') => {
     setError('');
     setSelectedAccount(account);
     setIsSigningIn(true);
@@ -73,8 +82,19 @@ export default function GoogleAuthModal({
         email: account.email,
         name: account.name,
         avatar: account.avatar || null,
-        phone: account.phone || null
+        phone: account.phone || null,
+        adminPassword: passwordToVerify || adminPassword
       });
+
+      if (res && res.requiresAdminPassword) {
+        setRequiresAdminPassword(true);
+        setIsCustomMode(true);
+        setCustomEmail(account.email);
+        if (account.name) setCustomName(account.name);
+        setError(res.error || 'Admin verification required: Enter your Admin Password to unlock Admin Portal.');
+        setIsSigningIn(false);
+        return;
+      }
 
       if (res && res.success) {
         try {
@@ -89,7 +109,9 @@ export default function GoogleAuthModal({
         onShowToast?.({
           type: 'success',
           title: `Welcome, ${userFirstName}! 🎉`,
-          message: `Signed in instantly via Google (${account?.email || ''})`
+          message: res.isAdmin 
+            ? `Store Owner Verified • Admin Portal unlocked` 
+            : `Signed in instantly via Google (${account?.email || ''})`
         });
 
         onLoginSuccess(res.user, res.token, res);
@@ -114,14 +136,23 @@ export default function GoogleAuthModal({
     const email = customEmail.trim().toLowerCase();
     const fullName = customName.trim() || extractFullNameFromEmail(email);
 
+    // If admin email and password is empty, prompt for it
+    if (isEmailAdmin(email) && !adminPassword.trim()) {
+      setRequiresAdminPassword(true);
+      setError('Admin verification required: Please enter your Admin Password.');
+      return;
+    }
+
     handleSignInWithAccount({
       name: fullName,
       email,
       phone: null,
       initials: (fullName.charAt(0) || 'G').toUpperCase(),
-      color: 'bg-blue-600'
-    });
+      color: 'bg-emerald-600'
+    }, adminPassword);
   };
+
+  const showAdminPasswordField = requiresAdminPassword || isEmailAdmin(customEmail);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
@@ -148,25 +179,25 @@ export default function GoogleAuthModal({
           </button>
         </div>
 
-        {/* Notice of zero password */}
+        {/* Notice */}
         <div className="bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2 border-b border-emerald-100 dark:border-emerald-900/60 flex items-center gap-2 text-xs text-emerald-900 dark:text-emerald-300 font-semibold">
           <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>Instant 1-click login • No password or OTP needed!</span>
+          <span>Instant Gmail login • Enter your Google Account to continue</span>
         </div>
 
         {/* Modal Content */}
         <div className="p-4 sm:p-5 space-y-4">
           
           {error && (
-            <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-bold">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-bold leading-relaxed">
               {error}
             </div>
           )}
 
-          {!isCustomMode ? (
+          {!isCustomMode && defaultAccounts.length > 0 ? (
             <div className="space-y-2">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block px-1">
-                Choose an account
+                Previously used account on this device
               </span>
 
               {defaultAccounts.map((acc) => (
@@ -210,7 +241,10 @@ export default function GoogleAuthModal({
 
               {/* Add / Switch account option */}
               <div
-                onClick={() => setIsCustomMode(true)}
+                onClick={() => {
+                  setIsCustomMode(true);
+                  setError('');
+                }}
                 className="p-3 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-3 cursor-pointer transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white mt-2"
               >
                 <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0">
@@ -231,10 +265,10 @@ export default function GoogleAuthModal({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Ramesh Kumar (or leave blank to auto-detect)"
+                  placeholder="e.g. Ramesh Kumar (or leave blank)"
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold dark:text-white"
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -247,26 +281,66 @@ export default function GoogleAuthModal({
                   required
                   placeholder="yourname@gmail.com"
                   value={customEmail}
-                  onChange={(e) => setCustomEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold dark:text-white"
+                  onChange={(e) => {
+                    setCustomEmail(e.target.value);
+                    if (isEmailAdmin(e.target.value)) {
+                      setRequiresAdminPassword(true);
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-900 dark:text-white"
                 />
               </div>
 
+              {/* Admin Verification Password Input (Shows ONLY when an admin/owner email is entered) */}
+              {showAdminPasswordField && (
+                <div className="p-3 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 rounded-2xl space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-purple-900 dark:text-purple-300">
+                    <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                    <span>Store Owner / Admin Verification</span>
+                  </div>
+                  <p className="text-[11px] text-purple-700 dark:text-purple-300 leading-tight">
+                    This Gmail has Store Admin privileges. Enter your Admin Password to verify ownership and unlock the Admin Portal:
+                  </p>
+                  <div className="relative">
+                    <input
+                      type={showPasswordEye ? "text" : "password"}
+                      required
+                      placeholder="Enter Store Admin Password"
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      className="w-full px-3.5 py-2.5 pr-10 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-purple-300 dark:border-purple-700 rounded-xl focus:ring-2 focus:ring-purple-500 font-bold text-slate-900 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswordEye(!showPasswordEye)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    >
+                      {showPasswordEye ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setIsCustomMode(false)}
-                  className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
-                >
-                  Back
-                </button>
+                {defaultAccounts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomMode(false);
+                      setError('');
+                    }}
+                    className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
+                  >
+                    Back
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={isSigningIn || !customEmail.trim()}
                   className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   <GoogleGLogo className="w-4 h-4" />
-                  <span>{isSigningIn ? 'Signing In...' : 'Continue with Google'}</span>
+                  <span>{isSigningIn ? 'Verifying...' : (showAdminPasswordField ? 'Verify & Unlock Admin' : 'Continue with Google')}</span>
                 </button>
               </div>
             </form>
@@ -274,7 +348,7 @@ export default function GoogleAuthModal({
 
           {/* Privacy & Safety badge */}
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 text-center leading-normal">
-            To continue, Google shares your name and email with Yashi General Store. No password is stored. Mobile number is only requested when placing a home delivery order.
+            Each user signs in with their own Gmail account. Store owner credentials are never shared with other devices.
           </div>
 
         </div>

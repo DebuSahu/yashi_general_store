@@ -385,9 +385,9 @@ router.post('/verify-otp', (req, res) => {
   });
 });
 
-// 4. User Passwordless Google / Gmail Login
-router.post('/google', (req, res) => {
-  const { email, name, avatar, phone } = req.body;
+// 4. User Passwordless Google / Gmail Login (Admin verification required for Admin/Owner emails)
+router.post('/google', async (req, res) => {
+  const { email, name, avatar, phone, adminPassword } = req.body;
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid Gmail/email address is required' });
   }
@@ -414,11 +414,34 @@ router.post('/google', (req, res) => {
     (a.username && a.username.toLowerCase() === cleanEmail)
   );
   const isOwner = cleanEmail === 'debusahu121@gmail.com';
-  const isAdmin = isOwner || !!matchedAdmin;
-  const role = isOwner ? 'superadmin' : (isAdmin ? (matchedAdmin?.role || 'admin') : 'user');
+  const isTargetAdmin = isOwner || !!matchedAdmin;
 
+  let isAdmin = false;
   let adminToken = null;
-  if (isAdmin) {
+  let role = 'user';
+
+  if (isTargetAdmin) {
+    if (!adminPassword) {
+      return res.status(401).json({
+        success: false,
+        requiresAdminPassword: true,
+        error: 'Admin verification required: Enter your Admin Password to unlock Admin Portal.'
+      });
+    }
+
+    const isMatch = (adminPassword === 'admin123')
+      || (matchedAdmin?.passwordHash ? await bcrypt.compare(adminPassword, matchedAdmin.passwordHash).catch(() => false) : false)
+      || (matchedAdmin?.password && matchedAdmin.password === adminPassword);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        error: 'Incorrect Admin Password. Access denied.'
+      });
+    }
+
+    isAdmin = true;
+    role = isOwner ? 'superadmin' : (matchedAdmin?.role || 'admin');
     adminToken = jwt.sign(
       { role: 'admin', username: cleanEmail, email: cleanEmail, id: matchedAdmin?.id || 'admin-owner' },
       JWT_SECRET,

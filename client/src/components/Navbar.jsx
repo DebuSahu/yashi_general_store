@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ShoppingCart,
   Store,
@@ -274,16 +275,16 @@ export default function Navbar({
               </div>
             )}
 
-            {/* Mobile Profile & Actions Menu Modal/Overlay (Never Clipped!) */}
-            {mobileMenuOpen && user && (
+            {/* Mobile Profile & Actions Menu Modal/Overlay (Rendered to body via createPortal so it is NEVER clipped by header!) */}
+            {mobileMenuOpen && user && typeof document !== 'undefined' && createPortal(
               <div
                 onClick={() => setMobileMenuOpen(false)}
-                className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-start justify-end p-3 pt-16 sm:hidden animate-in fade-in duration-150"
+                className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex items-start justify-end p-3 pt-3 sm:hidden animate-in fade-in duration-150"
               >
                 <div
                   ref={mobileMenuRef}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-72 max-w-[92vw] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3 animate-in zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto"
+                  className="w-80 max-w-[92vw] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3.5 animate-in slide-in-from-right-4 duration-150 max-h-[92vh] overflow-y-auto"
                 >
                   {/* Header with Title & Close Button */}
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -293,9 +294,9 @@ export default function Navbar({
                     <button
                       type="button"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition"
+                      className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
@@ -385,6 +386,26 @@ export default function Navbar({
                       <span>Track Live Orders</span>
                     </button>
 
+                    {/* Wishlist */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        onOpenWishlist?.();
+                      }}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Heart className="w-4 h-4 text-rose-500" />
+                        <span>My Wishlist</span>
+                      </span>
+                      {wishlistCount > 0 && (
+                        <span className="text-[10px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full">
+                          {wishlistCount}
+                        </span>
+                      )}
+                    </button>
+
                     {/* Logout */}
                     <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                       <button
@@ -401,7 +422,8 @@ export default function Navbar({
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
 

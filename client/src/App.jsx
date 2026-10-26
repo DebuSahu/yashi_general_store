@@ -333,13 +333,13 @@ export default function App() {
     localStorage.removeItem('gs_user');
     localStorage.removeItem('gs_user_token');
 
-    // Check if user is authorized as Admin (Owner debusahu121@gmail.com or authorized admin email)
+    // STRICT SECURITY: Only unlock Admin Portal if fullRes has a verified adminToken
     const email = userData?.email?.trim().toLowerCase();
     const isOwner = email === 'debusahu121@gmail.com';
-    const isAuthorized = isOwner || userData?.isAdmin || fullRes?.isAdmin || api.isAuthorizedAdminEmail(email);
+    const isAuthorized = Boolean(fullRes?.adminToken && (userData?.isAdmin || fullRes?.isAdmin));
 
     if (isAuthorized) {
-      const adminToken = fullRes?.adminToken || token || ('admin-jwt-token-' + Date.now());
+      const adminToken = fullRes.adminToken;
       const adminRole = isOwner ? 'superadmin' : (userData?.role === 'superadmin' ? 'superadmin' : 'admin');
       const adminObj = {
         username: email,
@@ -471,7 +471,7 @@ export default function App() {
           setToast({
             type: 'error',
             title: 'Admin Access Denied 🔒',
-            message: 'Please sign in with your authorized Gmail account (debusahu121@gmail.com) to access Admin Portal.'
+            message: 'Please sign in with your authorized Store Admin Gmail account to access Admin Portal.'
           });
         }
       }

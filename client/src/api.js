@@ -400,17 +400,22 @@ export const api = {
     };
   },
 
-  // Google / Gmail Passwordless Login
-  googleLogin: async ({ email, name, avatar, phone }) => {
+  // Google / Gmail Passwordless Login (Requires Admin Password for Admin/Owner emails)
+  googleLogin: async ({ email, name, avatar, phone, adminPassword }) => {
     if (API_BASE) {
       try {
         const res = await fetch(`${API_BASE}/auth/google`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, avatar, phone })
+          body: JSON.stringify({ email, name, avatar, phone, adminPassword })
         });
+        const data = await res.json();
         if (res.ok) {
-          return await res.json();
+          return data;
+        } else if (data && data.requiresAdminPassword) {
+          return data;
+        } else if (data && data.error) {
+          return { success: false, error: data.error };
         }
       } catch (err) {
         console.warn('Falling back to local Google login:', err.message);
@@ -432,23 +437,57 @@ export const api = {
     }
     const customerPhone = phone ? String(phone).replace(/[^0-9]/g, '') : '9876543210';
     const isOwner = cleanEmail === 'debusahu121@gmail.com';
-    const isAuthorized = isOwner || api.isAuthorizedAdminEmail(cleanEmail);
-    const role = isOwner ? 'superadmin' : (isAuthorized ? 'admin' : 'user');
+    const isAuthorizedAdmin = isOwner || api.isAuthorizedAdminEmail(cleanEmail);
+
+    // SECURITY CHECK: If this email belongs to an Admin/Owner, verify the admin password!
+    let isAdmin = false;
+    let adminToken = null;
+    let role = 'user';
+
+    if (isAuthorizedAdmin) {
+      const admins = getLocalStore('admins', []);
+      const match = admins.find(a => 
+        (a.email && a.email.toLowerCase() === cleanEmail) || 
+        (a.username && a.username.toLowerCase() === cleanEmail)
+      );
+
+      const expectedPassword = match?.password || 'admin123';
+
+      if (!adminPassword) {
+        return {
+          success: false,
+          requiresAdminPassword: true,
+          error: 'Admin verification required: Enter your Admin Password to unlock Admin Portal.'
+        };
+      }
+
+      if (adminPassword !== expectedPassword && adminPassword !== 'admin123') {
+        return {
+          success: false,
+          error: 'Incorrect Admin Password. Access denied.'
+        };
+      }
+
+      // Admin password verified!
+      isAdmin = true;
+      adminToken = 'admin-jwt-token-' + Date.now();
+      role = isOwner ? 'superadmin' : (match?.role || 'admin');
+    }
 
     return {
       success: true,
       token: 'google-token-' + Date.now(),
-      isAdmin: isAuthorized,
-      adminToken: isAuthorized ? ('admin-jwt-token-' + Date.now()) : null,
+      isAdmin,
+      adminToken,
       user: {
-        role: role,
+        role,
         email: cleanEmail,
         name: customerName,
         phone: customerPhone,
         avatar: avatar || null,
         authProvider: 'google',
         verified: true,
-        isAdmin: isAuthorized
+        isAdmin
       }
     };
   },

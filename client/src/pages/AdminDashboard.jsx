@@ -50,9 +50,9 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   });
   const [currentAdminUser, setCurrentAdminUser] = useState(() => {
     try {
-      return adminUser?.username || adminUser?.email || sessionStorage.getItem('gs_admin_user') || localStorage.getItem('gs_admin_user') || 'debusahu121@gmail.com';
+      return adminUser?.username || adminUser?.email || sessionStorage.getItem('gs_admin_user') || localStorage.getItem('gs_admin_user') || '';
     } catch {
-      return 'debusahu121@gmail.com';
+      return '';
     }
   });
   const [username, setUsername] = useState('');
@@ -594,7 +594,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             Admin Portal Restricted
           </h2>
           <p className="text-xs text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-            The Admin Portal is exclusively for authorized store management. Only registered Gmail administrators (such as <strong>debusahu121@gmail.com</strong>) can access this system.
+            The Admin Portal is exclusively for authorized store management. Only verified store administrators can access this system.
           </p>
           <button
             onClick={onBackToStore}

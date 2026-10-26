@@ -199,19 +199,3 @@
 .dark textarea {
   color-scheme: dark;
 }
-
-/* Fallbacks to guarantee dark mode contrast across tables and cards */
-.dark .text-gray-900,
-.dark .text-slate-900 {
-  color: #f8fafc;
-}
-
-.dark .text-gray-800,
-.dark .text-slate-800 {
-  color: #f1f5f9;
-}
-
-.dark .text-gray-700,
-.dark .text-slate-700 {
-  color: #e2e8f0;
-}

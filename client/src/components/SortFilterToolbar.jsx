@@ -270,7 +270,7 @@ export default function SortFilterToolbar({
                 <select
                   value={selectedBrand}
                   onChange={(e) => setSelectedBrand(e.target.value)}
-                  className="text-[11px] sm:text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[110px] sm:max-w-none"
+                  className="text-[11px] sm:text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                 >
                   <option value="all">All Brands</option>
                   {availableBrands.map((b) => (
@@ -283,12 +283,12 @@ export default function SortFilterToolbar({
             )}
 
             {/* Sort By Dropdown */}
-            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 sm:px-2.5 py-1">
-              <ArrowUpDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="text-[11px] sm:text-xs font-bold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1 max-w-[125px] sm:max-w-none"
+                className="text-[11px] sm:text-xs font-bold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1"
               >
                 <option value="featured">Featured / Best Sellers</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -328,7 +328,7 @@ export default function SortFilterToolbar({
         </div>
 
         {/* Bottom Row: Quick Filter Chips (Veg, Flash Deals, In Stock, Price Range) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth pt-1 pb-0.5 w-full">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth pt-1 pb-0.5 w-full pr-6">
           {/* Pure Veg Pill */}
           <button
             onClick={() => setFilterVegOnly(!filterVegOnly)}
@@ -369,7 +369,7 @@ export default function SortFilterToolbar({
             }`}
           >
             <ShieldCheck className="w-3 h-3" />
-            <span>In Stock Only</span>
+            <span>In Stock</span>
             {filterInStockOnly && <Check className="w-3 h-3 ml-0.5" />}
           </button>
 
