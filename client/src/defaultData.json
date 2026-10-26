@@ -24,7 +24,13 @@
       "stock": 60,
       "inStock": true,
       "image": "./images/products/amul_taaza.jpg",
-      "description": "Pasteurized, homogenized toned fresh milk (3.0% Fat, 8.5% SNF) from Amul. Freshly delivered every morning."
+      "description": "Pasteurized, homogenized toned fresh milk (3.0% Fat, 8.5% SNF) from Amul. Freshly delivered every morning.",
+      "mrp": 34,
+      "rating": 4.9,
+      "reviewCount": 132,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 21
     },
     {
       "id": "dairy-amul-2",
@@ -36,7 +42,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/amul_gold.jpg",
-      "description": "Thick and creamy full-cream milk (6.0% Fat, 9.0% SNF) by Amul, ideal for rich tea, coffee, and homemade sweets."
+      "description": "Thick and creamy full-cream milk (6.0% Fat, 9.0% SNF) by Amul, ideal for rich tea, coffee, and homemade sweets.",
+      "mrp": 41,
+      "rating": 4.8,
+      "reviewCount": 131,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "dairy-amul-3",
@@ -48,7 +60,13 @@
       "stock": 43,
       "inStock": true,
       "image": "./images/products/amul_butter.jpg",
-      "description": "The classic iconic Amul Butter made from fresh cream. Delicious spread on toast, parathas, and snacks."
+      "description": "The classic iconic Amul Butter made from fresh cream. Delicious spread on toast, parathas, and snacks.",
+      "mrp": 72,
+      "rating": 4.7,
+      "reviewCount": 130,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "dairy-amul-4",
@@ -60,7 +78,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/amul_paneer.jpg",
-      "description": "Soft, uniform, high-protein fresh cottage cheese (Paneer) by Amul. Perfect for Shahi Paneer, curries, and tikka."
+      "description": "Soft, uniform, high-protein fresh cottage cheese (Paneer) by Amul. Perfect for Shahi Paneer, curries, and tikka.",
+      "mrp": 113,
+      "rating": 4.6,
+      "reviewCount": 129,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "dairy-amul-5",
@@ -72,7 +96,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/amul_dahi.jpg",
-      "description": "Thick, creamy set natural curd prepared from pasteurized milk. Cooling and healthy probiotic for daily meals."
+      "description": "Thick, creamy set natural curd prepared from pasteurized milk. Cooling and healthy probiotic for daily meals.",
+      "mrp": 43,
+      "rating": 4.5,
+      "reviewCount": 128,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "dairy-amul-6",
@@ -84,7 +114,13 @@
       "stock": 30,
       "inStock": true,
       "image": "./images/products/desi_ghee.jpg",
-      "description": "Aromatic pure desi ghee with rich granular texture made from pure fresh milk fat by Amul."
+      "description": "Aromatic pure desi ghee with rich granular texture made from pure fresh milk fat by Amul.",
+      "mrp": 714,
+      "rating": 4.9,
+      "reviewCount": 127,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 17
     },
     {
       "id": "dairy-amul-7",
@@ -96,7 +132,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/amul_cheese.jpg",
-      "description": "Wholesome cheese cubes made from 100% natural milk. Great for quick sandwiches, kids tiffin, and pasta."
+      "description": "Wholesome cheese cubes made from 100% natural milk. Great for quick sandwiches, kids tiffin, and pasta.",
+      "mrp": 162,
+      "rating": 4.8,
+      "reviewCount": 126,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 17
     },
     {
       "id": "dairy-namaste-1",
@@ -108,7 +150,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/amul_taaza.jpg",
-      "description": "Pure, fresh pasteurized homogenized milk from Namaste India Dairy, fortified with essential vitamins."
+      "description": "Pure, fresh pasteurized homogenized milk from Namaste India Dairy, fortified with essential vitamins.",
+      "mrp": 34,
+      "rating": 4.5,
+      "reviewCount": 133,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "dairy-namaste-2",
@@ -120,7 +168,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/amul_paneer.jpg",
-      "description": "Melt-in-mouth traditional desi paneer prepared from pure cows and buffalo milk by Namaste India."
+      "description": "Melt-in-mouth traditional desi paneer prepared from pure cows and buffalo milk by Namaste India.",
+      "mrp": 111,
+      "rating": 4.9,
+      "reviewCount": 132,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 21
     },
     {
       "id": "dairy-namaste-3",
@@ -132,7 +186,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/amul_dahi.jpg",
-      "description": "Homestyle creamy pure curd without artificial preservatives from Namaste India."
+      "description": "Homestyle creamy pure curd without artificial preservatives from Namaste India.",
+      "mrp": 40,
+      "rating": 4.8,
+      "reviewCount": 131,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "dairy-namaste-4",
@@ -144,7 +204,13 @@
       "stock": 25,
       "inStock": true,
       "image": "./images/products/desi_ghee.jpg",
-      "description": "Golden aromatic pure cow ghee made using traditional slow cooking methods by Namaste India."
+      "description": "Golden aromatic pure cow ghee made using traditional slow cooking methods by Namaste India.",
+      "mrp": 769,
+      "rating": 4.7,
+      "reviewCount": 130,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "dairy-namaste-5",
@@ -156,7 +222,13 @@
       "stock": 55,
       "inStock": true,
       "image": "./images/products/namaste_chaach.jpg",
-      "description": "Refreshing digestive spiced buttermilk with jeera, black salt, and pudina from Namaste India."
+      "description": "Refreshing digestive spiced buttermilk with jeera, black salt, and pudina from Namaste India.",
+      "mrp": 22,
+      "rating": 4.6,
+      "reviewCount": 129,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 18
     },
     {
       "id": "ice-1",
@@ -168,7 +240,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/ice_cassata.jpg",
-      "description": "Creamy classic rich vanilla ice cream made from pure fresh cream and real milk."
+      "description": "Creamy classic rich vanilla ice cream made from pure fresh cream and real milk.",
+      "mrp": 24,
+      "rating": 4.9,
+      "reviewCount": 157,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 17
     },
     {
       "id": "ice-2",
@@ -180,7 +258,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/ice_chocobar.jpg",
-      "description": "Crunchy chocolate outer shell covering rich velvety chocolate cream bar."
+      "description": "Crunchy chocolate outer shell covering rich velvety chocolate cream bar.",
+      "mrp": 37,
+      "rating": 4.5,
+      "reviewCount": 158,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "ice-3",
@@ -192,7 +276,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/ice_kulfi.jpg",
-      "description": "Traditional Indian stick kulfi loaded with real alphonso mango pulp and cardamom rabdi."
+      "description": "Traditional Indian stick kulfi loaded with real alphonso mango pulp and cardamom rabdi.",
+      "mrp": 37,
+      "rating": 4.6,
+      "reviewCount": 159,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "ice-4",
@@ -204,7 +294,13 @@
       "stock": 30,
       "inStock": true,
       "image": "./images/products/ice_tub.jpg",
-      "description": "Golden crunch praline cashew bits embedded in rich butterscotch cream."
+      "description": "Golden crunch praline cashew bits embedded in rich butterscotch cream.",
+      "mrp": 198,
+      "rating": 4.7,
+      "reviewCount": 160,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "ice-5",
@@ -216,7 +312,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/ice_cone.jpg",
-      "description": "Crispy wafer cone filled with dual vanilla chocolate cream topped with roasted nuts and chocolate disk."
+      "description": "Crispy wafer cone filled with dual vanilla chocolate cream topped with roasted nuts and chocolate disk.",
+      "mrp": 56,
+      "rating": 4.8,
+      "reviewCount": 161,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "ice-6",
@@ -228,7 +330,13 @@
       "stock": 25,
       "inStock": true,
       "image": "./images/products/ice_cassata.jpg",
-      "description": "Classic multi-layered rainbow sponge cake slice with strawberry, pistachio, and vanilla ice cream."
+      "description": "Classic multi-layered rainbow sponge cake slice with strawberry, pistachio, and vanilla ice cream.",
+      "mrp": 82,
+      "rating": 4.9,
+      "reviewCount": 162,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 21
     },
     {
       "id": "veg-1",
@@ -239,7 +347,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/fresh_tomatoes.jpg",
-      "description": "Farm-fresh ripe red juicy tomatoes, perfect for daily curries, gravies, and fresh salads."
+      "description": "Farm-fresh ripe red juicy tomatoes, perfect for daily curries, gravies, and fresh salads.",
+      "mrp": 43,
+      "rating": 4.6,
+      "reviewCount": 159,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "veg-2",
@@ -250,7 +364,13 @@
       "stock": 80,
       "inStock": true,
       "image": "./images/products/fresh_potatoes.jpg",
-      "description": "Premium quality firm potatoes with thin skins, ideal for frying, curries, and sabzi."
+      "description": "Premium quality firm potatoes with thin skins, ideal for frying, curries, and sabzi.",
+      "mrp": 35,
+      "rating": 4.7,
+      "reviewCount": 160,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "veg-3",
@@ -261,7 +381,13 @@
       "stock": 60,
       "inStock": true,
       "image": "./images/products/fresh_onions.jpg",
-      "description": "Crisp and pungent quality red onions, an absolute essential for everyday Indian cooking."
+      "description": "Crisp and pungent quality red onions, an absolute essential for everyday Indian cooking.",
+      "mrp": 56,
+      "rating": 4.8,
+      "reviewCount": 161,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "veg-4",
@@ -272,7 +398,13 @@
       "stock": 30,
       "inStock": true,
       "image": "./images/products/fresh_spinach.jpg",
-      "description": "Tender, iron-rich fresh green leafy spinach harvested daily from local farms."
+      "description": "Tender, iron-rich fresh green leafy spinach harvested daily from local farms.",
+      "mrp": 32,
+      "rating": 4.9,
+      "reviewCount": 162,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 22
     },
     {
       "id": "veg-5",
@@ -283,7 +415,13 @@
       "stock": 25,
       "inStock": true,
       "image": "./images/products/fresh_cauliflower.jpg",
-      "description": "Clean, spotless tight white florets fresh from morning vegetable mandis."
+      "description": "Clean, spotless tight white florets fresh from morning vegetable mandis.",
+      "mrp": 45,
+      "rating": 4.5,
+      "reviewCount": 163,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 11
     },
     {
       "id": "veg-6",
@@ -294,7 +432,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/fresh_chillies.jpg",
-      "description": "Spicy pungent green chillies paired with fragrant fresh green coriander leaves."
+      "description": "Spicy pungent green chillies paired with fragrant fresh green coriander leaves.",
+      "mrp": 23,
+      "rating": 4.6,
+      "reviewCount": 164,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 13
     },
     {
       "id": "veg-7",
@@ -305,7 +449,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/fresh_carrots.jpg",
-      "description": "Sweet, crunchy and Vitamin A rich carrots, great for salads, stir fries, and halwa."
+      "description": "Sweet, crunchy and Vitamin A rich carrots, great for salads, stir fries, and halwa.",
+      "mrp": 51,
+      "rating": 4.7,
+      "reviewCount": 165,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "groc-1",
@@ -316,7 +466,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/chakki_atta.jpg",
-      "description": "100% pure whole wheat chakki-fresh atta for soft, fluffy, and nourishing rotis."
+      "description": "100% pure whole wheat chakki-fresh atta for soft, fluffy, and nourishing rotis.",
+      "mrp": 281,
+      "rating": 4.5,
+      "reviewCount": 123,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 15
     },
     {
       "id": "groc-2",
@@ -327,7 +483,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/basmati_rice.jpg",
-      "description": "Aged long-grain aromatic royal basmati rice that elongates beautifully upon cooking."
+      "description": "Aged long-grain aromatic royal basmati rice that elongates beautifully upon cooking.",
+      "mrp": 215,
+      "rating": 4.9,
+      "reviewCount": 122,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 14
     },
     {
       "id": "groc-3",
@@ -338,7 +500,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/toor_dal.jpg",
-      "description": "High-protein unpolished nutritious yellow pigeon peas for authentic daily dal tadka."
+      "description": "High-protein unpolished nutritious yellow pigeon peas for authentic daily dal tadka.",
+      "mrp": 190,
+      "rating": 4.8,
+      "reviewCount": 121,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 13
     },
     {
       "id": "groc-4",
@@ -349,7 +517,13 @@
       "stock": 60,
       "inStock": true,
       "image": "./images/products/cooking_oil.jpg",
-      "description": "Light, healthy, and vitamin-fortified refined sunflower oil for everyday cooking."
+      "description": "Light, healthy, and vitamin-fortified refined sunflower oil for everyday cooking.",
+      "mrp": 165,
+      "rating": 4.7,
+      "reviewCount": 120,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "groc-5",
@@ -360,7 +534,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/kadak_chai.jpg",
-      "description": "Rich amber color and invigorating strong aroma tea leaves for authentic morning tea."
+      "description": "Rich amber color and invigorating strong aroma tea leaves for authentic morning tea.",
+      "mrp": 147,
+      "rating": 4.6,
+      "reviewCount": 119,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "groc-6",
@@ -371,7 +551,13 @@
       "stock": 90,
       "inStock": true,
       "image": "./images/products/sugar_salt.jpg",
-      "description": "Pure, white, free-flowing vacuum evaporated salt with essential iodine."
+      "description": "Pure, white, free-flowing vacuum evaporated salt with essential iodine.",
+      "mrp": 28,
+      "rating": 4.5,
+      "reviewCount": 118,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 11
     },
     {
       "id": "groc-7",
@@ -382,7 +568,13 @@
       "stock": 75,
       "inStock": true,
       "image": "./images/products/sugar_salt.jpg",
-      "description": "Sparkling clean refined sugar crystals, sulfur-free and hygienic."
+      "description": "Sparkling clean refined sugar crystals, sulfur-free and hygienic.",
+      "mrp": 60,
+      "rating": 4.9,
+      "reviewCount": 117,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "gen-1",
@@ -393,7 +585,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/surf_excel.jpg",
-      "description": "Tough stain removal formula with fabric conditioners and fresh lavender fragrance."
+      "description": "Tough stain removal formula with fabric conditioners and fresh lavender fragrance.",
+      "mrp": 126,
+      "rating": 4.8,
+      "reviewCount": 46,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 13
     },
     {
       "id": "gen-2",
@@ -404,7 +602,13 @@
       "stock": 55,
       "inStock": true,
       "image": "./images/products/herbal_toothpaste.jpg",
-      "description": "Herbal gum protection and fresh breath with natural neem, babool, and clove oils."
+      "description": "Herbal gum protection and fresh breath with natural neem, babool, and clove oils.",
+      "mrp": 87,
+      "rating": 4.9,
+      "reviewCount": 47,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 14
     },
     {
       "id": "gen-3",
@@ -415,7 +619,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/dettol_soap.jpg",
-      "description": "Mild moisturizing soap bars enriched with natural oils for soft, glowing skin."
+      "description": "Mild moisturizing soap bars enriched with natural oils for soft, glowing skin.",
+      "mrp": 164,
+      "rating": 4.5,
+      "reviewCount": 48,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 15
     },
     {
       "id": "gen-4",
@@ -426,7 +636,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/vim_dishwash.jpg",
-      "description": "Instant grease-cutting lemon power leaves utensils and glasses shining and clean."
+      "description": "Instant grease-cutting lemon power leaves utensils and glasses shining and clean.",
+      "mrp": 112,
+      "rating": 4.6,
+      "reviewCount": 49,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 15
     },
     {
       "id": "stat-1",
@@ -438,7 +654,13 @@
       "stock": 30,
       "inStock": true,
       "image": "./images/products/classmate_notebooks.jpg",
-      "description": "Superior white paper notebooks with sturdy binding for school, college, and office."
+      "description": "Superior white paper notebooks with sturdy binding for school, college, and office.",
+      "mrp": 138,
+      "rating": 4.8,
+      "reviewCount": 31,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 13
     },
     {
       "id": "stat-2",
@@ -450,7 +672,13 @@
       "stock": 65,
       "inStock": true,
       "image": "./images/products/ballpoint_pens.jpg",
-      "description": "Ergonomic grip and waterproof smudge-resistant blue ink for effortless handwriting."
+      "description": "Ergonomic grip and waterproof smudge-resistant blue ink for effortless handwriting.",
+      "mrp": 57,
+      "rating": 4.7,
+      "reviewCount": 30,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "stat-3",
@@ -462,7 +690,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/pencils_highlighters.jpg",
-      "description": "Smooth extra-dark bonded lead pencils complete with non-dust eraser and precision sharpener."
+      "description": "Smooth extra-dark bonded lead pencils complete with non-dust eraser and precision sharpener.",
+      "mrp": 73,
+      "rating": 4.6,
+      "reviewCount": 29,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 11
     },
     {
       "id": "stat-4",
@@ -474,7 +708,13 @@
       "stock": 30,
       "inStock": true,
       "image": "./images/products/geometry_box.jpg",
-      "description": "Self-centering compass, divider, protractor, set squares, and transparent scale in sturdy tin case."
+      "description": "Self-centering compass, divider, protractor, set squares, and transparent scale in sturdy tin case.",
+      "mrp": 123,
+      "rating": 4.5,
+      "reviewCount": 28,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 11
     },
     {
       "id": "stat-5",
@@ -486,7 +726,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/pencils_highlighters.jpg",
-      "description": "Soft eye-friendly pastel colors for highlighting notes and study textbooks without bleeding."
+      "description": "Soft eye-friendly pastel colors for highlighting notes and study textbooks without bleeding.",
+      "mrp": 113,
+      "rating": 4.9,
+      "reviewCount": 192,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "stat-6",
@@ -498,7 +744,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/sticky_notes.jpg",
-      "description": "Removable repositionable self-adhesive note pad for reminders, study bookmarks, and memos."
+      "description": "Removable repositionable self-adhesive note pad for reminders, study bookmarks, and memos.",
+      "mrp": 56,
+      "rating": 4.8,
+      "reviewCount": 191,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "dairy-amul-8",
@@ -510,7 +762,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/amul_cheese.jpg",
-      "description": "Rich, creamy sweetened condensed milk ideal for making traditional homemade Indian sweets, kheer, cakes, and desserts."
+      "description": "Rich, creamy sweetened condensed milk ideal for making traditional homemade Indian sweets, kheer, cakes, and desserts.",
+      "mrp": 155,
+      "rating": 4.7,
+      "reviewCount": 125,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 16
     },
     {
       "id": "dairy-ni-5",
@@ -522,7 +780,13 @@
       "stock": 65,
       "inStock": true,
       "image": "./images/products/amul_gold.jpg",
-      "description": "100% pure, natural cow milk packed with natural calcium, proteins, and vitamins. Delivered fresh every morning."
+      "description": "100% pure, natural cow milk packed with natural calcium, proteins, and vitamins. Delivered fresh every morning.",
+      "mrp": 39,
+      "rating": 4.5,
+      "reviewCount": 53,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 18
     },
     {
       "id": "dairy-ni-6",
@@ -534,7 +798,13 @@
       "stock": 80,
       "inStock": true,
       "image": "./images/products/namaste_chaach.jpg",
-      "description": "Refreshing digestive spiced buttermilk spiced with roasted cumin (jeera), fresh mint, and Himalayan black salt."
+      "description": "Refreshing digestive spiced buttermilk spiced with roasted cumin (jeera), fresh mint, and Himalayan black salt.",
+      "mrp": 18,
+      "rating": 4.9,
+      "reviewCount": 52,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 17
     },
     {
       "id": "icecream-amul-7",
@@ -546,7 +816,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/ice_chocobar.jpg",
-      "description": "Velvety smooth vanilla cream ice cream dipped in a thick, crunchy coating of rich dark chocolate."
+      "description": "Velvety smooth vanilla cream ice cream dipped in a thick, crunchy coating of rich dark chocolate.",
+      "mrp": 40,
+      "rating": 4.6,
+      "reviewCount": 74,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 13
     },
     {
       "id": "icecream-amul-8",
@@ -558,7 +834,13 @@
       "stock": 30,
       "inStock": true,
       "image": "./images/products/ice_chocobar.jpg",
-      "description": "Decadent Belgian chocolate ice cream coated with crispy wafer crunch and roasted California almond nuts."
+      "description": "Decadent Belgian chocolate ice cream coated with crispy wafer crunch and roasted California almond nuts.",
+      "mrp": 57,
+      "rating": 4.7,
+      "reviewCount": 75,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "icecream-kw-2",
@@ -570,7 +852,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/ice_chocobar.jpg",
-      "description": "Solid chocolate core encased in smooth chocolate cream ice cream and coated with crispy biscuit crunchies."
+      "description": "Solid chocolate core encased in smooth chocolate cream ice cream and coated with crispy biscuit crunchies.",
+      "mrp": 53,
+      "rating": 4.6,
+      "reviewCount": 124,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 15
     },
     {
       "id": "icecream-ni-2",
@@ -582,7 +870,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/ice_kulfi.jpg",
-      "description": "Natural fruit ice candy stick made from sun-ripened Alphonso mango pulp for a burst of tropical refreshment."
+      "description": "Natural fruit ice candy stick made from sun-ripened Alphonso mango pulp for a burst of tropical refreshment.",
+      "mrp": 29,
+      "rating": 4.7,
+      "reviewCount": 105,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 14
     },
     {
       "id": "veg-8",
@@ -594,7 +888,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/fresh_spinach.jpg",
-      "description": "Sweet, juicy, and tender whole green peas freshly picked from local farms. Perfect for matar paneer and aloo matar."
+      "description": "Sweet, juicy, and tender whole green peas freshly picked from local farms. Perfect for matar paneer and aloo matar.",
+      "mrp": 52,
+      "rating": 4.8,
+      "reviewCount": 166,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 13
     },
     {
       "id": "veg-9",
@@ -606,7 +906,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/fresh_chillies.jpg",
-      "description": "Crunchy, glossy bell peppers / green capsicum, ideal for kadai paneer, pizzas, noodles, and vegetable stir fry."
+      "description": "Crunchy, glossy bell peppers / green capsicum, ideal for kadai paneer, pizzas, noodles, and vegetable stir fry.",
+      "mrp": 41,
+      "rating": 4.9,
+      "reviewCount": 167,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 15
     },
     {
       "id": "veg-10",
@@ -618,7 +924,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/fresh_potatoes.jpg",
-      "description": "Intensely aromatic and spicy fresh Indian ginger root, essential for daily masala chai, curries, and immunity teas."
+      "description": "Intensely aromatic and spicy fresh Indian ginger root, essential for daily masala chai, curries, and immunity teas.",
+      "mrp": 34,
+      "rating": 4.7,
+      "reviewCount": 180,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "veg-11",
@@ -630,7 +942,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/fresh_onions.jpg",
-      "description": "Firm, pungent desi garlic with tight papery skins. Adds deep flavour to dals, curries, and garlic tadka."
+      "description": "Firm, pungent desi garlic with tight papery skins. Adds deep flavour to dals, curries, and garlic tadka.",
+      "mrp": 51,
+      "rating": 4.6,
+      "reviewCount": 179,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 12
     },
     {
       "id": "veg-12",
@@ -642,7 +960,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/fresh_chillies.jpg",
-      "description": "Bright green, crisp and tender okra / bhindi, free of blemishes and stringiness. Best for crispy bhindi fry."
+      "description": "Bright green, crisp and tender okra / bhindi, free of blemishes and stringiness. Best for crispy bhindi fry.",
+      "mrp": 36,
+      "rating": 4.5,
+      "reviewCount": 178,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 11
     },
     {
       "id": "veg-13",
@@ -654,7 +978,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/fresh_carrots.jpg",
-      "description": "Cooling, crunchy and refreshing farm fresh cucumbers, great for everyday salads, sandwiches, and raita."
+      "description": "Cooling, crunchy and refreshing farm fresh cucumbers, great for everyday salads, sandwiches, and raita.",
+      "mrp": 38,
+      "rating": 4.9,
+      "reviewCount": 177,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 21
     },
     {
       "id": "groc-8",
@@ -666,7 +996,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/cooking_oil.jpg",
-      "description": "Cold-pressed traditional mustard oil with authentic strong pungency, ideal for pickling and North Indian curries."
+      "description": "Cold-pressed traditional mustard oil with authentic strong pungency, ideal for pickling and North Indian curries.",
+      "mrp": 194,
+      "rating": 4.8,
+      "reviewCount": 116,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 20
     },
     {
       "id": "groc-9",
@@ -678,7 +1014,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/toor_dal.jpg",
-      "description": "100% unpolished split Bengal gram lentils retaining their natural protein, dietary fiber, and authentic nutty taste."
+      "description": "100% unpolished split Bengal gram lentils retaining their natural protein, dietary fiber, and authentic nutty taste.",
+      "mrp": 136,
+      "rating": 4.7,
+      "reviewCount": 115,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "groc-10",
@@ -690,7 +1032,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/moong_dal.jpg",
-      "description": "Yellow split moong dal, easy on the stomach, highly nutritious, and unpolished for superior health."
+      "description": "Yellow split moong dal, easy on the stomach, highly nutritious, and unpolished for superior health.",
+      "mrp": 173,
+      "rating": 4.7,
+      "reviewCount": 170,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 16
     },
     {
       "id": "groc-11",
@@ -702,7 +1050,13 @@
       "stock": 60,
       "inStock": true,
       "image": "./images/products/indian_spices.jpg",
-      "description": "Unique blend of special red chillies that gives dishes a glowing natural red colour with gentle, flavorful warmth."
+      "description": "Unique blend of special red chillies that gives dishes a glowing natural red colour with gentle, flavorful warmth.",
+      "mrp": 114,
+      "rating": 4.8,
+      "reviewCount": 171,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 17
     },
     {
       "id": "groc-12",
@@ -714,7 +1068,13 @@
       "stock": 65,
       "inStock": true,
       "image": "./images/products/indian_spices.jpg",
-      "description": "Finely ground high-curcumin turmeric powder with deep golden hue and natural healing antiseptic properties."
+      "description": "Finely ground high-curcumin turmeric powder with deep golden hue and natural healing antiseptic properties.",
+      "mrp": 51,
+      "rating": 4.9,
+      "reviewCount": 172,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 18
     },
     {
       "id": "groc-13",
@@ -726,7 +1086,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/kadak_chai.jpg",
-      "description": "Master blend of rich Assam CTC teas with 15% gently rolled long leaves for an unbeatable aroma and kadak strength."
+      "description": "Master blend of rich Assam CTC teas with 15% gently rolled long leaves for an unbeatable aroma and kadak strength.",
+      "mrp": 183,
+      "rating": 4.5,
+      "reviewCount": 173,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 18
     },
     {
       "id": "groc-14",
@@ -738,7 +1104,13 @@
       "stock": 75,
       "inStock": true,
       "image": "./images/products/indian_spices.jpg",
-      "description": "India's beloved 2-minute instant noodles cooked with the signature tastemaker masala blend of 10 roasted spices."
+      "description": "India's beloved 2-minute instant noodles cooked with the signature tastemaker masala blend of 10 roasted spices.",
+      "mrp": 69,
+      "rating": 4.6,
+      "reviewCount": 174,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "groc-15",
@@ -750,7 +1122,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/ice_chocobar.jpg",
-      "description": "Premium smooth milk chocolate with a decadent, creamy melt-in-mouth texture."
+      "description": "Premium smooth milk chocolate with a decadent, creamy melt-in-mouth texture.",
+      "mrp": 105,
+      "rating": 4.7,
+      "reviewCount": 175,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "stat-7",
@@ -762,7 +1140,13 @@
       "stock": 60,
       "inStock": true,
       "image": "./images/products/ballpoint_pens.jpg",
-      "description": "Reliable ballpoint pens featuring a soft elastic comfort grip and low-viscosity ink for fatigue-free exam writing."
+      "description": "Reliable ballpoint pens featuring a soft elastic comfort grip and low-viscosity ink for fatigue-free exam writing.",
+      "mrp": 62,
+      "rating": 4.7,
+      "reviewCount": 190,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "stat-8",
@@ -774,7 +1158,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/art_colours.jpg",
-      "description": "Rich, vivid inter-mixable oil pastels providing brilliant colour blending for young artists and students."
+      "description": "Rich, vivid inter-mixable oil pastels providing brilliant colour blending for young artists and students.",
+      "mrp": 80,
+      "rating": 4.6,
+      "reviewCount": 189,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "stat-9",
@@ -786,7 +1176,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/sticky_notes.jpg",
-      "description": "Clean non-staining white adhesive with precision dispenser nozzle for paper crafts, school charts, and cardboard."
+      "description": "Clean non-staining white adhesive with precision dispenser nozzle for paper crafts, school charts, and cardboard.",
+      "mrp": 31,
+      "rating": 4.5,
+      "reviewCount": 188,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 19
     },
     {
       "id": "stat-10",
@@ -798,7 +1194,13 @@
       "stock": 45,
       "inStock": true,
       "image": "./images/products/classmate_notebooks.jpg",
-      "description": "Transparent waterproof polypropylene folders with push-button closure for organizing certificates and bills."
+      "description": "Transparent waterproof polypropylene folders with push-button closure for organizing certificates and bills.",
+      "mrp": 48,
+      "rating": 4.9,
+      "reviewCount": 82,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 17
     },
     {
       "id": "gen-5",
@@ -810,7 +1212,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/surf_excel.jpg",
-      "description": "Advanced super-fine detergent powder engineered to dissolve quickly and lift tough collar stains effortlessly."
+      "description": "Advanced super-fine detergent powder engineered to dissolve quickly and lift tough collar stains effortlessly.",
+      "mrp": 161,
+      "rating": 4.7,
+      "reviewCount": 50,
+      "badge": "Daily Essential",
+      "isVeg": true,
+      "discountPercent": 16
     },
     {
       "id": "gen-6",
@@ -822,7 +1230,13 @@
       "stock": 65,
       "inStock": true,
       "image": "./images/products/vim_dishwash.jpg",
-      "description": "Powerful concentrated lemon extract formula that removes greasy oils and burnt stains from cookware."
+      "description": "Powerful concentrated lemon extract formula that removes greasy oils and burnt stains from cookware.",
+      "mrp": 42,
+      "rating": 4.8,
+      "reviewCount": 51,
+      "badge": "Fresh Arrival",
+      "isVeg": true,
+      "discountPercent": 17
     },
     {
       "id": "gen-7",
@@ -834,7 +1248,13 @@
       "stock": 50,
       "inStock": true,
       "image": "./images/products/dettol_soap.jpg",
-      "description": "Trusted 99.9% antibacterial protection soap with nourishing moisturizers and iconic fresh pine fragrance."
+      "description": "Trusted 99.9% antibacterial protection soap with nourishing moisturizers and iconic fresh pine fragrance.",
+      "mrp": 188,
+      "rating": 4.9,
+      "reviewCount": 52,
+      "badge": "Top Pick",
+      "isVeg": true,
+      "discountPercent": 18
     },
     {
       "id": "gen-8",
@@ -846,7 +1266,13 @@
       "stock": 35,
       "inStock": true,
       "image": "./images/products/shampoo_bottle.jpg",
-      "description": "Infused with milk protein formula to strengthen hair fiber and stimulate healthy hair growth."
+      "description": "Infused with milk protein formula to strengthen hair fiber and stimulate healthy hair growth.",
+      "mrp": 146,
+      "rating": 4.5,
+      "reviewCount": 53,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 18
     },
     {
       "id": "gen-9",
@@ -858,7 +1284,13 @@
       "stock": 30,
       "inStock": true,
       "image": "./images/products/toilet_cleaner.jpg",
-      "description": "Thick disinfectant liquid that clings to bowl surfaces, removes yellow calcification, and kills 99.9% germs."
+      "description": "Thick disinfectant liquid that clings to bowl surfaces, removes yellow calcification, and kills 99.9% germs.",
+      "mrp": 141,
+      "rating": 4.6,
+      "reviewCount": 54,
+      "badge": "Hot Deal",
+      "isVeg": true,
+      "discountPercent": 18
     },
     {
       "id": "gen-10",
@@ -870,7 +1302,13 @@
       "stock": 40,
       "inStock": true,
       "image": "./images/products/herbal_toothpaste.jpg",
-      "description": "Dual-mode mosquito vaporiser refill providing non-stop protection against disease-causing mosquitoes."
+      "description": "Dual-mode mosquito vaporiser refill providing non-stop protection against disease-causing mosquitoes.",
+      "mrp": 171,
+      "rating": 4.5,
+      "reviewCount": 53,
+      "badge": "Bestseller",
+      "isVeg": true,
+      "discountPercent": 18
     }
   ],
   "orders": [

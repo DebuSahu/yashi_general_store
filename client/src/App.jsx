@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import DeliveryNoticeBanner from './components/DeliveryNoticeBanner';
+import AnnouncementTicker from './components/AnnouncementTicker';
 import ProductCard from './components/ProductCard';
+import ProductDetailModal from './components/ProductDetailModal';
+import WishlistDrawer from './components/WishlistDrawer';
+import OrderHistoryModal from './components/OrderHistoryModal';
+import SortFilterToolbar from './components/SortFilterToolbar';
+import Toast from './components/Toast';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import AuthModal from './components/AuthModal';
@@ -11,6 +17,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import YGSLogo from './components/YGSLogo';
 import defaultData from './defaultData.json';
 import { api } from './api';
+import confetti from 'canvas-confetti';
 import {
   Carrot,
   ShoppingBag,
@@ -28,7 +35,14 @@ import {
   Milk,
   IceCream,
   BookOpen,
-  ArrowRight
+  ArrowRight,
+  Zap,
+  Tag,
+  Star,
+  Heart,
+  Grid,
+  List,
+  RotateCcw
 } from 'lucide-react';
 
 export default function App() {
@@ -40,6 +54,14 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [shopSettings, setShopSettings] = useState(defaultData.settings || null);
 
+  // E-Commerce Filter & Sort State
+  const [sortBy, setSortBy] = useState('featured');
+  const [filterVegOnly, setFilterVegOnly] = useState(false);
+  const [filterDealsOnly, setFilterDealsOnly] = useState(false);
+  const [filterInStockOnly, setFilterInStockOnly] = useState(false);
+  const [selectedPriceRange, setSelectedPriceRange] = useState('all');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+
   // Cart state
   const [cart, setCart] = useState(() => {
     try {
@@ -49,6 +71,25 @@ export default function App() {
       return {};
     }
   });
+
+  // Wishlist state
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      const saved = localStorage.getItem('gs_wishlist');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Applied Coupon State
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  // Toast Notification state
+  const [toast, setToast] = useState(null);
+
+  // Quick View / Product Detail Modal State
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
 
   // User auth state
   const [user, setUser] = useState(() => {
@@ -76,18 +117,25 @@ export default function App() {
 
   const [authInitialTab, setAuthInitialTab] = useState('user');
 
-  // Modals
+  // Modals state
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
+  const [wishlistDrawerOpen, setWishlistDrawerOpen] = useState(false);
+  const [orderHistoryModalOpen, setOrderHistoryModalOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [orderTrackerOpen, setOrderTrackerOpen] = useState(false);
+  const [targetTrackerOrder, setTargetTrackerOrder] = useState(null);
   const [eligibilityModalOpen, setEligibilityModalOpen] = useState(false);
   const [orderPlacedSuccess, setOrderPlacedSuccess] = useState(null);
 
-  // Sync cart to localStorage
+  // Sync cart & wishlist to localStorage
   useEffect(() => {
     localStorage.setItem('gs_cart', JSON.stringify(cart));
   }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('gs_wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
 
   // Load shop settings and products
   const loadInitialData = async () => {
@@ -168,9 +216,74 @@ export default function App() {
     });
   };
 
+  // Wishlist operations
+  const handleToggleWishlist = (product) => {
+    setWishlist((prev) => {
+      const copy = { ...prev };
+      if (copy[product.id]) {
+        delete copy[product.id];
+        setToast({
+          type: 'wishlist',
+          title: 'Removed from Wishlist',
+          message: `${product.name} removed from your saved items.`
+        });
+      } else {
+        copy[product.id] = product;
+        setToast({
+          type: 'wishlist',
+          title: 'Saved to Wishlist! ❤️',
+          message: `${product.name} added to your favorites.`
+        });
+        try {
+          confetti({
+            particleCount: 20,
+            spread: 40,
+            origin: { y: 0.6 }
+          });
+        } catch (e) {}
+      }
+      return copy;
+    });
+  };
+
+  const handleRemoveFromWishlist = (productId) => {
+    setWishlist((prev) => {
+      const copy = { ...prev };
+      delete copy[productId];
+      return copy;
+    });
+  };
+
+  const handleClearWishlist = () => {
+    setWishlist({});
+    setToast({
+      type: 'wishlist',
+      title: 'Wishlist Cleared',
+      message: 'All saved items removed.'
+    });
+  };
+
+  // Reorder items from past orders
+  const handleReorder = (orderItems) => {
+    setCart((prev) => {
+      const copy = { ...prev };
+      orderItems.forEach((it) => {
+        const matched = products.find((p) => p.id === it.id) || it;
+        const currentQty = copy[it.id]?.quantity || 0;
+        copy[it.id] = {
+          ...matched,
+          quantity: currentQty + (it.quantity || 1)
+        };
+      });
+      return copy;
+    });
+    setCartDrawerOpen(true);
+  };
+
   const cartItems = Object.values(cart);
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const wishlistCount = Object.keys(wishlist).length;
 
   // Auth operations
   const handleUserVerified = (userData, token) => {
@@ -183,6 +296,11 @@ export default function App() {
     setUser(null);
     localStorage.removeItem('gs_user');
     localStorage.removeItem('gs_user_token');
+    setToast({
+      type: 'success',
+      title: 'Logged Out',
+      message: 'You have been logged out safely.'
+    });
   };
 
   const handleAdminLoginSuccess = (adminData, token) => {
@@ -207,7 +325,6 @@ export default function App() {
 
   // Admin Direct In-Stock / Out of Stock updater from Storefront
   const handleToggleProductStock = async (productId, inStock) => {
-    // 1. Optimistic UI update
     setProducts((prev) =>
       prev.map((p) => {
         if (p.id === productId) {
@@ -218,7 +335,6 @@ export default function App() {
       })
     );
 
-    // 2. Persist update
     try {
       const target = products.find((p) => p.id === productId);
       const updatedStock = inStock ? (target?.stock > 0 ? target.stock : 25) : 0;
@@ -235,6 +351,16 @@ export default function App() {
       setAuthInitialTab('admin');
       setAuthModalOpen(true);
     }
+  };
+
+  const handleResetFilters = () => {
+    setSortBy('featured');
+    setFilterVegOnly(false);
+    setFilterDealsOnly(false);
+    setFilterInStockOnly(false);
+    setSelectedPriceRange('all');
+    setSelectedBrand('all');
+    setSearchTerm('');
   };
 
   // Switch to Admin Dashboard View if requested and authenticated as admin
@@ -301,16 +427,126 @@ export default function App() {
     }
   ];
 
-  const mainCategorySections = categoryPills.filter(c => c.id !== 'all');
+  const mainCategorySections = categoryPills.filter((c) => c.id !== 'all');
 
-  const displayedProducts = products.filter((p) => {
-    if (selectedBrand === 'all') return true;
-    return p.brand && p.brand.toLowerCase() === selectedBrand.toLowerCase();
-  });
+  // Compute available unique brands
+  const availableBrands = useMemo(() => {
+    const bSet = new Set();
+    products.forEach((p) => {
+      if (p.brand && p.brand.trim()) {
+        bSet.add(p.brand.trim());
+      }
+    });
+    return Array.from(bSet).sort();
+  }, [products]);
+
+  // Comprehensive filtered and sorted products list
+  const filteredAndSortedProducts = useMemo(() => {
+    let list = [...products];
+
+    // Category filter
+    if (selectedCategory !== 'all') {
+      list = list.filter(
+        (p) =>
+          p.category.toLowerCase().replace(/[\s-_]+/g, '') ===
+          selectedCategory.replace(/[\s-_]+/g, '')
+      );
+    }
+
+    // Search term
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.brand && p.brand.toLowerCase().includes(q)) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.description && p.description.toLowerCase().includes(q))
+      );
+    }
+
+    // Brand filter
+    if (selectedBrand !== 'all') {
+      list = list.filter(
+        (p) => p.brand && p.brand.toLowerCase() === selectedBrand.toLowerCase()
+      );
+    }
+
+    // Pure Veg filter
+    if (filterVegOnly) {
+      list = list.filter((p) => p.isVeg !== false);
+    }
+
+    // Hot Deals Only filter (>= 15% discount)
+    if (filterDealsOnly) {
+      list = list.filter((p) => {
+        const mrp = p.mrp || Math.round(p.price * 1.15);
+        const disc = Math.round(((mrp - p.price) / mrp) * 100);
+        return disc >= 15;
+      });
+    }
+
+    // In Stock Only
+    if (filterInStockOnly) {
+      list = list.filter((p) => p.inStock !== false && p.stock > 0);
+    }
+
+    // Price range
+    if (selectedPriceRange === 'under-50') {
+      list = list.filter((p) => p.price < 50);
+    } else if (selectedPriceRange === '50-150') {
+      list = list.filter((p) => p.price >= 50 && p.price <= 150);
+    } else if (selectedPriceRange === '150-300') {
+      list = list.filter((p) => p.price > 150 && p.price <= 300);
+    } else if (selectedPriceRange === '300-plus') {
+      list = list.filter((p) => p.price > 300);
+    }
+
+    // Sorting
+    if (sortBy === 'price-asc') {
+      list.sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'price-desc') {
+      list.sort((a, b) => b.price - a.price);
+    } else if (sortBy === 'rating') {
+      list.sort((a, b) => (b.rating || 4.8) - (a.rating || 4.8));
+    } else if (sortBy === 'discount') {
+      list.sort((a, b) => {
+        const discA = a.discountPercent || Math.round((((a.mrp || a.price * 1.15) - a.price) / (a.mrp || a.price * 1.15)) * 100);
+        const discB = b.discountPercent || Math.round((((b.mrp || b.price * 1.15) - b.price) / (b.mrp || b.price * 1.15)) * 100);
+        return discB - discA;
+      });
+    } else if (sortBy === 'name') {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return list;
+  }, [
+    products,
+    selectedCategory,
+    searchTerm,
+    selectedBrand,
+    filterVegOnly,
+    filterDealsOnly,
+    filterInStockOnly,
+    selectedPriceRange,
+    sortBy
+  ]);
+
+  const isCustomFiltered =
+    filterVegOnly ||
+    filterDealsOnly ||
+    filterInStockOnly ||
+    selectedPriceRange !== 'all' ||
+    selectedBrand !== 'all' ||
+    sortBy !== 'featured' ||
+    searchTerm.trim().length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-100 selection:text-emerald-900 w-full max-w-full overflow-x-hidden">
       
+      {/* 0. LIVE ANIMATED TICKER MARQUEE */}
+      <AnnouncementTicker />
+
       {/* 1. TOP ANNOUNCEMENT BANNER (Strict 5km delivery notice) */}
       <DeliveryNoticeBanner
         onOpenLocationChecker={() => setEligibilityModalOpen(true)}
@@ -322,98 +558,131 @@ export default function App() {
         setSearchTerm={setSearchTerm}
         cartCount={cartCount}
         cartTotal={cartTotal}
+        wishlistCount={wishlistCount}
         onOpenCart={() => setCartDrawerOpen(true)}
+        onOpenWishlist={() => setWishlistDrawerOpen(true)}
+        onOpenOrderHistory={() => setOrderHistoryModalOpen(true)}
         onOpenAuth={() => {
           setAuthInitialTab('user');
           setAuthModalOpen(true);
         }}
-        onOpenOrders={() => setOrderTrackerOpen(true)}
+        onOpenOrders={() => {
+          setTargetTrackerOrder(null);
+          setOrderTrackerOpen(true);
+        }}
         onOpenAdmin={handleOpenAdmin}
         user={user}
         onLogoutUser={handleLogoutUser}
         adminUser={adminUser}
         onLogoutAdmin={handleLogoutAdmin}
         shopSettings={shopSettings}
+        products={products}
+        onAddToCart={handleAddToCart}
+        onOpenQuickView={(p) => setQuickViewProduct(p)}
       />
 
-      {/* 3. HERO SECTION */}
-      <section className="relative bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 text-white overflow-hidden py-6 sm:py-12 lg:py-14 w-full max-w-full">
-        {/* Decorative background circles strictly contained within section bounds */}
+      {/* 3. HERO SECTION WITH VIBRANT ANIMATIONS */}
+      <section className="relative bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white overflow-hidden py-7 sm:py-14 lg:py-16 w-full max-w-full">
+        {/* Decorative glowing gradient orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-500/20 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-teal-500/20 blur-3xl" />
+          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-emerald-400/20 blur-3xl animate-pulse-glow" />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-teal-400/20 blur-3xl animate-pulse-glow-amber" />
         </div>
 
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center">
             
-            <div className="lg:col-span-7 space-y-2.5 sm:space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs font-semibold text-emerald-100">
-                <Truck className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
-                <span>Superfast Local Delivery • Strictly within 5 km of Shop</span>
+            {/* Left Hero Content */}
+            <div className="lg:col-span-7 space-y-3 sm:space-y-4">
+              
+              {/* Animated Flash Delivery Pill */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold text-emerald-100 shadow-sm animate-float-slow">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <Zap className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
+                <span>15-30 Mins Lightning Local Delivery • Strictly within 5 km</span>
               </div>
 
-              <h1 className="text-xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-                Fresh Milk, Dairy, Vegetables & Grocery Delivered to Your Doorstep.
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+                Fresh Milk, Amul Dairy, Farm Veggies & Daily Groceries Delivered.
               </h1>
 
-              <p className="text-xs sm:text-sm md:text-base text-emerald-100/90 max-w-xl">
-                Order fresh daily <strong className="text-white">Amul & Namaste India</strong> milk, paneer, dahi, ghee, farm-fresh vegetables, flour, rice, and household provisions from{' '}
-                <strong className="text-white">Yashi General Store</strong>.
+              <p className="text-xs sm:text-sm md:text-base text-emerald-100/90 max-w-xl leading-relaxed">
+                Order fresh daily <strong className="text-white">Amul & Namaste India</strong> milk, malai paneer, dahi, ghee, farm-fresh green vegetables, chakki atta, dal, spices, and stationery from{' '}
+                <strong className="text-white underline decoration-yellow-400 decoration-2">Yashi General Store</strong>.
               </p>
 
               {/* 5km Radius Highlight Badge */}
-              <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
-                <div className="bg-emerald-900/60 backdrop-blur-md border border-emerald-400/40 rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 flex items-center space-x-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-yellow-400 text-emerald-950 flex items-center justify-center font-black text-base sm:text-lg shrink-0">
+              <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="bg-emerald-950/70 backdrop-blur-md border border-emerald-400/50 rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center space-x-3 shadow-md">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-300 text-slate-950 flex items-center justify-center font-black text-lg shrink-0 shadow-sm">
                     5
                   </div>
                   <div className="min-w-0">
                     <span className="text-[10px] sm:text-xs font-black uppercase text-yellow-300 tracking-wider block">
-                      Delivery Perimeter
+                      Guaranteed 5 km Delivery Zone
                     </span>
-                    <span className="text-xs text-white/90">
-                      Deliveries available only up to <strong>5km</strong> from Mirpur Cantt, Kanpur
+                    <span className="text-xs text-white/95">
+                      Fast doorstep delivery across <strong>Mirpur Cantonment, Kanpur</strong>
                     </span>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setEligibilityModalOpen(true)}
-                  className="px-4 py-2.5 sm:py-3 bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 shrink-0"
+                  className="px-4 py-2.5 sm:py-3 bg-white hover:bg-emerald-50 text-emerald-900 font-black text-xs sm:text-sm rounded-2xl shadow-xl transition active:scale-95 flex items-center justify-center gap-2 shrink-0 border border-white/80"
                 >
                   <MapPin className="w-4 h-4 text-emerald-700" />
-                  <span>Check If We Deliver To You</span>
+                  <span>Check GPS Eligibility (≤ 5km)</span>
                 </button>
               </div>
+
+              {/* Trust Badges Bar */}
+              <div className="pt-2 flex items-center gap-4 text-xs font-bold text-emerald-200/90 flex-wrap">
+                <span className="flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
+                  <span>4.9★ (1,500+ Happy Customers)</span>
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>100% Original Products</span>
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Tag className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Coupon YASHI50</span>
+                </span>
+              </div>
+
             </div>
 
             {/* Visual Hero Feature Showcase Card */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-emerald-950/40 group">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-emerald-950/40 group">
                 <img
                   src="./images/hero_banner.jpg"
                   alt="Yashi General Store (YGS) Fresh Catalog"
-                  className="w-full aspect-[16/9] sm:aspect-auto sm:h-72 object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                  className="w-full aspect-[16/10] sm:aspect-auto sm:h-76 object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
-                    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80';
+                    e.currentTarget.src =
+                      'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80';
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-3.5 sm:p-5 text-white">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[9px] sm:text-xs font-black uppercase tracking-wider text-yellow-300 bg-emerald-900/90 border border-emerald-400/30 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Sparkles className="w-2.5 h-2.5 text-yellow-300" />
-                      <span>Actual Store Showcase</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-end p-4 sm:p-5 text-white">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-yellow-300 bg-emerald-900/90 border border-emerald-400/40 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                      <Sparkles className="w-3 h-3 text-yellow-300" />
+                      <span>Actual Store Inventory</span>
                     </span>
-                    <span className="text-[9px] sm:text-[10px] text-emerald-200 font-bold bg-white/10 px-2 py-0.5 rounded-full">
-                      70+ Products
+                    <span className="text-[10px] text-emerald-200 font-black bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
+                      {products.length}+ Items Ready
                     </span>
                   </div>
-                  <h3 className="text-xs sm:text-base font-black leading-tight text-white">
-                    Fresh Farm Vegetables, Amul Dairy, Groceries & Stationery
+                  <h3 className="text-sm sm:text-lg font-black leading-tight text-white">
+                    Farm Fresh Veggies, Amul Dairy, Groceries & Ice Creams
                   </h3>
-                  <p className="text-[10px] sm:text-[11px] text-emerald-200 mt-0.5">
-                    Order online • Strictly delivered up to 5 km from shop location
+                  <p className="text-[11px] text-emerald-200 mt-1">
+                    Direct local delivery • Strictly up to 5 km from shop location
                   </p>
                 </div>
               </div>
@@ -424,12 +693,20 @@ export default function App() {
       </section>
 
       {/* 4. CATEGORY SELECTOR & FILTER TABS */}
-      <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-2 sm:py-3 shadow-xs w-full max-w-full overflow-hidden">
+      <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 py-2 sm:py-3 shadow-xs w-full max-w-full overflow-hidden">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full overflow-hidden">
           <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
             {categoryPills.map((pill) => {
               const Icon = pill.icon;
               const isActive = selectedCategory === pill.id;
+              const count = pill.id === 'all'
+                ? products.length
+                : products.filter(
+                    (p) =>
+                      p.category.toLowerCase().replace(/[\s-_]+/g, '') ===
+                      pill.id.replace(/[\s-_]+/g, '')
+                  ).length;
+
               return (
                 <button
                   key={pill.id}
@@ -437,14 +714,23 @@ export default function App() {
                     setSelectedCategory(pill.id);
                     setSelectedBrand('all');
                   }}
-                  className={`flex-shrink-0 inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-extrabold transition active:scale-95 whitespace-nowrap ${
+                  className={`flex-shrink-0 inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black transition active:scale-95 whitespace-nowrap ${
                     isActive
-                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200/80 hover:text-emerald-700'
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 border border-emerald-500'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-emerald-800 border border-slate-200/80'
                   }`}
                 >
                   <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
                   <span>{pill.label}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                      isActive
+                        ? 'bg-white/25 text-white'
+                        : 'bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {count}
+                  </span>
                 </button>
               );
             })}
@@ -452,58 +738,91 @@ export default function App() {
         </div>
       </div>
 
-      {/* 5. PRODUCT CATALOG: DEDICATED SECTIONS PER CATEGORY */}
+      {/* 5. PRODUCT CATALOG & TOOLBAR */}
       <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-24 sm:py-8 flex-1 min-w-0">
         
+        {/* SORT & FILTER TOOLBAR */}
+        <SortFilterToolbar
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          filterVegOnly={filterVegOnly}
+          setFilterVegOnly={setFilterVegOnly}
+          filterDealsOnly={filterDealsOnly}
+          setFilterDealsOnly={setFilterDealsOnly}
+          filterInStockOnly={filterInStockOnly}
+          setFilterInStockOnly={setFilterInStockOnly}
+          selectedPriceRange={selectedPriceRange}
+          setSelectedPriceRange={setSelectedPriceRange}
+          selectedBrand={selectedBrand}
+          setSelectedBrand={setSelectedBrand}
+          availableBrands={availableBrands}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          totalResults={filteredAndSortedProducts.length}
+          onResetFilters={handleResetFilters}
+        />
+
         {/* Loading state */}
         {loadingProducts ? (
-          <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
+          <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
             {[...Array(10)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs animate-pulse space-y-3">
-                <div className="aspect-square bg-gray-200 rounded-xl" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
-                <div className="h-8 bg-gray-200 rounded-xl" />
+              <div key={i} className="bg-white rounded-3xl p-4 border border-slate-100 shadow-xs animate-pulse space-y-3">
+                <div className="aspect-square bg-slate-200 rounded-2xl" />
+                <div className="h-4 bg-slate-200 rounded-lg w-3/4" />
+                <div className="h-3 bg-slate-200 rounded-lg w-1/2" />
+                <div className="h-9 bg-slate-200 rounded-xl" />
               </div>
             ))}
           </div>
-        ) : searchTerm ? (
-          /* Search Results View */
+        ) : isCustomFiltered || selectedCategory !== 'all' ? (
+          /* Filtered / Single Category / Search Results View */
           <div>
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg sm:text-2xl font-black text-gray-900">
-                  Search Results for "{searchTerm}"
+                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+                  {searchTerm ? `Search Results for "${searchTerm}"` : `Showing ${filteredAndSortedProducts.length} Items`}
                 </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Found {products.length} matching product{products.length === 1 ? '' : 's'}
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Available for superfast 15-30 min delivery within 5km radius
                 </p>
               </div>
-              <button
-                onClick={() => setSearchTerm('')}
-                className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition"
-              >
-                Clear Search
-              </button>
+
+              {isCustomFiltered && (
+                <button
+                  onClick={handleResetFilters}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl border border-rose-200 transition"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Clear All Filters</span>
+                </button>
+              )}
             </div>
 
-            {products.length === 0 ? (
-              <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-gray-200 max-w-md mx-auto my-8">
-                <Search className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-3" />
-                <h3 className="text-sm sm:text-base font-bold text-gray-800">No items match "{searchTerm}"</h3>
-                <p className="text-xs text-gray-500 mt-1 mb-4">
-                  Try searching for milk, paneer, ice cream, potato, atta, dal, or pens.
+            {filteredAndSortedProducts.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-slate-200 max-w-md mx-auto my-8 space-y-3">
+                <Search className="w-12 h-12 text-slate-300 mx-auto" />
+                <h3 className="text-base font-black text-slate-800">
+                  No products match your filters
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Try adjusting your search keywords, price range, or clearing active filters.
                 </p>
                 <button
-                  onClick={() => setSearchTerm('')}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition"
+                  onClick={handleResetFilters}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition shadow-md shadow-emerald-600/20"
                 >
-                  View All Products
+                  Show All Products
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
-                {products.map((product) => (
+              <div
+                className={
+                  viewMode === 'list'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full'
+                    : 'grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0'
+                }
+              >
+                {filteredAndSortedProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -512,28 +831,32 @@ export default function App() {
                     onUpdateQty={handleUpdateQty}
                     isAdmin={Boolean(adminUser)}
                     onToggleStock={handleToggleProductStock}
+                    isWishlisted={Boolean(wishlist[product.id])}
+                    onToggleWishlist={handleToggleWishlist}
+                    onOpenQuickView={(p) => setQuickViewProduct(p)}
+                    onShowToast={(t) => setToast(t)}
                   />
                 ))}
               </div>
             )}
           </div>
-        ) : selectedCategory === 'all' ? (
-          /* ALL ITEMS: Dedicated Section for each category */
+        ) : (
+          /* ALL ITEMS: Dedicated Sections per Category */
           <div className="space-y-10 sm:space-y-12">
             
             {/* Top Store Overview Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 pb-3 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-slate-200">
               <div>
-                <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight">
+                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                   Shop by Categories
                 </h2>
-                <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5 leading-normal break-words">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Browse {products.length} daily essentials available for superfast 5km delivery
                 </p>
               </div>
 
-              <div className="hidden sm:flex items-center space-x-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                <Truck className="w-4 h-4" />
+              <div className="hidden sm:flex items-center space-x-2 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                <Truck className="w-4 h-4 text-emerald-600" />
                 <span>Delivery Radius: Max {shopSettings?.maxDeliveryRadiusKm || 5} km</span>
               </div>
             </div>
@@ -541,7 +864,9 @@ export default function App() {
             {/* Sections for Each Category */}
             {mainCategorySections.map((section) => {
               const sectionProducts = products.filter(
-                (p) => p.category.toLowerCase().replace(/[\s-_]+/g, '') === section.id.replace(/[\s-_]+/g, '')
+                (p) =>
+                  p.category.toLowerCase().replace(/[\s-_]+/g, '') ===
+                  section.id.replace(/[\s-_]+/g, '')
               );
               if (sectionProducts.length === 0) return null;
               const SectionIcon = section.icon;
@@ -552,25 +877,27 @@ export default function App() {
                   id={`section-${section.id}`}
                   className="scroll-mt-36 w-full max-w-full min-w-0"
                 >
-                  {/* Category Section Header with Showcase Blurred Background */}
-                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-3.5 sm:mb-6 border border-gray-200/80 shadow-md group min-h-[140px] sm:min-h-[175px] md:min-h-[195px] flex flex-col justify-between bg-slate-900">
+                  {/* Category Section Header with Showcase Background */}
+                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-3.5 sm:mb-6 border border-slate-200 shadow-md group min-h-[140px] sm:min-h-[175px] md:min-h-[195px] flex flex-col justify-between bg-slate-900">
                     {/* Background Showcase Image */}
                     {section.bannerImage && (
                       <img
                         src={section.bannerImage}
                         alt={`${section.label} Showcase Background`}
                         className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     )}
 
-                    {/* Glassmorphic Gradient & Blur Overlay for High Contrast & Text Legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/35 backdrop-blur-[2px] sm:backdrop-blur-sm" />
+                    {/* Gradient & Blur Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-slate-950/35 backdrop-blur-[2px] sm:backdrop-blur-sm" />
 
                     {/* Foreground Content */}
                     <div className="relative z-10 p-3.5 sm:p-5 md:p-6 flex flex-col justify-between h-full gap-2.5 sm:gap-3.5">
                       
-                      {/* Header Row: Icon + Title + Items Pill on left, View All on right */}
+                      {/* Header Row */}
                       <div className="flex items-center justify-between gap-2.5 min-w-0">
                         <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
                           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-md shrink-0">
@@ -597,22 +924,21 @@ export default function App() {
                             setSelectedCategory(section.id);
                             window.scrollTo({ top: 350, behavior: 'smooth' });
                           }}
-                          className="shrink-0 inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-gray-900 bg-white/95 hover:bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-md transition active:scale-95 border border-white/60 hover:shadow-lg"
+                          className="shrink-0 inline-flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 bg-white/95 hover:bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-md transition active:scale-95 border border-white/60 hover:shadow-lg"
                         >
                           <span>View All</span>
                           <ArrowRight className="w-3.5 h-3.5 text-emerald-700" />
                         </button>
                       </div>
 
-                      {/* Description with Increased Size & High Contrast Text */}
-                      <p className="text-xs sm:text-sm md:text-base text-gray-100 font-medium leading-relaxed max-w-2xl drop-shadow-sm">
+                      <p className="text-xs sm:text-sm md:text-base text-slate-100 font-medium leading-relaxed max-w-2xl drop-shadow-sm">
                         {section.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Responsive Grid */}
-                  <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
+                  <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
                     {sectionProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -622,6 +948,10 @@ export default function App() {
                         onUpdateQty={handleUpdateQty}
                         isAdmin={Boolean(adminUser)}
                         onToggleStock={handleToggleProductStock}
+                        isWishlisted={Boolean(wishlist[product.id])}
+                        onToggleWishlist={handleToggleWishlist}
+                        onOpenQuickView={(p) => setQuickViewProduct(p)}
+                        onShowToast={(t) => setToast(t)}
                       />
                     ))}
                   </div>
@@ -629,101 +959,6 @@ export default function App() {
               );
             })}
 
-          </div>
-        ) : (
-          /* Single Filtered Category View */
-          <div>
-            {(() => {
-              const activeCat = categoryPills.find(c => c.id === selectedCategory) || {
-                label: selectedCategory,
-                description: 'Provisions for immediate delivery',
-                icon: Package,
-                colorClass: 'bg-emerald-100 text-emerald-800 border-emerald-200'
-              };
-              const ActiveIcon = activeCat.icon;
-
-              return (
-                <div>
-                  {/* Category Header Card with Showcase Blurred Background */}
-                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden mb-4 sm:mb-6 border border-gray-200/80 shadow-md group min-h-[140px] sm:min-h-[175px] md:min-h-[195px] flex flex-col justify-between bg-slate-900">
-                    {/* Background Showcase Image */}
-                    {activeCat.bannerImage && (
-                      <img
-                        src={activeCat.bannerImage}
-                        alt={`${activeCat.label} Showcase Background`}
-                        className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                      />
-                    )}
-
-                    {/* Glassmorphic Gradient & Blur Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/35 backdrop-blur-[2px] sm:backdrop-blur-sm" />
-
-                    {/* Foreground Content */}
-                    <div className="relative z-10 p-3.5 sm:p-5 md:p-6 flex flex-col justify-between h-full gap-2.5 sm:gap-3.5">
-                      <div className="flex items-center justify-between gap-2.5 min-w-0">
-                        <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-md shrink-0">
-                            <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap">
-                              <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
-                                {activeCat.label}
-                              </h2>
-                              <span className="text-[10px] sm:text-xs font-black uppercase px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-500/95 text-white shadow-xs backdrop-blur-xs border border-emerald-400/40">
-                                {displayedProducts.length} Items
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => setSelectedCategory('all')}
-                            className="shrink-0 inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-gray-900 bg-white/95 hover:bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-md transition active:scale-95 border border-white/60 hover:shadow-lg"
-                          >
-                            <span>&larr; All Categories</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <p className="text-xs sm:text-sm md:text-base text-gray-100 font-medium leading-relaxed max-w-2xl drop-shadow-sm">
-                        {activeCat.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Product Grid */}
-                  {displayedProducts.length === 0 ? (
-                    <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-gray-200 max-w-md mx-auto my-8">
-                      <Search className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-3" />
-                      <h3 className="text-sm sm:text-base font-bold text-gray-800">No items available in this category</h3>
-                      <button
-                        onClick={() => setSelectedCategory('all')}
-                        className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition"
-                      >
-                        Back to All Categories
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 [grid-template-columns:repeat(2,minmax(0,1fr))] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-5 w-full max-w-full min-w-0">
-                      {displayedProducts.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                          cartQty={cart[product.id]?.quantity || 0}
-                          onAddToCart={handleAddToCart}
-                          onUpdateQty={handleUpdateQty}
-                          isAdmin={Boolean(adminUser)}
-                          onToggleStock={handleToggleProductStock}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
           </div>
         )}
 
@@ -753,7 +988,7 @@ export default function App() {
                 <p className="text-[10px] sm:text-[11px] text-emerald-200 truncate">
                   {cartTotal < (shopSettings?.minOrderAmount || 100)
                     ? `Add ₹${(shopSettings?.minOrderAmount || 100) - cartTotal} more for Min ₹100`
-                    : 'Free 5km Delivery • Ready'}
+                    : 'Free 5km Delivery • Ready to Order'}
                 </p>
               </div>
             </div>
@@ -769,75 +1004,138 @@ export default function App() {
       )}
 
       {/* 7. FOOTER */}
-      <footer className="bg-gray-900 text-gray-400 text-xs py-10 border-t border-gray-800 mt-auto">
+      <footer className="bg-slate-950 text-slate-400 text-xs py-10 border-t border-slate-800 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 border-b border-gray-800">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pb-6 border-b border-slate-800">
+            
+            <div className="md:col-span-2">
               <div className="flex items-center gap-2.5 mb-2">
                 <YGSLogo size="sm" />
                 <span className="text-lg font-black text-white">Yashi General Store</span>
               </div>
-              <p className="mt-1 text-gray-400">
-                {shopSettings?.tagline || 'Daily Grocery, Farm Fresh Vegetables & Household Essentials.'}
+              <p className="mt-1 text-slate-400 max-w-sm">
+                {shopSettings?.tagline ||
+                  'Your daily neighborhood grocery, fresh vegetables, Amul & Namaste India dairy, household provisions & stationery.'}
               </p>
-              <p className="text-amber-400 font-bold mt-2 flex items-center gap-1 text-[11px]">
-                <Truck className="w-3.5 h-3.5" />
-                <span>Notice: Delivery strictly restricted to 5 km radius of shop.</span>
-              </p>
+              <div className="mt-3 flex items-center gap-3 text-xs text-emerald-400 font-bold">
+                <span className="flex items-center gap-1">
+                  <Truck className="w-3.5 h-3.5 text-yellow-300" />
+                  <span>Strictly 5km Delivery Radius</span>
+                </span>
+                <span>•</span>
+                <span>Mirpur Cantt, Kanpur</span>
+              </div>
             </div>
 
             <div>
-              <span className="text-sm font-bold text-white block mb-1">Store Address & Contact</span>
-              <p className="text-gray-400 font-medium">{shopSettings?.address || '510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004'}</p>
+              <span className="text-sm font-black text-white block mb-2">
+                Store Location & Contact
+              </span>
+              <p className="text-slate-400 font-medium">
+                {shopSettings?.address ||
+                  '510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004'}
+              </p>
               <a
-                href={shopSettings?.mapsUrl || "https://maps.app.goo.gl/36DwR1dGU2bfv7KD9"}
+                href={shopSettings?.mapsUrl || 'https://maps.app.goo.gl/36DwR1dGU2bfv7KD9'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-semibold mt-1.5 text-xs transition underline"
+                className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-bold mt-2 text-xs transition underline"
               >
                 <MapPin className="w-3.5 h-3.5" />
-                <span>View on Google Maps (Directions & Location) &rarr;</span>
+                <span>Directions on Google Maps &rarr;</span>
               </a>
-              <p className="mt-1.5 font-semibold text-gray-300">Call: {shopSettings?.phone}</p>
-              <p className="text-emerald-400 font-semibold mt-0.5">Admin: admin@yashigeneralstore.com</p>
+              <p className="mt-2 font-bold text-slate-300">Call: {shopSettings?.phone || '+91 98765 43210'}</p>
             </div>
 
             <div>
-              <span className="text-sm font-bold text-white block mb-1">Portals</span>
-              <div className="space-y-2 mt-2">
+              <span className="text-sm font-black text-white block mb-2">Quick Navigation</span>
+              <div className="space-y-1.5 mt-1 text-xs">
+                <button
+                  onClick={() => setWishlistDrawerOpen(true)}
+                  className="block text-emerald-400 hover:underline"
+                >
+                  &rarr; My Saved Wishlist ({wishlistCount})
+                </button>
+                <button
+                  onClick={() => setOrderHistoryModalOpen(true)}
+                  className="block text-emerald-400 hover:underline"
+                >
+                  &rarr; Order History & Reorder
+                </button>
                 <button
                   onClick={() => {
-                    setAuthInitialTab('user');
-                    setAuthModalOpen(true);
+                    setTargetTrackerOrder(null);
+                    setOrderTrackerOpen(true);
                   }}
                   className="block text-emerald-400 hover:underline"
                 >
-                  &rarr; Customer & Store Login
+                  &rarr; Live Order Tracker
                 </button>
                 <button
-                  onClick={() => setOrderTrackerOpen(true)}
+                  onClick={() => setEligibilityModalOpen(true)}
                   className="block text-emerald-400 hover:underline"
                 >
-                  &rarr; Track My Delivery Request
+                  &rarr; Check GPS 5km Radius
                 </button>
                 {adminUser && (
                   <button
                     onClick={() => setIsAdminView(true)}
                     className="block text-purple-400 hover:underline font-bold"
                   >
-                    &rarr; 🛡️ Admin Management Portal
+                    &rarr; 🛡️ Admin Store Management
                   </button>
                 )}
               </div>
             </div>
+
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-between items-center text-gray-500 text-[11px] gap-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center text-slate-500 text-[11px] gap-2">
             <p>&copy; 2026 Yashi General Store (YGS). All rights reserved.</p>
-            <p>5km Delivery Restriction Enforced via Haversine Distance Calculation.</p>
+            <p>5 km Delivery Radius Restriction strictly enforced via GPS Haversine verification.</p>
           </div>
         </div>
       </footer>
+
+      {/* TOAST NOTIFICATION */}
+      <Toast toast={toast} onClose={() => setToast(null)} />
+
+      {/* PRODUCT QUICK VIEW MODAL */}
+      <ProductDetailModal
+        product={quickViewProduct}
+        isOpen={Boolean(quickViewProduct)}
+        onClose={() => setQuickViewProduct(null)}
+        cartQty={quickViewProduct ? cart[quickViewProduct.id]?.quantity || 0 : 0}
+        onAddToCart={handleAddToCart}
+        onUpdateQty={handleUpdateQty}
+        isWishlisted={quickViewProduct ? Boolean(wishlist[quickViewProduct.id]) : false}
+        onToggleWishlist={handleToggleWishlist}
+        onShowToast={(t) => setToast(t)}
+        allProducts={products}
+      />
+
+      {/* WISHLIST DRAWER */}
+      <WishlistDrawer
+        isOpen={wishlistDrawerOpen}
+        onClose={() => setWishlistDrawerOpen(false)}
+        wishlist={wishlist}
+        onRemoveFromWishlist={handleRemoveFromWishlist}
+        onClearWishlist={handleClearWishlist}
+        onAddToCart={handleAddToCart}
+        onShowToast={(t) => setToast(t)}
+      />
+
+      {/* ORDER HISTORY & REORDER MODAL */}
+      <OrderHistoryModal
+        isOpen={orderHistoryModalOpen}
+        onClose={() => setOrderHistoryModalOpen(false)}
+        onReorder={handleReorder}
+        onTrackOrder={(order) => {
+          setTargetTrackerOrder(order);
+          setOrderTrackerOpen(true);
+        }}
+        onShowToast={(t) => setToast(t)}
+      />
 
       {/* CART DRAWER */}
       <CartDrawer
@@ -846,14 +1144,19 @@ export default function App() {
         cart={cart}
         onUpdateQty={handleUpdateQty}
         onRemoveItem={handleRemoveItem}
+        onAddToCart={handleAddToCart}
         shopSettings={shopSettings}
+        appliedCoupon={appliedCoupon}
+        setAppliedCoupon={setAppliedCoupon}
+        allProducts={products}
+        onShowToast={(t) => setToast(t)}
         onProceedCheckout={() => {
           setCartDrawerOpen(false);
           setCheckoutModalOpen(true);
         }}
       />
 
-      {/* CHECKOUT MODAL (Phone verification + Address + Location picker + 5km check) */}
+      {/* CHECKOUT MODAL */}
       <CheckoutModal
         isOpen={checkoutModalOpen}
         onClose={() => setCheckoutModalOpen(false)}
@@ -861,9 +1164,12 @@ export default function App() {
         user={user}
         onUserVerified={handleUserVerified}
         shopSettings={shopSettings}
+        appliedCoupon={appliedCoupon}
+        onShowToast={(t) => setToast(t)}
         onOrderPlacedSuccess={(order) => {
           setCheckoutModalOpen(false);
           setCart({});
+          setAppliedCoupon(null);
           setOrderPlacedSuccess(order);
         }}
       />
@@ -880,31 +1186,35 @@ export default function App() {
       {/* USER ORDER TRACKER MODAL */}
       <OrderTrackerModal
         isOpen={orderTrackerOpen}
-        onClose={() => setOrderTrackerOpen(false)}
+        onClose={() => {
+          setOrderTrackerOpen(false);
+          setTargetTrackerOrder(null);
+        }}
         initialPhone={user?.phone || ''}
+        targetOrder={targetTrackerOrder}
       />
 
       {/* LOCATION ELIGIBILITY CHECKER MODAL */}
       {eligibilityModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 p-5 sm:p-6">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 p-5 sm:p-6 animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-base font-bold text-gray-900">
+                <h3 className="text-base font-black text-slate-900">
                   Check Delivery Eligibility (≤ 5km)
                 </h3>
               </div>
               <button
                 onClick={() => setEligibilityModalOpen(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded-lg"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-gray-500 mb-4">
-              Click "Use My GPS Location" or tap on the map to see if your home is within Yashi General Store's 5km delivery radius.
+            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+              Click "Use My GPS Location" or tap anywhere on the map to verify if your home is within Yashi General Store's 5 km delivery perimeter.
             </p>
 
             <LocationPicker
@@ -916,7 +1226,7 @@ export default function App() {
             <div className="mt-5 text-right">
               <button
                 onClick={() => setEligibilityModalOpen(false)}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-xs transition"
               >
                 Done
               </button>
@@ -928,54 +1238,58 @@ export default function App() {
       {/* ORDER PLACED SUCCESS MODAL */}
       {orderPlacedSuccess && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 p-6 text-center">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 p-6 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
-            <h3 className="text-xl font-black text-gray-900">
-              Delivery Request Sent!
+            <h3 className="text-xl font-black text-slate-900">
+              Delivery Request Dispatched!
             </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              Your request has been dispatched to <strong>Yashi General Store</strong> admin.
+            <p className="text-xs text-slate-500 mt-1">
+              Your request has been received by <strong>Yashi General Store</strong>.
             </p>
 
             <div className="bg-emerald-50 rounded-2xl p-4 my-4 text-left border border-emerald-100 space-y-1.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-600">Order ID:</span>
-                <span className="font-black text-emerald-900">{orderPlacedSuccess.id}</span>
+                <span className="text-slate-600">Order ID:</span>
+                <span className="font-black text-emerald-950">{orderPlacedSuccess.id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Customer:</span>
-                <span className="font-bold text-gray-800">{orderPlacedSuccess.customerName}</span>
+                <span className="text-slate-600">Customer:</span>
+                <span className="font-bold text-slate-800">{orderPlacedSuccess.customerName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Mobile:</span>
-                <span className="font-bold text-gray-800">+91 {orderPlacedSuccess.customerPhone}</span>
+                <span className="text-slate-600">Mobile:</span>
+                <span className="font-bold text-slate-800">+91 {orderPlacedSuccess.customerPhone}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Distance from Shop:</span>
-                <span className="font-bold text-emerald-700">{orderPlacedSuccess.distanceKm} km (≤5km verified)</span>
+                <span className="text-slate-600">Distance from Shop:</span>
+                <span className="font-bold text-emerald-700">
+                  {orderPlacedSuccess.distanceKm || '≤ 5.0'} km (Verified ≤ 5km)
+                </span>
               </div>
-              <div className="flex justify-between font-bold text-gray-900 pt-1.5 border-t border-emerald-200">
+              <div className="flex justify-between font-bold text-slate-900 pt-1.5 border-t border-emerald-200">
                 <span>Total Amount:</span>
-                <span className="text-emerald-700 font-black">₹{orderPlacedSuccess.totalAmount}</span>
+                <span className="text-emerald-700 font-black text-sm">₹{orderPlacedSuccess.totalAmount}</span>
               </div>
             </div>
 
             <div className="space-y-2">
               <button
                 onClick={() => {
+                  const ord = orderPlacedSuccess;
                   setOrderPlacedSuccess(null);
+                  setTargetTrackerOrder(ord);
                   setOrderTrackerOpen(true);
                 }}
-                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition active:scale-98"
               >
                 Track Live Order Status
               </button>
               <button
                 onClick={() => setOrderPlacedSuccess(null)}
-                className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition"
+                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition"
               >
                 Continue Shopping
               </button>
@@ -987,4 +1301,3 @@ export default function App() {
     </div>
   );
 }
-
