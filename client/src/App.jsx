@@ -46,7 +46,8 @@ import {
   RotateCcw,
   Sun,
   Moon,
-  Store
+  Store,
+  ShoppingCart
 } from 'lucide-react';
 
 export default function App() {
