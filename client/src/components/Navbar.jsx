@@ -12,7 +12,10 @@ import {
   History,
   Sparkles,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Sun,
+  Moon,
+  Mail
 } from 'lucide-react';
 import YGSLogo from './YGSLogo';
 import { GoogleGLogo } from './GoogleAuthModal';
@@ -37,10 +40,15 @@ export default function Navbar({
   shopSettings,
   products = [],
   onAddToCart,
-  onOpenQuickView
+  onOpenQuickView,
+  theme = 'light',
+  toggleTheme
 }) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef(null);
+
+  const storePhone = shopSettings?.phone || '+91 98765 43210';
+  const storeEmail = shopSettings?.email || 'contact@yashigeneralstore.com';
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -74,9 +82,9 @@ export default function Navbar({
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors duration-200 w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 w-full max-w-full">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-1.5 sm:gap-4 w-full">
           
           {/* Logo & Store Branding */}
           <div
@@ -84,29 +92,29 @@ export default function Navbar({
               setSearchTerm('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0 shrink-0"
+            className="flex items-center space-x-1.5 sm:space-x-3 cursor-pointer min-w-0 shrink"
           >
-            <YGSLogo size="sm" className="sm:hidden" />
-            <YGSLogo size="md" className="hidden sm:inline-flex" />
+            <YGSLogo size="sm" className="sm:hidden shrink-0" />
+            <YGSLogo size="md" className="hidden sm:inline-flex shrink-0" />
             <div className="min-w-0">
-              <div className="flex items-center space-x-1.5 sm:space-x-2">
-                <span className="text-base sm:text-2xl font-black tracking-tight text-slate-900 truncate">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <span className="text-sm sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white truncate">
                   Yashi General Store
                 </span>
-                <span className="hidden md:inline-flex items-center gap-1 bg-emerald-100 text-emerald-900 text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 border border-emerald-300">
+                <span className="hidden md:inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 border border-emerald-300 dark:border-emerald-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                   <span>5km Delivery</span>
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs text-slate-500 flex items-center gap-1 mt-0.5 truncate font-medium">
+              <p className="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5 truncate font-medium">
                 <MapPin className="h-3 w-3 text-emerald-600 shrink-0" />
-                <span className="truncate">Mirpur Cantt, Kanpur • Superfast Local Order</span>
+                <span className="truncate">Mirpur Cantt, Kanpur • <span className="hidden sm:inline">Call: {storePhone}</span></span>
               </p>
             </div>
           </div>
 
           {/* Desktop Search Bar with Instant Autocomplete */}
-          <div ref={searchContainerRef} className="hidden md:flex flex-1 max-w-md mx-4 relative">
+          <div ref={searchContainerRef} className="hidden md:flex flex-1 max-w-md mx-3 relative">
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                 <Search className="h-4 w-4" />
@@ -120,7 +128,7 @@ export default function Navbar({
                   setSearchTerm(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition font-medium"
+                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-750 transition font-medium text-slate-900 dark:text-white"
               />
               {searchTerm && (
                 <button
@@ -134,7 +142,7 @@ export default function Navbar({
 
             {/* Instant Search Suggestions Dropdown */}
             {isSearchFocused && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 space-y-2.5">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150 space-y-2.5">
                 {autocompleteSuggestions.length > 0 ? (
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1 block mb-1.5">
@@ -148,20 +156,20 @@ export default function Navbar({
                             onOpenQuickView?.(item);
                             setIsSearchFocused(false);
                           }}
-                          className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition"
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <img
                               src={item.image}
                               alt={item.name}
-                              className="w-9 h-9 rounded-lg object-cover bg-slate-100 shrink-0 border border-slate-200"
+                              className="w-9 h-9 rounded-lg object-cover bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-700"
                               onError={(e) => { e.currentTarget.src = './images/hero_banner.jpg'; }}
                             />
                             <div className="min-w-0">
-                              <p className="text-xs font-bold text-slate-900 truncate">
+                              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                                 {item.name}
                               </p>
-                              <p className="text-[10px] text-emerald-700 font-black">
+                              <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-black">
                                 ₹{item.price} <span className="text-slate-400 font-normal">/ {item.unit}</span>
                               </p>
                             </div>
@@ -173,7 +181,7 @@ export default function Navbar({
                               e.stopPropagation();
                               onAddToCart?.(item);
                             }}
-                            className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 transition active:scale-95 shadow-2xs"
+                            className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-600 hover:text-white text-emerald-800 dark:text-emerald-300 transition active:scale-95 shadow-2xs"
                             title="Add to cart"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -201,7 +209,7 @@ export default function Navbar({
                             setSearchTerm(tag);
                             setIsSearchFocused(false);
                           }}
-                          className="text-[11px] font-bold bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 px-2.5 py-1 rounded-xl text-slate-700 border border-slate-200 transition"
+                          className="text-[11px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-800 dark:hover:text-emerald-300 px-2.5 py-1 rounded-xl text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
                         >
                           {tag}
                         </button>
@@ -213,18 +221,31 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Action Buttons: Wishlist, Orders, User, Cart */}
-          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
             
+            {/* DARK THEME TOGGLE BUTTON */}
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 sm:p-2 text-slate-600 dark:text-amber-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition active:scale-95"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
+              ) : (
+                <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
+              )}
+            </button>
+
             {/* Wishlist Button */}
             <button
               onClick={onOpenWishlist}
-              className="relative p-2 text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition active:scale-95"
+              className="relative p-1.5 sm:p-2 text-slate-700 dark:text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-95"
               title="My Wishlist"
             >
-              <Heart className="h-5 w-5" />
+              <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white font-black text-[9px] sm:text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-xs">
                   {wishlistCount}
                 </span>
               )}
@@ -233,96 +254,91 @@ export default function Navbar({
             {/* Past Orders History Button */}
             <button
               onClick={onOpenOrderHistory}
-              className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+              className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition"
               title="View past order history & 1-click reorder"
             >
-              <History className="h-4 w-4 text-slate-600" />
+              <History className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               <span>Past Orders</span>
             </button>
 
             {/* Track Orders Button */}
             <button
               onClick={onOpenOrders}
-              className="hidden lg:flex items-center space-x-1 px-3 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-xl border border-emerald-200 transition"
+              className="hidden lg:flex items-center space-x-1 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 rounded-xl border border-emerald-200 dark:border-emerald-800 transition"
               title="Track existing delivery requests"
             >
-              <PackageCheck className="h-4 w-4 text-emerald-700" />
+              <PackageCheck className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
               <span>Track Orders</span>
             </button>
 
-            {/* Customer Profile / Login Badge */}
+            {/* Customer Profile / Gmail Login */}
             {user ? (
-              <div className="flex items-center space-x-1.5 sm:space-x-2 bg-emerald-50 border border-emerald-200 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl">
+              <div className="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-1.5 sm:px-2.5 py-1 rounded-xl">
                 {user.avatar ? (
                   <img
                     src={user.avatar}
                     alt={user.name}
                     className="w-5 h-5 rounded-full object-cover shrink-0 border border-emerald-300"
                   />
-                ) : user.authProvider === 'google' ? (
+                ) : (
                   <div className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
                     {(user.name || 'G').charAt(0).toUpperCase()}
                   </div>
-                ) : (
-                  <User className="h-3.5 w-3.5 text-emerald-700" />
                 )}
                 <div className="text-left hidden sm:block">
-                  <p className="text-[11px] font-black text-emerald-950 leading-tight">
+                  <p className="text-[11px] font-black text-emerald-950 dark:text-emerald-200 leading-tight">
                     {user.name || 'Customer'}
                   </p>
-                  <p className="text-[10px] text-emerald-700 font-bold truncate max-w-[120px]">
-                    {user.email || `+91 ${user.phone}`}
+                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold truncate max-w-[110px]">
+                    {user.email || 'Gmail Logged In'}
                   </p>
                 </div>
                 <button
                   onClick={onLogoutUser}
-                  className="text-[10px] text-slate-400 hover:text-rose-600 font-bold underline ml-1"
+                  className="text-[10px] text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 font-bold underline ml-1"
                 >
                   Logout
                 </button>
               </div>
             ) : !adminUser ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 {/* 1-Click Google Sign In */}
                 <button
                   type="button"
                   onClick={onOpenGoogleAuth}
-                  className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-2xs hover:border-slate-300 active:scale-95"
+                  className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-black text-slate-800 dark:text-white bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition shadow-2xs hover:border-slate-300 active:scale-95 shrink-0"
                   title="Sign in instantly with Gmail (No password)"
                 >
-                  <GoogleGLogo className="w-3.5 h-3.5" />
-                  <span>Google</span>
+                  <GoogleGLogo className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden xs:inline">Gmail</span>
                 </button>
 
                 <button
                   onClick={onOpenAuth}
-                  className="flex items-center space-x-1 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-black text-emerald-900 bg-emerald-100/90 hover:bg-emerald-200 rounded-xl transition"
+                  className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-black text-emerald-900 dark:text-emerald-200 bg-emerald-100/90 dark:bg-emerald-950 hover:bg-emerald-200 rounded-xl transition shrink-0"
                 >
-                  <User className="h-3.5 w-3.5" />
+                  <User className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span>Login</span>
                 </button>
               </div>
             ) : null}
 
-            {/* Admin Portal Section: Visible when admin is logged in */}
+            {/* Admin Portal Section */}
             {adminUser && (
-              <div className="flex items-center space-x-1 sm:space-x-1.5">
+              <div className="flex items-center space-x-1">
                 <button
                   onClick={onOpenAdmin}
-                  className="flex items-center space-x-1 px-2.5 py-1.5 text-xs font-black text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-md shadow-purple-600/20 transition active:scale-95"
+                  className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-black text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-md transition active:scale-95 shrink-0"
                   title="Open Admin Portal"
                 >
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  <span>
-                    <span className="inline sm:hidden">Admin</span>
-                    <span className="hidden sm:inline">Admin Portal</span>
-                  </span>
+                  <span className="hidden sm:inline">Admin Portal</span>
+                  <span className="sm:hidden">Admin</span>
                 </button>
 
                 <button
                   onClick={onLogoutAdmin}
                   className="text-[10px] text-slate-400 hover:text-rose-600 font-bold underline px-1"
-                  title="Logout Store Admin"
                 >
                   Exit
                 </button>
@@ -332,12 +348,12 @@ export default function Navbar({
             {/* Cart Button */}
             <button
               onClick={onOpenCart}
-              className="relative flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition active:scale-95 shrink-0"
+              className="relative flex items-center space-x-1 sm:space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition active:scale-95 shrink-0"
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>₹{cartTotal}</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-slate-900 font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-slate-900 font-black text-[10px] w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-sm">
                   {cartCount}
                 </span>
               )}
@@ -347,7 +363,7 @@ export default function Navbar({
         </div>
 
         {/* Mobile Search Input */}
-        <div className="md:hidden pb-2.5 pt-0.5">
+        <div className="md:hidden pb-2 pt-0.5 w-full">
           <div className="relative w-full">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <Search className="h-3.5 w-3.5" />
@@ -357,7 +373,7 @@ export default function Navbar({
               placeholder="Search milk, vegetables, atta, stationery..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+              className="w-full pl-9 pr-8 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900 dark:text-white"
             />
             {searchTerm && (
               <button

@@ -112,7 +112,8 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   // Shop Settings form
   const [settingsForm, setSettingsForm] = useState({
     storeName: shopSettings?.storeName || 'Yashi General Store',
-    phone: shopSettings?.phone || '',
+    phone: shopSettings?.phone || '+91 98765 43210',
+    email: shopSettings?.email || 'contact@yashigeneralstore.com',
     address: shopSettings?.address || '510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004',
     latitude: shopSettings?.latitude || 26.4519124,
     longitude: shopSettings?.longitude || 80.3537057,
@@ -1271,6 +1272,41 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   onChange={(e) => setSettingsForm({ ...settingsForm, storeName: e.target.value })}
                   className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
                 />
+              </div>
+
+              {/* Store Mobile Number & Store Gmail */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Store Contact Mobile Number / Phone *</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="+91 98765 43210"
+                    value={settingsForm.phone}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, phone: e.target.value })}
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-semibold"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1">Displayed to customers across store for support calls</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Store Official Gmail / Contact Email *</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="yashigeneralstore@gmail.com"
+                    value={settingsForm.email}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })}
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-semibold"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1">Customer support and official store inquiries</p>
+                </div>
               </div>
 
               <div>

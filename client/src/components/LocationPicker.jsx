@@ -69,52 +69,55 @@ export default function LocationPicker({
 
       // Custom icon for Shop
       const shopIcon = L.divIcon({
-        className: 'custom-shop-pin',
-        html: `<div style="background-color:#16a34a;color:white;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 4px 6px rgba(0,0,0,0.3);font-size:18px;">🏪</div>`,
+        className: 'custom-shop-icon',
+        html: `
+          <div style="background-color: #047857; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2.5px solid white; font-weight: bold; font-size: 14px;">
+            🏪
+          </div>
+        `,
         iconSize: [34, 34],
         iconAnchor: [17, 17]
       });
 
-      // Shop Marker
       L.marker([shopLat, shopLon], { icon: shopIcon })
         .addTo(map)
-        .bindPopup(`<b>Yashi General Store (YGS)</b><br/>510, Elliot Lane, Mirpur Cantt, Kanpur<br/><b>5 km Delivery Zone Origin</b><br/><a href="https://maps.app.goo.gl/36DwR1dGU2bfv7KD9" target="_blank" rel="noopener noreferrer" style="color:#16a34a;font-weight:bold;text-decoration:underline;">Open in Google Maps &rarr;</a>`)
+        .bindPopup('<b>Yashi General Store</b><br>510, Elliot Lane, Mirpur Cantt, Kanpur<br>5 km Delivery Center')
         .openPopup();
 
       // 5km Delivery Radius Circle
-      const circle = L.circle([shopLat, shopLon], {
-        color: '#16a34a',
-        fillColor: '#22c55e',
-        fillOpacity: 0.15,
-        radius: maxRadiusKm * 1000 // Convert km to meters
+      circleRef.current = L.circle([shopLat, shopLon], {
+        radius: maxRadiusKm * 1000,
+        color: '#10b981',
+        fillColor: '#10b981',
+        fillOpacity: 0.14,
+        weight: 2.5
       }).addTo(map);
-      circleRef.current = circle;
 
-      // Custom icon for User
+      // User destination marker
       const userIcon = L.divIcon({
-        className: 'custom-user-pin',
-        html: `<div style="background-color:#ef4444;color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 4px 6px rgba(0,0,0,0.3);font-size:16px;">📍</div>`,
+        className: 'custom-user-icon',
+        html: `
+          <div style="background-color: #ef4444; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid white; font-size: 15px;">
+            📍
+          </div>
+        `,
         iconSize: [32, 32],
         iconAnchor: [16, 16]
       });
 
-      // User Marker (Draggable)
-      const userMarker = L.marker([userLocation.lat, userLocation.lng], {
+      userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], {
         icon: userIcon,
         draggable: true
       }).addTo(map);
 
-      userMarker.bindPopup('<b>Your Delivery Location</b><br/>Drag or click anywhere on the map');
-
-      userMarker.on('dragend', (event) => {
-        const marker = event.target;
+      // Handle marker drag
+      userMarkerRef.current.on('dragend', (e) => {
+        const marker = e.target;
         const position = marker.getLatLng();
         setUserLocation({ lat: position.lat, lng: position.lng });
       });
 
-      userMarkerRef.current = userMarker;
-
-      // Click on map to place pin
+      // Handle map clicks
       map.on('click', (e) => {
         const { lat, lng } = e.latlng;
         setUserLocation({ lat, lng });
@@ -122,16 +125,20 @@ export default function LocationPicker({
           userMarkerRef.current.setLatLng([lat, lng]);
         }
       });
-    } else {
-      // Update markers if position changes externally
-      if (userMarkerRef.current) {
-        userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lng]);
-      }
     }
 
-    return () => {
-      // cleanup on unmount
-    };
+    // Force map size invalidation
+    setTimeout(() => {
+      mapInstanceRef.current?.invalidateSize();
+    }, 200);
+  }, []);
+
+  // Update shop center and circle radius when shopLat/shopLon/maxRadiusKm changes
+  useEffect(() => {
+    if (mapInstanceRef.current && circleRef.current) {
+      circleRef.current.setRadius(maxRadiusKm * 1000);
+      circleRef.current.setLatLng([shopLat, shopLon]);
+    }
   }, [shopLat, shopLon, maxRadiusKm]);
 
   // Update user marker position when userLocation changes
@@ -141,43 +148,46 @@ export default function LocationPicker({
     }
   }, [userLocation]);
 
-  // Geolocation detection handler
+  // Detect GPS geolocation from device
   const handleDetectLocation = () => {
-    setGeoError('');
     if (!navigator.geolocation) {
-      setGeoError('Geolocation is not supported by your browser.');
+      setGeoError('GPS Geolocation is not supported by your browser.');
       return;
     }
 
     setIsLocating(true);
+    setGeoError('');
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setIsLocating(false);
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         setUserLocation({ lat, lng });
 
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.flyTo([lat, lng], 14, { duration: 1.5 });
+          mapInstanceRef.current.setView([lat, lng], 14);
         }
+
+        setIsLocating(false);
       },
       (err) => {
         setIsLocating(false);
-        console.warn('Geolocation error:', err);
-        setGeoError('Could not retrieve GPS location automatically. You can tap anywhere on the map to set your address pin!');
+        setGeoError(
+          'Could not retrieve your location. Please check browser permissions or click directly on the map.'
+        );
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
   const isEligible = distance <= maxRadiusKm;
 
   return (
-    <div className="space-y-3">
-      {/* Location Actions & Status */}
+    <div className="space-y-3 w-full max-w-full">
+      {/* Title & Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <div className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
-          <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+          <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>Set Delivery Point (Shop has a strict 5km limit)</span>
         </div>
 
@@ -185,7 +195,7 @@ export default function LocationPicker({
           type="button"
           onClick={handleDetectLocation}
           disabled={isLocating}
-          className="w-full sm:w-auto inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition active:scale-95 disabled:opacity-50"
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition active:scale-95 disabled:opacity-50"
         >
           <Navigation className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
           <span>{isLocating ? 'Detecting GPS...' : '📍 Use My GPS Location'}</span>
@@ -193,35 +203,35 @@ export default function LocationPicker({
       </div>
 
       {geoError && (
-        <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
+        <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2">
           <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
           <p>{geoError}</p>
         </div>
       )}
 
       {/* Map Canvas */}
-      <div className="w-full h-56 sm:h-64 rounded-xl overflow-hidden border border-gray-200 relative shadow-inner">
+      <div className="w-full h-52 sm:h-64 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 relative shadow-inner">
         <div ref={mapContainerRef} className="w-full h-full" />
         
         {/* Floating helper overlay */}
-        <div className="absolute top-2 right-2 z-20 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-[11px] font-semibold text-gray-700 border border-gray-200 shadow-xs pointer-events-none">
+        <div className="absolute top-2 right-2 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 shadow-xs pointer-events-none">
           🟢 Green circle = 5 km delivery zone
         </div>
       </div>
 
       {/* Real-time Distance & Eligibility Indicator */}
       <div
-        className={`p-3.5 rounded-xl border transition-all ${
+        className={`p-3.5 rounded-2xl border transition-all ${
           isEligible
-            ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
-            : 'bg-red-50 border-red-300 text-red-950'
+            ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200'
+            : 'bg-red-50 dark:bg-red-950/60 border-red-300 dark:border-red-800 text-red-950 dark:text-red-200'
         }`}
       >
         <div className="flex items-start gap-3">
           {isEligible ? (
-            <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
           ) : (
-            <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           )}
 
           <div className="flex-1">
@@ -229,19 +239,19 @@ export default function LocationPicker({
               <span className="text-xs font-black uppercase tracking-wider">
                 {isEligible ? 'Eligible For Delivery' : 'Outside 5km Delivery Zone'}
               </span>
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/80 shadow-2xs">
-                Distance: <strong className={isEligible ? 'text-emerald-700' : 'text-red-700'}>{distance} km</strong> / Max {maxRadiusKm} km
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-2xs">
+                Distance: <strong className={isEligible ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}>{distance} km</strong> / Max {maxRadiusKm} km
               </span>
             </div>
 
-            <p className="text-xs mt-1 text-gray-600">
+            <p className="text-xs mt-1 text-slate-600 dark:text-slate-300">
               {isEligible ? (
                 <span>
-                  Great! Your location is within our <strong className="text-emerald-800">5 km delivery boundary</strong>. Our delivery partner can reach your doorstep.
+                  Great! Your location is within our <strong className="text-emerald-800 dark:text-emerald-300">5 km delivery boundary</strong>. Our delivery partner can reach your doorstep.
                 </span>
               ) : (
-                <span className="text-red-700 font-medium">
-                  Sorry, we only deliver up to {maxRadiusKm} km of Yashi General Store YGS. Please pick a closer delivery location within the green zone or contact the store directly.
+                <span className="text-red-700 dark:text-red-300 font-medium">
+                  Sorry, we only deliver up to {maxRadiusKm} km of Yashi General Store. Please pick a closer delivery location within the green zone or contact the store directly.
                 </span>
               )}
             </p>

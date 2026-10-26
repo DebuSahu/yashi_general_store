@@ -156,7 +156,7 @@ export default function OrderTrackerModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-100 flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200 transition-colors">
         
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-900 to-emerald-950 text-white p-4 sm:p-5 flex items-center justify-between">
@@ -180,7 +180,7 @@ export default function OrderTrackerModal({
         </div>
 
         {/* Search Bar */}
-        <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200">
+        <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800">
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="relative flex-1">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-black text-slate-500">
@@ -192,7 +192,7 @@ export default function OrderTrackerModal({
                 placeholder="Enter verified 10-digit mobile number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                className="w-full pl-12 pr-4 py-2 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                className="w-full pl-12 pr-4 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold dark:text-white"
               />
             </div>
             <button

@@ -43,10 +43,42 @@ import {
   Heart,
   Grid,
   List,
-  RotateCcw
+  RotateCcw,
+  Sun,
+  Moon,
+  Store
 } from 'lucide-react';
 
 export default function App() {
+  // Theme state (Dark / Light mode)
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('gs_theme');
+      if (saved) return saved;
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'light';
+    } catch {
+      return 'light';
+    }
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    try {
+      localStorage.setItem('gs_theme', theme);
+    } catch {}
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   const [isAdminView, setIsAdminView] = useState(false);
   const [products, setProducts] = useState(defaultData.products || []);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -544,7 +576,7 @@ export default function App() {
     searchTerm.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-100 selection:text-emerald-900 w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-100 selection:text-emerald-900 w-full max-w-full overflow-x-hidden transition-colors duration-200">
       
       {/* 0. LIVE ANIMATED TICKER MARQUEE */}
       <AnnouncementTicker />
@@ -582,6 +614,8 @@ export default function App() {
         products={products}
         onAddToCart={handleAddToCart}
         onOpenQuickView={(p) => setQuickViewProduct(p)}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       {/* 3. HERO SECTION WITH VIBRANT ANIMATIONS */}
@@ -696,7 +730,7 @@ export default function App() {
       </section>
 
       {/* 4. CATEGORY SELECTOR & FILTER TABS */}
-      <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 py-2 sm:py-3 shadow-xs w-full max-w-full overflow-hidden">
+      <div className="sticky top-16 sm:top-20 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-2 sm:py-3 shadow-xs w-full max-w-full overflow-hidden transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full overflow-hidden">
           <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
             {categoryPills.map((pill) => {
@@ -720,7 +754,7 @@ export default function App() {
                   className={`flex-shrink-0 inline-flex items-center space-x-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black transition active:scale-95 whitespace-nowrap ${
                     isActive
                       ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 border border-emerald-500'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-emerald-800 border border-slate-200/80'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-emerald-800 dark:hover:text-emerald-300 border border-slate-200/80 dark:border-slate-700'
                   }`}
                 >
                   <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
@@ -729,7 +763,7 @@ export default function App() {
                     className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
                       isActive
                         ? 'bg-white/25 text-white'
-                        : 'bg-slate-200 text-slate-600'
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                     }`}
                   >
                     {count}
@@ -782,7 +816,7 @@ export default function App() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                   {searchTerm ? `Search Results for "${searchTerm}"` : `Showing ${filteredAndSortedProducts.length} Items`}
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -802,9 +836,9 @@ export default function App() {
             </div>
 
             {filteredAndSortedProducts.length === 0 ? (
-              <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-slate-200 max-w-md mx-auto my-8 space-y-3">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-12 text-center border border-slate-200 dark:border-slate-800 max-w-md mx-auto my-8 space-y-3">
                 <Search className="w-12 h-12 text-slate-300 mx-auto" />
-                <h3 className="text-base font-black text-slate-800">
+                <h3 className="text-base font-black text-slate-800 dark:text-white">
                   No products match your filters
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -1047,7 +1081,14 @@ export default function App() {
                 <MapPin className="w-3.5 h-3.5" />
                 <span>Directions on Google Maps &rarr;</span>
               </a>
-              <p className="mt-2 font-bold text-slate-300">Call: {shopSettings?.phone || '+91 98765 43210'}</p>
+              <p className="mt-2 font-bold text-slate-300 flex items-center gap-1.5">
+                <PhoneCall className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Call Store: <strong>{shopSettings?.phone || '+91 98765 43210'}</strong></span>
+              </p>
+              <p className="mt-1 font-bold text-slate-300 flex items-center gap-1.5">
+                <span className="text-emerald-400">✉️</span>
+                <span>Email / Gmail: <strong>{shopSettings?.email || 'contact@yashigeneralstore.com'}</strong></span>
+              </p>
             </div>
 
             <div>
@@ -1308,6 +1349,66 @@ export default function App() {
           </div>
         </div>
       )}
+
+
+      {/* MOBILE BOTTOM FLOATING NAVIGATION BAR */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl transition-colors">
+        <button
+          onClick={() => {
+            setSelectedCategory('all');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px]"
+        >
+          <Store className="w-5 h-5 mb-0.5" />
+          <span>Home</span>
+        </button>
+
+        <button
+          onClick={() => setWishlistDrawerOpen(true)}
+          className="relative flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 hover:text-rose-600 font-extrabold text-[10px]"
+        >
+          <Heart className="w-5 h-5 mb-0.5" />
+          <span>Wishlist</span>
+          {wishlistCount > 0 && (
+            <span className="absolute -top-1 right-2 bg-rose-500 text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white dark:border-slate-900">
+              {wishlistCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            setTargetTrackerOrder(null);
+            setOrderTrackerOpen(true);
+          }}
+          className="flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 hover:text-emerald-600 font-extrabold text-[10px]"
+        >
+          <Package className="w-5 h-5 mb-0.5" />
+          <span>Track</span>
+        </button>
+
+        <button
+          onClick={toggleTheme}
+          className="flex flex-col items-center justify-center text-slate-600 dark:text-amber-400 hover:text-amber-500 font-extrabold text-[10px]"
+        >
+          {theme === 'dark' ? <Sun className="w-5 h-5 mb-0.5" /> : <Moon className="w-5 h-5 mb-0.5 text-slate-600" />}
+          <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+        </button>
+
+        <button
+          onClick={() => setCartDrawerOpen(true)}
+          className="relative flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-xl font-black text-xs shadow-md shadow-emerald-600/30 active:scale-95"
+        >
+          <ShoppingCart className="w-4 h-4" />
+          <span>₹{cartTotal}</span>
+          {cartCount > 0 && (
+            <span className="w-4 h-4 rounded-full bg-yellow-400 text-slate-950 text-[10px] flex items-center justify-center font-black">
+              {cartCount}
+            </span>
+          )}
+        </button>
+      </nav>
 
     </div>
   );

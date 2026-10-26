@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, ShieldCheck, User, Plus, ArrowRight, Sparkles, Phone } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, User, Plus, ArrowRight, Sparkles } from 'lucide-react';
 import { api } from '../api';
 import confetti from 'canvas-confetti';
 
@@ -39,10 +39,9 @@ export default function GoogleAuthModal({
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [customName, setCustomName] = useState('');
   const [customEmail, setCustomEmail] = useState('');
-  const [customPhone, setCustomPhone] = useState('');
   const [error, setError] = useState('');
 
-  // Primary detected account and suggestions
+  // Primary detected account
   const savedGoogleUser = (() => {
     try {
       const u = JSON.parse(localStorage.getItem('gs_user') || 'null');
@@ -58,7 +57,7 @@ export default function GoogleAuthModal({
       avatar: savedGoogleUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
       initials: 'D',
       color: 'bg-emerald-600',
-      phone: savedGoogleUser?.phone || '9876543210'
+      phone: savedGoogleUser?.phone || null
     }
   ];
 
@@ -72,11 +71,10 @@ export default function GoogleAuthModal({
         email: account.email,
         name: account.name,
         avatar: account.avatar || null,
-        phone: account.phone || '9876543210'
+        phone: account.phone || null
       });
 
       if (res && res.success) {
-        // Trigger confetti celebration
         try {
           confetti({
             particleCount: 45,
@@ -112,61 +110,60 @@ export default function GoogleAuthModal({
 
     const email = customEmail.trim().toLowerCase();
     const name = customName.trim() || email.split('@')[0];
-    const phone = customPhone.trim() || '9876543210';
 
     handleSignInWithAccount({
       name,
       email,
-      phone,
+      phone: null,
       initials: name.charAt(0).toUpperCase(),
       color: 'bg-blue-600'
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 flex flex-col animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col animate-in zoom-in-95 duration-200 transition-colors">
         
         {/* Header mimicking clean Google Identity dialog */}
-        <div className="p-5 pb-3 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 sm:p-5 pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <GoogleGLogo className="w-6 h-6" />
+            <GoogleGLogo className="w-6 h-6 shrink-0" />
             <div>
-              <h3 className="text-base font-black text-slate-900 leading-tight">
+              <h3 className="text-base font-black text-slate-900 dark:text-white leading-tight">
                 Sign in with Google
               </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Choose an account to continue to <strong>Yashi General Store</strong>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Continue directly to <strong>Yashi General Store</strong>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Notice of zero password */}
-        <div className="bg-emerald-50 px-5 py-2 border-b border-emerald-100 flex items-center gap-2 text-xs text-emerald-900 font-semibold">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Automatic 1-click login • No password or OTP required!</span>
+        <div className="bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2 border-b border-emerald-100 dark:border-emerald-900/60 flex items-center gap-2 text-xs text-emerald-900 dark:text-emerald-300 font-semibold">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <span>Instant 1-click login • No password or OTP needed!</span>
         </div>
 
         {/* Modal Content */}
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4">
           
           {error && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-bold">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-xl text-rose-700 dark:text-rose-300 text-xs font-bold">
               {error}
             </div>
           )}
 
           {!isCustomMode ? (
             <div className="space-y-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 block px-1">
-                Detected Google Accounts
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block px-1">
+                Choose an account
               </span>
 
               {defaultAccounts.map((acc) => (
@@ -175,8 +172,8 @@ export default function GoogleAuthModal({
                   onClick={() => !isSigningIn && handleSignInWithAccount(acc)}
                   className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition select-none ${
                     selectedAccount?.email === acc.email && isSigningIn
-                      ? 'bg-emerald-50 border-emerald-400 ring-2 ring-emerald-200'
-                      : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/80 shadow-2xs'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-400 ring-2 ring-emerald-200 dark:ring-emerald-800'
+                      : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-2xs'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -184,10 +181,10 @@ export default function GoogleAuthModal({
                       {acc.initials}
                     </div>
                     <div className="min-w-0 text-left">
-                      <p className="text-xs sm:text-sm font-black text-slate-900 truncate">
+                      <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate">
                         {acc.name}
                       </p>
-                      <p className="text-xs text-slate-500 truncate mt-0.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                         {acc.email}
                       </p>
                     </div>
@@ -195,11 +192,11 @@ export default function GoogleAuthModal({
 
                   <div className="shrink-0">
                     {selectedAccount?.email === acc.email && isSigningIn ? (
-                      <span className="text-[11px] font-bold text-emerald-700 animate-pulse">
+                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 animate-pulse">
                         Signing in...
                       </span>
                     ) : (
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 flex items-center gap-1">
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
                         <span>Continue</span>
                         <ArrowRight className="w-3 h-3" />
                       </span>
@@ -211,14 +208,14 @@ export default function GoogleAuthModal({
               {/* Add / Switch account option */}
               <div
                 onClick={() => setIsCustomMode(true)}
-                className="p-3 rounded-2xl border border-dashed border-slate-300 hover:border-slate-400 hover:bg-slate-50 flex items-center gap-3 cursor-pointer transition text-slate-600 hover:text-slate-900 mt-2"
+                className="p-3 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-3 cursor-pointer transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white mt-2"
               >
-                <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+                <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0">
                   <Plus className="w-4 h-4" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold">Use another Gmail account</p>
-                  <p className="text-[10px] text-slate-400">Sign in with any other Google email</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">Sign in with any other Google email</p>
                 </div>
               </div>
             </div>
@@ -226,7 +223,7 @@ export default function GoogleAuthModal({
             /* Custom Gmail Entry Form */
             <form onSubmit={handleCustomSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">
+                <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1">
                   Your Full Name
                 </label>
                 <input
@@ -235,13 +232,13 @@ export default function GoogleAuthModal({
                   placeholder="e.g. Ramesh Kumar"
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold dark:text-white"
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">
+                <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1">
                   Gmail / Google Account Address *
                 </label>
                 <input
@@ -250,21 +247,7 @@ export default function GoogleAuthModal({
                   placeholder="yourname@gmail.com"
                   value={customEmail}
                   onChange={(e) => setCustomEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">
-                  Mobile Number (For Delivery Tracking)
-                </label>
-                <input
-                  type="tel"
-                  maxLength="10"
-                  placeholder="9876543210"
-                  value={customPhone}
-                  onChange={(e) => setCustomPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold dark:text-white"
                 />
               </div>
 
@@ -272,7 +255,7 @@ export default function GoogleAuthModal({
                 <button
                   type="button"
                   onClick={() => setIsCustomMode(false)}
-                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition"
+                  className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
                 >
                   Back
                 </button>
@@ -289,8 +272,8 @@ export default function GoogleAuthModal({
           )}
 
           {/* Privacy & Safety badge */}
-          <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-400 text-center leading-normal">
-            To continue, Google will share your name and email address with Yashi General Store. No password is stored.
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 text-center leading-normal">
+            To continue, Google shares your name and email with Yashi General Store. No password is stored. Mobile number is only requested when placing a home delivery order.
           </div>
 
         </div>
@@ -299,4 +282,3 @@ export default function GoogleAuthModal({
     </div>
   );
 }
-

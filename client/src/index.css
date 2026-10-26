@@ -6,14 +6,23 @@
   *, *::before, *::after {
     box-sizing: border-box;
   }
-  html, body {
+  html {
     overflow-x: hidden;
     max-width: 100%;
     width: 100%;
     -webkit-tap-highlight-color: transparent;
   }
+  html.dark {
+    color-scheme: dark;
+  }
   body {
-    @apply antialiased selection:bg-emerald-200 selection:text-emerald-900;
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+    @apply antialiased selection:bg-emerald-200 selection:text-emerald-900 bg-slate-50 text-slate-900 transition-colors duration-200;
+  }
+  html.dark body {
+    @apply bg-slate-950 text-slate-100 selection:bg-emerald-800 selection:text-emerald-100;
   }
   #root {
     width: 100%;
@@ -43,9 +52,15 @@
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #10b981;
@@ -57,6 +72,11 @@
   height: 100%;
   border-radius: 0.75rem;
   z-index: 10;
+}
+
+/* Dark theme tiles for Leaflet */
+.dark .leaflet-tile-pane {
+  filter: brightness(0.75) invert(1) contrast(3) hue-rotate(200deg) saturate(0.35);
 }
 
 /* Vibrant animations */
