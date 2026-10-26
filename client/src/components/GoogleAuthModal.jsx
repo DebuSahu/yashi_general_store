@@ -32,7 +32,6 @@ export default function GoogleAuthModal({
   onLoginSuccess,
   onShowToast
 }) {
-  if (!isOpen) return null;
 
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -40,6 +39,8 @@ export default function GoogleAuthModal({
   const [customName, setCustomName] = useState('');
   const [customEmail, setCustomEmail] = useState('');
   const [error, setError] = useState('');
+
+  if (!isOpen) return null;
 
   // Primary detected account
   const savedGoogleUser = (() => {

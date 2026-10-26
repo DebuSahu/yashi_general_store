@@ -22,7 +22,6 @@ export default function AuthModal({
   onAdminLoginSuccess,
   initialTab = 'user'
 }) {
-  if (!isOpen) return null;
 
   const [loginType, setLoginType] = useState(initialTab || 'user');
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
@@ -44,6 +43,8 @@ export default function AuthModal({
       setError('');
     }
   }, [isOpen, initialTab]);
+
+  if (!isOpen) return null;
 
   // Detected default Google account for fast 1-click login
   const defaultAccount = {

@@ -412,17 +412,7 @@ export default function App() {
     setSearchTerm('');
   };
 
-  // Switch to Admin Dashboard View if requested
-  if (isAdminView) {
-    return (
-      <AdminDashboard
-        shopSettings={shopSettings}
-        onSettingsUpdated={(newSettings) => setShopSettings(newSettings)}
-        onBackToStore={handleBackToStore}
-        onLogoutAdmin={handleLogoutAdmin}
-      />
-    );
-  }
+
 
   const categoryPills = [
     { id: 'all', label: 'All Items', icon: Layers },
@@ -589,6 +579,18 @@ export default function App() {
     selectedBrand !== 'all' ||
     sortBy !== 'featured' ||
     searchTerm.trim().length > 0;
+
+  // Switch to Admin Dashboard View if requested (called after all hooks have run)
+  if (isAdminView) {
+    return (
+      <AdminDashboard
+        shopSettings={shopSettings}
+        onSettingsUpdated={(newSettings) => setShopSettings(newSettings)}
+        onBackToStore={handleBackToStore}
+        onLogoutAdmin={handleLogoutAdmin}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-100 selection:text-emerald-900 w-full max-w-full overflow-x-hidden transition-colors duration-200">

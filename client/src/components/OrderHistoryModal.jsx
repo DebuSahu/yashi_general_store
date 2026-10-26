@@ -23,9 +23,10 @@ export default function OrderHistoryModal({
   onTrackOrder,
   onShowToast
 }) {
-  if (!isOpen) return null;
 
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+
+  if (!isOpen) return null;
 
   // Load orders from localStorage
   const savedOrders = (() => {

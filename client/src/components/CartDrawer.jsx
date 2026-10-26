@@ -31,10 +31,11 @@ export default function CartDrawer({
   allProducts = [],
   onShowToast
 }) {
-  if (!isOpen) return null;
 
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
+
+  if (!isOpen) return null;
 
   const items = Object.values(cart);
   const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);

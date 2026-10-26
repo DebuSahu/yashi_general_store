@@ -23,7 +23,6 @@ export default function OrderTrackerModal({
   initialPhone = '',
   targetOrder = null
 }) {
-  if (!isOpen) return null;
 
   const [phone, setPhone] = useState(initialPhone);
   const [orders, setOrders] = useState(targetOrder ? [targetOrder] : []);
@@ -73,6 +72,8 @@ export default function OrderTrackerModal({
       fetchOrders(initialPhone);
     }
   }, [initialPhone, targetOrder]);
+
+  if (!isOpen) return null;
 
   const handleSearch = (e) => {
     e.preventDefault();

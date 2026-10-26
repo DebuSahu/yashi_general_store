@@ -30,7 +30,6 @@ export default function CheckoutModal({
   onOrderPlacedSuccess,
   onShowToast
 }) {
-  if (!isOpen) return null;
 
   const items = Object.values(cart);
   const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -110,6 +109,8 @@ export default function CheckoutModal({
   const [locationData, setLocationData] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [orderError, setOrderError] = useState('');
+
+  if (!isOpen) return null;
 
   const handleGoogleSuccess = (userData, token) => {
     onUserVerified?.(userData, token);

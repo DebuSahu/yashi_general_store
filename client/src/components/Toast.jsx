@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { CheckCircle2, AlertCircle, Heart, ShoppingBag, Sparkles, X } from 'lucide-react';
 
 export default function Toast({ toast, onClose }) {
-  if (!toast) return null;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -10,6 +9,8 @@ export default function Toast({ toast, onClose }) {
     }, toast.duration || 3200);
     return () => clearTimeout(timer);
   }, [toast, onClose]);
+
+  if (!toast) return null;
 
   const getIcon = () => {
     switch (toast.type) {

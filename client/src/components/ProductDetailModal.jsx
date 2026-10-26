@@ -28,7 +28,6 @@ export default function ProductDetailModal({
   onShowToast,
   allProducts = []
 }) {
-  if (!isOpen || !product) return null;
 
   const [userRating, setUserRating] = useState(5);
   const [reviewName, setReviewName] = useState('');
