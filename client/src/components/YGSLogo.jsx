@@ -39,10 +39,10 @@ export default function YGSLogo({ size = 'md', className = '', showSubtitle = fa
 
       {showSubtitle && (
         <div className="flex flex-col text-left">
-          <span className="text-lg sm:text-xl font-black text-gray-900 leading-tight tracking-tight">
+          <span className="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
             Yashi General Store
           </span>
-          <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
+          <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Fresh Grocery & Veg • 5km Local Delivery
           </span>
@@ -51,4 +51,3 @@ export default function YGSLogo({ size = 'md', className = '', showSubtitle = fa
     </div>
   );
 }
-

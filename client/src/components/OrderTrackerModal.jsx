@@ -165,7 +165,7 @@ export default function OrderTrackerModal({
               <Package className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="text-base sm:text-lg font-black">Live Order Tracking</h3>
+              <h3 className="text-base sm:text-lg font-black text-white">Live Order Tracking</h3>
               <p className="text-[11px] text-emerald-300">
                 Real-time delivery status for Yashi General Store
               </p>
@@ -183,7 +183,7 @@ export default function OrderTrackerModal({
         <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800">
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="relative flex-1">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-black text-slate-500">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-black text-slate-500 dark:text-slate-400">
                 +91
               </span>
               <input
@@ -192,32 +192,32 @@ export default function OrderTrackerModal({
                 placeholder="Enter verified 10-digit mobile number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                className="w-full pl-12 pr-4 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold dark:text-white"
+                className="w-full pl-12 pr-4 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-900 dark:text-white placeholder:text-slate-400"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-xs transition disabled:opacity-50"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-xs transition disabled:opacity-50 active:scale-95"
             >
               {loading ? 'Tracking...' : 'Track'}
             </button>
           </form>
 
-          {error && <p className="text-xs text-rose-600 mt-2 font-bold">{error}</p>}
+          {error && <p className="text-xs text-rose-600 dark:text-rose-400 mt-2 font-bold">{error}</p>}
         </div>
 
         {/* Orders list */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
           {loading ? (
-            <div className="py-12 text-center text-slate-400 text-sm font-semibold animate-pulse">
+            <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm font-semibold animate-pulse">
               Fetching live delivery status from store...
             </div>
           ) : searched && orders.length === 0 ? (
-            <div className="py-12 text-center text-slate-500">
-              <Package className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-              <p className="font-bold text-slate-800">No active orders found</p>
-              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+            <div className="py-12 text-center text-slate-500 dark:text-slate-400">
+              <Package className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+              <p className="font-bold text-slate-800 dark:text-slate-200">No active orders found</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
                 Check that you entered the correct 10-digit phone number or place a new delivery order.
               </p>
             </div>
@@ -230,15 +230,15 @@ export default function OrderTrackerModal({
               return (
                 <div
                   key={order.id}
-                  className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:border-emerald-300 transition space-y-4"
+                  className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm hover:border-emerald-300 dark:hover:border-emerald-600 transition space-y-4"
                 >
                   {/* Top order metadata */}
-                  <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
+                  <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg">
+                      <span className="text-xs font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg">
                         {order.id}
                       </span>
-                      <span className="text-xs text-slate-400 font-medium">
+                      <span className="text-xs text-slate-400 dark:text-slate-400 font-medium">
                         {new Date(order.createdAt || Date.now()).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit'
@@ -249,10 +249,10 @@ export default function OrderTrackerModal({
                     <span
                       className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider ${
                         isDelivered
-                          ? 'bg-emerald-100 text-emerald-800'
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
                           : isCancelled
-                          ? 'bg-rose-100 text-rose-800'
-                          : 'bg-amber-100 text-amber-900 animate-pulse'
+                          ? 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
+                          : 'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 animate-pulse border border-amber-300 dark:border-amber-800'
                       }`}
                     >
                       {order.status || 'Received'}
@@ -263,12 +263,12 @@ export default function OrderTrackerModal({
                   {!isCancelled && (
                     <div className="py-2 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
-                          <Truck className="w-4 h-4 text-emerald-600" />
+                        <span className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                          <Truck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                           <span>Delivery Progress</span>
                         </span>
                         {!isDelivered && (
-                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                             ⚡ ETA: ~20 mins
                           </span>
                         )}
@@ -276,7 +276,7 @@ export default function OrderTrackerModal({
 
                       {/* Step Bubbles & Connecting Line */}
                       <div className="relative pt-2 pb-1">
-                        <div className="absolute top-5 left-3 right-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="absolute top-5 left-3 right-3 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700 rounded-full"
                             style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
@@ -295,8 +295,8 @@ export default function OrderTrackerModal({
                                 <div
                                   className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shadow-xs transition-all ${
                                     isDone
-                                      ? 'bg-emerald-600 text-white ring-4 ring-emerald-100'
-                                      : 'bg-slate-200 text-slate-500'
+                                      ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 dark:ring-emerald-950'
+                                      : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                                   } ${isCurrent ? 'scale-110 animate-bounce' : ''}`}
                                 >
                                   {isDone && !isCurrent ? (
@@ -305,7 +305,7 @@ export default function OrderTrackerModal({
                                     step.num
                                   )}
                                 </div>
-                                <span className={`text-[10px] font-bold mt-1.5 leading-tight ${isDone ? 'text-slate-900' : 'text-slate-400'}`}>
+                                <span className={`text-[10px] font-bold mt-1.5 leading-tight ${isDone ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
                                   {step.label}
                                 </span>
                               </div>
@@ -316,23 +316,23 @@ export default function OrderTrackerModal({
 
                       {/* Simulated Rider On The Way Card */}
                       {currentStep >= 3 && !isDelivered && (
-                        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 flex items-center justify-between text-xs">
+                        <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/60 dark:to-teal-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2.5">
                             <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black">
                               🛵
                             </div>
                             <div>
-                              <p className="font-black text-slate-900">
+                              <p className="font-black text-slate-900 dark:text-white">
                                 Delivery Partner Assigned & En Route
                               </p>
-                              <p className="text-[11px] text-emerald-800">
+                              <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
                                 Direct route from Mirpur Cantt shop to your address
                               </p>
                             </div>
                           </div>
                           <a
                             href="tel:+919876543210"
-                            className="px-3 py-1.5 bg-white hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300 rounded-xl font-bold transition flex items-center gap-1 shadow-2xs"
+                            className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-emerald-600 hover:text-white text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 rounded-xl font-bold transition flex items-center gap-1 shadow-2xs"
                           >
                             <PhoneCall className="w-3 h-3" />
                             <span>Call</span>
@@ -343,42 +343,42 @@ export default function OrderTrackerModal({
                   )}
 
                   {/* Order Details & Summary */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-slate-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-slate-600 dark:text-slate-400">
                     <div>
-                      <p className="font-bold text-slate-800 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                      <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>Delivery Address</span>
                       </p>
-                      <p className="mt-0.5 text-slate-700">{order.address}</p>
+                      <p className="mt-0.5 text-slate-700 dark:text-slate-300">{order.address}</p>
                       {order.distanceKm && (
-                        <p className="text-[11px] text-emerald-700 font-bold mt-0.5">
+                        <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">
                           Perimeter Distance: {order.distanceKm} km (Verified ≤5km)
                         </p>
                       )}
                     </div>
 
                     <div>
-                      <p className="font-bold text-slate-800">Order Items Summary</p>
+                      <p className="font-bold text-slate-800 dark:text-slate-200">Order Items Summary</p>
                       <div className="mt-0.5 space-y-1">
                         {(order.items || []).map((item, idx) => (
-                          <div key={idx} className="flex justify-between text-slate-700">
+                          <div key={idx} className="flex justify-between text-slate-700 dark:text-slate-300">
                             <span>{item.quantity}x {item.name || item.id}</span>
-                            <span className="font-bold">₹{item.itemTotal || (item.price * item.quantity) || 0}</span>
+                            <span className="font-bold text-slate-900 dark:text-white">₹{item.itemTotal || (item.price * item.quantity) || 0}</span>
                           </div>
                         ))}
                       </div>
-                      <div className="flex justify-between font-black text-slate-900 pt-1.5 border-t border-slate-100 mt-1">
+                      <div className="flex justify-between font-black text-slate-900 dark:text-white pt-1.5 border-t border-slate-100 dark:border-slate-700 mt-1">
                         <span>Total Paid / Payable:</span>
-                        <span className="text-emerald-700 font-black text-sm">₹{order.totalAmount}</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 font-black text-sm">₹{order.totalAmount}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Actions: Print Bill & Store Support */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
                     <button
                       onClick={() => handlePrint(order)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-xl transition"
                     >
                       <Printer className="w-3.5 h-3.5" />
                       <span>Print Receipt</span>
@@ -386,7 +386,7 @@ export default function OrderTrackerModal({
 
                     <a
                       href="tel:+919876543210"
-                      className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 transition"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 transition"
                     >
                       <PhoneCall className="w-3.5 h-3.5" />
                       <span>Store Support (+91 98765 43210)</span>

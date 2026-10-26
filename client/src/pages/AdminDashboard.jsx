@@ -579,23 +579,42 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   // If not logged in as Admin, show login screen
   if (!token) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100 transition-colors">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
           <div className="flex justify-center mb-3">
             <YGSLogo size="lg" />
           </div>
-          <h2 className="text-center text-2xl font-black text-gray-900">
+          <h2 className="text-center text-2xl font-black text-slate-900 dark:text-white">
             Yashi General Store Admin
           </h2>
-          <p className="mt-1 text-center text-xs text-gray-500">
+          <p className="mt-1 text-center text-xs text-slate-500 dark:text-slate-400">
             Sign in to manage catalog (Vegetables, Grocery, Store items) and dispatch deliveries (≤5km)
           </p>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-          <div className="bg-white py-8 px-6 shadow-xl rounded-3xl border border-gray-200">
+          <div className="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800">
+            
+            {/* Quick 1-Click Auto Fill Demo Admin */}
+            <div className="mb-4 flex items-center justify-between text-xs bg-purple-50 dark:bg-purple-950/40 p-3 rounded-2xl border border-purple-200 dark:border-purple-800/80">
+              <div className="flex items-center gap-1.5 text-purple-900 dark:text-purple-300">
+                <Lock className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                <span>Admin: <strong>admin</strong> / <strong>admin123</strong></span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setUsername('admin');
+                  setPassword('admin123');
+                }}
+                className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white font-black text-[11px] rounded-xl transition active:scale-95 shadow-2xs"
+              >
+                Auto Fill
+              </button>
+            </div>
+
             {loginError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                 <span>{loginError}</span>
               </div>
@@ -603,48 +622,50 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Admin Username
                 </label>
                 <input
                   type="text"
                   required
+                  placeholder="Enter admin username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Admin Password
                 </label>
                 <input
                   type="password"
                   required
+                  placeholder="Enter secure password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white"
                 />
               </div>
 
-              <div className="text-[11px] text-gray-500 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
                 🔒 Restricted access. All authorization attempts are logged and protected.
               </div>
 
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-50"
+                className="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-50 active:scale-98"
               >
                 {loginLoading ? 'Signing in...' : 'Sign In as Store Admin'}
               </button>
             </form>
 
-            <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
               <button
                 onClick={onBackToStore}
-                className="text-xs text-emerald-700 font-bold hover:underline inline-flex items-center gap-1"
+                className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to Storefront
               </button>
@@ -661,7 +682,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   const totalRevenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 pb-16">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 transition-colors">
       
       {/* Admin Top Navbar */}
       <header className="sticky top-0 z-30 bg-purple-900 text-white shadow-md">
@@ -705,9 +726,9 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
         
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-5 sm:mb-6">
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-200 shadow-2xs">
+          <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
             <span className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider block truncate">Total Requests</span>
-            <p className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5 sm:mt-1">{orders.length}</p>
+            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 sm:mt-1">{orders.length}</p>
           </div>
           <div className="bg-white p-3 sm:p-4 rounded-2xl border border-amber-200 shadow-2xs bg-amber-50/30">
             <span className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase tracking-wider block truncate">Pending Delivery</span>
@@ -724,7 +745,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
         </div>
 
         {/* Navigation Tabs (Smooth horizontal scroll on mobile) */}
-        <div className="flex overflow-x-auto no-scrollbar scroll-smooth gap-1.5 sm:gap-2 mb-5 sm:mb-6 bg-white rounded-2xl p-1.5 shadow-2xs border border-gray-200">
+        <div className="flex overflow-x-auto no-scrollbar scroll-smooth gap-1.5 sm:gap-2 mb-5 sm:mb-6 bg-white dark:bg-slate-900 rounded-2xl p-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <button
             onClick={() => setActiveTab('orders')}
             className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${

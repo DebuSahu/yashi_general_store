@@ -83,32 +83,32 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors duration-200 w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 w-full max-w-full">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-1.5 sm:gap-4 w-full">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 w-full max-w-full">
+        <div className="flex items-center justify-between min-h-[60px] sm:h-20 gap-2 sm:gap-4 py-2 sm:py-0 w-full">
           
-          {/* Logo & Store Branding */}
+          {/* Logo & Store Branding - Full Visibility on Mobile */}
           <div
             onClick={() => {
               setSearchTerm('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="flex items-center space-x-1.5 sm:space-x-3 cursor-pointer min-w-0 shrink"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0 flex-1 sm:flex-initial"
           >
             <YGSLogo size="sm" className="sm:hidden shrink-0" />
             <YGSLogo size="md" className="hidden sm:inline-flex shrink-0" />
-            <div className="min-w-0">
-              <div className="flex items-center space-x-1 sm:space-x-2">
-                <span className="text-sm sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white truncate">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-sm xs:text-base sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
                   Yashi General Store
                 </span>
-                <span className="hidden md:inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 border border-emerald-300 dark:border-emerald-800">
+                <span className="inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300 text-[8px] sm:text-[11px] font-black px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full uppercase tracking-wider shrink-0 border border-emerald-300 dark:border-emerald-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                   <span>5km Delivery</span>
                 </span>
               </div>
-              <p className="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5 truncate font-medium">
+              <p className="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5 font-medium truncate">
                 <MapPin className="h-3 w-3 text-emerald-600 shrink-0" />
-                <span className="truncate">Mirpur Cantt, Kanpur • <span className="hidden sm:inline">Call: {storePhone}</span></span>
+                <span className="truncate">Mirpur Cantt, Kanpur • <span className="hidden sm:inline">Call: {storePhone}</span><span className="sm:hidden">{storePhone}</span></span>
               </p>
             </div>
           </div>
@@ -128,12 +128,12 @@ export default function Navbar({
                   setSearchTerm(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-750 transition font-medium text-slate-900 dark:text-white"
+                className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-750 transition font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-slate-400 hover:text-slate-600 font-bold"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
                 >
                   ✕
                 </button>
@@ -170,7 +170,7 @@ export default function Navbar({
                                 {item.name}
                               </p>
                               <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-black">
-                                ₹{item.price} <span className="text-slate-400 font-normal">/ {item.unit}</span>
+                                ₹{item.price} <span className="text-slate-400 dark:text-slate-500 font-normal">/ {item.unit}</span>
                               </p>
                             </div>
                           </div>
@@ -191,7 +191,7 @@ export default function Navbar({
                     </div>
                   </div>
                 ) : searchTerm.trim().length >= 2 ? (
-                  <p className="text-xs text-slate-500 text-center py-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-2">
                     No products found for "{searchTerm}"
                   </p>
                 ) : (
@@ -221,7 +221,7 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons Toolbar */}
           <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
             
             {/* DARK THEME TOGGLE BUTTON */}
@@ -237,10 +237,25 @@ export default function Navbar({
               )}
             </button>
 
-            {/* Wishlist Button */}
+            {/* ALWAYS-ACCESSIBLE STORE ADMIN PORTAL BUTTON */}
+            <button
+              onClick={onOpenAdmin}
+              className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-black rounded-xl shadow-xs transition active:scale-95 shrink-0 ${
+                adminUser
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 hover:bg-purple-600 hover:text-white border border-purple-300 dark:border-purple-800'
+              }`}
+              title="Store Admin Portal (Manage Orders, Inventory & Store Settings)"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{adminUser ? 'Admin Portal' : 'Admin'}</span>
+              <span className="sm:hidden font-extrabold text-[11px]">{adminUser ? 'Portal' : 'Admin'}</span>
+            </button>
+
+            {/* Desktop Only: Wishlist Button */}
             <button
               onClick={onOpenWishlist}
-              className="relative p-1.5 sm:p-2 text-slate-700 dark:text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-95"
+              className="hidden sm:inline-flex relative p-1.5 sm:p-2 text-slate-700 dark:text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-xl transition active:scale-95"
               title="My Wishlist"
             >
               <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -251,17 +266,17 @@ export default function Navbar({
               )}
             </button>
 
-            {/* Past Orders History Button */}
+            {/* Desktop Only: Past Orders History Button */}
             <button
               onClick={onOpenOrderHistory}
-              className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition"
+              className="hidden md:flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition"
               title="View past order history & 1-click reorder"
             >
               <History className="h-4 w-4 text-slate-600 dark:text-slate-400" />
               <span>Past Orders</span>
             </button>
 
-            {/* Track Orders Button */}
+            {/* Desktop Only: Track Orders Button */}
             <button
               onClick={onOpenOrders}
               className="hidden lg:flex items-center space-x-1 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 rounded-xl border border-emerald-200 dark:border-emerald-800 transition"
@@ -300,7 +315,7 @@ export default function Navbar({
                   Logout
                 </button>
               </div>
-            ) : !adminUser ? (
+            ) : (
               <div className="flex items-center gap-1">
                 {/* 1-Click Google Sign In */}
                 <button
@@ -315,40 +330,18 @@ export default function Navbar({
 
                 <button
                   onClick={onOpenAuth}
-                  className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-black text-emerald-900 dark:text-emerald-200 bg-emerald-100/90 dark:bg-emerald-950 hover:bg-emerald-200 rounded-xl transition shrink-0"
+                  className="hidden sm:flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-black text-emerald-900 dark:text-emerald-200 bg-emerald-100/90 dark:bg-emerald-950 hover:bg-emerald-200 rounded-xl transition shrink-0"
                 >
                   <User className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span>Login</span>
                 </button>
               </div>
-            ) : null}
-
-            {/* Admin Portal Section */}
-            {adminUser && (
-              <div className="flex items-center space-x-1">
-                <button
-                  onClick={onOpenAdmin}
-                  className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-black text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-md transition active:scale-95 shrink-0"
-                  title="Open Admin Portal"
-                >
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Admin Portal</span>
-                  <span className="sm:hidden">Admin</span>
-                </button>
-
-                <button
-                  onClick={onLogoutAdmin}
-                  className="text-[10px] text-slate-400 hover:text-rose-600 font-bold underline px-1"
-                >
-                  Exit
-                </button>
-              </div>
             )}
 
-            {/* Cart Button */}
+            {/* Desktop Only: Cart Button (Mobile has full cart bar in bottom floating nav) */}
             <button
               onClick={onOpenCart}
-              className="relative flex items-center space-x-1 sm:space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition active:scale-95 shrink-0"
+              className="hidden sm:flex relative items-center space-x-1 sm:space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition active:scale-95 shrink-0"
             >
               <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>₹{cartTotal}</span>
@@ -373,12 +366,12 @@ export default function Navbar({
               placeholder="Search milk, vegetables, atta, stationery..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-8 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900 dark:text-white"
+              className="w-full pl-9 pr-8 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-slate-400 hover:text-slate-600 font-bold"
+                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
               >
                 ✕
               </button>

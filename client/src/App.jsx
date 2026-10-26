@@ -380,13 +380,27 @@ export default function App() {
   };
 
   const handleOpenAdmin = () => {
-    if (adminUser) {
-      setIsAdminView(true);
-    } else {
-      setAuthInitialTab('admin');
-      setAuthModalOpen(true);
+    setIsAdminView(true);
+  };
+
+  const handleBackToStore = () => {
+    setIsAdminView(false);
+    if (window.location.hash === '#admin') {
+      window.history.pushState(null, '', window.location.pathname + window.location.search);
     }
   };
+
+  // URL hash routing for #admin
+  useEffect(() => {
+    const checkAdminRoute = () => {
+      if (window.location.hash === '#admin' || window.location.search.includes('admin=true')) {
+        setIsAdminView(true);
+      }
+    };
+    checkAdminRoute();
+    window.addEventListener('hashchange', checkAdminRoute);
+    return () => window.removeEventListener('hashchange', checkAdminRoute);
+  }, []);
 
   const handleResetFilters = () => {
     setSortBy('featured');
@@ -398,13 +412,13 @@ export default function App() {
     setSearchTerm('');
   };
 
-  // Switch to Admin Dashboard View if requested and authenticated as admin
-  if (isAdminView && adminUser) {
+  // Switch to Admin Dashboard View if requested
+  if (isAdminView) {
     return (
       <AdminDashboard
         shopSettings={shopSettings}
         onSettingsUpdated={(newSettings) => setShopSettings(newSettings)}
-        onBackToStore={() => setIsAdminView(false)}
+        onBackToStore={handleBackToStore}
         onLogoutAdmin={handleLogoutAdmin}
       />
     );
@@ -820,7 +834,7 @@ export default function App() {
                 <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                   {searchTerm ? `Search Results for "${searchTerm}"` : `Showing ${filteredAndSortedProducts.length} Items`}
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Available for superfast 15-30 min delivery within 5km radius
                 </p>
               </div>
@@ -883,9 +897,9 @@ export default function App() {
           <div className="space-y-10 sm:space-y-12">
             
             {/* Top Store Overview Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
               <div>
-                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                   Shop by Categories
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -893,7 +907,7 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="hidden sm:flex items-center space-x-2 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+              <div className="hidden sm:flex items-center space-x-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
                 <Truck className="w-4 h-4 text-emerald-600" />
                 <span>Delivery Radius: Max {shopSettings?.maxDeliveryRadiusKm || 5} km</span>
               </div>
@@ -1122,14 +1136,12 @@ export default function App() {
                 >
                   &rarr; Check GPS 5km Radius
                 </button>
-                {adminUser && (
-                  <button
-                    onClick={() => setIsAdminView(true)}
-                    className="block text-purple-400 hover:underline font-bold"
-                  >
-                    &rarr; 🛡️ Admin Store Management
-                  </button>
-                )}
+                <button
+                  onClick={() => setIsAdminView(true)}
+                  className="block text-purple-400 hover:text-purple-300 hover:underline font-bold text-left"
+                >
+                  &rarr; 🛡️ Admin Store Management
+                </button>
               </div>
             </div>
 
@@ -1250,11 +1262,11 @@ export default function App() {
       {/* LOCATION ELIGIBILITY CHECKER MODAL */}
       {eligibilityModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 p-5 sm:p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-slate-800 p-5 sm:p-6 animate-in zoom-in-95 duration-200 text-slate-900 dark:text-white transition-colors">
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-base font-black text-slate-900">
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
                   Check Delivery Eligibility (≤ 5km)
                 </h3>
               </div>
@@ -1266,7 +1278,7 @@ export default function App() {
               </button>
             </div>
 
-            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
               Click "Use My GPS Location" or tap anywhere on the map to verify if your home is within Yashi General Store's 5 km delivery perimeter.
             </p>
 
@@ -1291,38 +1303,38 @@ export default function App() {
       {/* ORDER PLACED SUCCESS MODAL */}
       {orderPlacedSuccess && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 p-6 text-center animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 dark:border-slate-800 p-6 text-center animate-in zoom-in-95 duration-200 text-slate-900 dark:text-white transition-colors">
+            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
-            <h3 className="text-xl font-black text-slate-900">
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">
               Delivery Request Dispatched!
             </h3>
             <p className="text-xs text-slate-500 mt-1">
               Your request has been received by <strong>Yashi General Store</strong>.
             </p>
 
-            <div className="bg-emerald-50 rounded-2xl p-4 my-4 text-left border border-emerald-100 space-y-1.5 text-xs">
+            <div className="bg-emerald-50 dark:bg-emerald-950/50 rounded-2xl p-4 my-4 text-left border border-emerald-100 dark:border-emerald-800/80 space-y-1.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-600">Order ID:</span>
+                <span className="text-slate-600 dark:text-slate-400">Order ID:</span>
                 <span className="font-black text-emerald-950">{orderPlacedSuccess.id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">Customer:</span>
-                <span className="font-bold text-slate-800">{orderPlacedSuccess.customerName}</span>
+                <span className="text-slate-600 dark:text-slate-400">Customer:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{orderPlacedSuccess.customerName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">Mobile:</span>
-                <span className="font-bold text-slate-800">+91 {orderPlacedSuccess.customerPhone}</span>
+                <span className="text-slate-600 dark:text-slate-400">Mobile:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">+91 {orderPlacedSuccess.customerPhone}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">Distance from Shop:</span>
+                <span className="text-slate-600 dark:text-slate-400">Distance from Shop:</span>
                 <span className="font-bold text-emerald-700">
                   {orderPlacedSuccess.distanceKm || '≤ 5.0'} km (Verified ≤ 5km)
                 </span>
               </div>
-              <div className="flex justify-between font-bold text-slate-900 pt-1.5 border-t border-emerald-200">
+              <div className="flex justify-between font-bold text-slate-900 dark:text-white pt-1.5 border-t border-emerald-200 dark:border-emerald-800">
                 <span>Total Amount:</span>
                 <span className="text-emerald-700 font-black text-sm">₹{orderPlacedSuccess.totalAmount}</span>
               </div>
@@ -1342,7 +1354,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setOrderPlacedSuccess(null)}
-                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition"
+                className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
               >
                 Continue Shopping
               </button>
@@ -1390,11 +1402,11 @@ export default function App() {
         </button>
 
         <button
-          onClick={toggleTheme}
-          className="flex flex-col items-center justify-center text-slate-600 dark:text-amber-400 hover:text-amber-500 font-extrabold text-[10px]"
+          onClick={handleOpenAdmin}
+          className="flex flex-col items-center justify-center text-purple-700 dark:text-purple-400 hover:text-purple-600 font-extrabold text-[10px]"
         >
-          {theme === 'dark' ? <Sun className="w-5 h-5 mb-0.5" /> : <Moon className="w-5 h-5 mb-0.5 text-slate-600" />}
-          <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          <ShieldCheck className="w-5 h-5 mb-0.5" />
+          <span>Admin</span>
         </button>
 
         <button

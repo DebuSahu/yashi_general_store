@@ -139,7 +139,7 @@ export default function OrderHistoryModal({
         <div className="bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Package className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-base sm:text-lg font-black">My Order History</h3>
+            <h3 className="text-base sm:text-lg font-black text-white">My Order History</h3>
             <span className="bg-white/10 text-white text-xs font-bold px-2 py-0.5 rounded-full">
               {savedOrders.length} {savedOrders.length === 1 ? 'order' : 'orders'}
             </span>
@@ -155,12 +155,12 @@ export default function OrderHistoryModal({
         {/* Orders List */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {savedOrders.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center text-center text-slate-400">
-              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-                <ShoppingBag className="w-8 h-8 text-slate-400" />
+            <div className="py-12 flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500">
+              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                <ShoppingBag className="w-8 h-8 text-slate-400 dark:text-slate-500" />
               </div>
-              <h4 className="text-base font-bold text-slate-700">No Past Orders Found</h4>
-              <p className="text-xs text-slate-500 mt-1 max-w-xs">
+              <h4 className="text-base font-bold text-slate-700 dark:text-slate-200">No Past Orders Found</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
                 Your completed delivery requests will appear here so you can easily track or reorder them in 1-click!
               </p>
               <button
@@ -186,27 +186,27 @@ export default function OrderHistoryModal({
               return (
                 <div
                   key={order.id}
-                  className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-2xs hover:border-slate-300 transition"
+                  className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 overflow-hidden shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition"
                 >
                   {/* Order summary bar */}
-                  <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/70">
+                  <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/70 dark:bg-slate-800/60">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-black text-slate-900 text-sm">
+                        <span className="font-black text-slate-900 dark:text-white text-sm">
                           {order.id}
                         </span>
                         <span
                           className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
                             (order.status || '').toLowerCase() === 'delivered'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-amber-100 text-amber-900'
+                              ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                              : 'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                           }`}
                         >
                           {order.status || 'Received'}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span>{dateStr}</span>
                         <span>•</span>
                         <span>{(order.items || []).length} items</span>
@@ -214,7 +214,7 @@ export default function OrderHistoryModal({
                     </div>
 
                     <div className="flex items-center gap-2 sm:self-center">
-                      <span className="text-base font-black text-emerald-700 mr-2">
+                      <span className="text-base font-black text-emerald-700 dark:text-emerald-400 mr-2">
                         ₹{order.totalAmount}
                       </span>
 
@@ -231,7 +231,7 @@ export default function OrderHistoryModal({
                       {/* Details expand */}
                       <button
                         onClick={() => toggleExpand(order.id)}
-                        className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition"
+                        className="p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition"
                       >
                         {isExpanded ? (
                           <ChevronUp className="w-4 h-4" />
@@ -244,21 +244,21 @@ export default function OrderHistoryModal({
 
                   {/* Expanded Items & Actions */}
                   {isExpanded && (
-                    <div className="p-4 border-t border-slate-100 space-y-3 bg-white">
+                    <div className="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3 bg-white dark:bg-slate-900">
                       <div className="space-y-2">
-                        <span className="text-xs font-black text-slate-700 uppercase tracking-wider block">
+                        <span className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
                           Ordered Items:
                         </span>
-                        <div className="divide-y divide-slate-100">
+                        <div className="divide-y divide-slate-100 dark:divide-slate-800">
                           {(order.items || []).map((it, idx) => (
                             <div
                               key={idx}
                               className="py-1.5 flex justify-between items-center text-xs"
                             >
-                              <span className="font-semibold text-slate-800">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">
                                 {it.quantity}x {it.name || it.id}
                               </span>
-                              <span className="font-bold text-slate-600">
+                              <span className="font-bold text-slate-600 dark:text-slate-400">
                                 ₹{it.itemTotal || (it.price * it.quantity) || 0}
                               </span>
                             </div>
@@ -266,13 +266,13 @@ export default function OrderHistoryModal({
                         </div>
                       </div>
 
-                      <div className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
-                        <div className="flex items-center gap-1 font-semibold text-slate-700">
-                          <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                      <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Delivered to: {order.address}</span>
                         </div>
                         {order.distanceKm && (
-                          <p className="text-[11px] text-slate-500">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
                             Distance from Yashi General Store: <strong>{order.distanceKm} km</strong>
                           </p>
                         )}
@@ -281,7 +281,7 @@ export default function OrderHistoryModal({
                       <div className="flex items-center justify-between pt-2">
                         <button
                           onClick={() => handlePrintReceipt(order)}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-xl transition"
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>Print Bill / Receipt</span>
@@ -292,7 +292,7 @@ export default function OrderHistoryModal({
                             onClose();
                             onTrackOrder(order);
                           }}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-900 underline"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 underline"
                         >
                           <span>Live Track This Order &rarr;</span>
                         </button>
@@ -305,10 +305,10 @@ export default function OrderHistoryModal({
           )}
         </div>
 
-        <div className="p-3.5 px-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <div className="p-3.5 px-6 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-100 dark:border-slate-800 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl transition"
+            className="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs rounded-xl transition"
           >
             Close
           </button>
@@ -318,4 +318,3 @@ export default function OrderHistoryModal({
     </div>
   );
 }
-

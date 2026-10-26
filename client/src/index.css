@@ -181,3 +181,37 @@
   background-clip: text;
   animation: shimmer-sweep 4s linear infinite;
 }
+
+
+/* Universal Dark Mode Enhancements for inputs, native dropdowns & character visibility */
+.dark select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  color-scheme: dark;
+}
+
+/* Fallbacks to guarantee dark mode contrast across tables and cards */
+.dark .text-gray-900,
+.dark .text-slate-900 {
+  color: #f8fafc;
+}
+
+.dark .text-gray-800,
+.dark .text-slate-800 {
+  color: #f1f5f9;
+}
+
+.dark .text-gray-700,
+.dark .text-slate-700 {
+  color: #e2e8f0;
+}
