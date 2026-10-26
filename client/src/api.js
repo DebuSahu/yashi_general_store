@@ -63,22 +63,53 @@ function initLocalData() {
   if (!getLocalStore('orders', null)) {
     setLocalStore('orders', []);
   }
-  if (!getLocalStore('admins', null)) {
-    setLocalStore('admins', [
+  const primaryOwnerEmail = 'debusahu121@gmail.com';
+  let admins = getLocalStore('admins', null);
+  if (!admins || !Array.isArray(admins) || admins.length === 0) {
+    admins = [
       {
-        id: 'admin-primary',
-        username: 'admin',
-        name: 'Store Owner',
+        id: 'admin-owner',
+        username: primaryOwnerEmail,
+        email: primaryOwnerEmail,
+        name: 'Debu Sahu (Store Owner)',
         role: 'superadmin',
-        password: 'admin123',
         createdAt: new Date().toISOString()
       }
-    ]);
+    ];
+    setLocalStore('admins', admins);
+  } else {
+    // Ensure primary owner is always present in admins list
+    const hasOwner = admins.some(a => 
+      (a.email && a.email.toLowerCase() === primaryOwnerEmail) || 
+      (a.username && a.username.toLowerCase() === primaryOwnerEmail)
+    );
+    if (!hasOwner) {
+      admins.unshift({
+        id: 'admin-owner',
+        username: primaryOwnerEmail,
+        email: primaryOwnerEmail,
+        name: 'Debu Sahu (Store Owner)',
+        role: 'superadmin',
+        createdAt: new Date().toISOString()
+      });
+      setLocalStore('admins', admins);
+    }
   }
 }
 initLocalData();
 
 export const api = {
+  // Check if an email is an authorized store admin
+  isAuthorizedAdminEmail: (email) => {
+    if (!email) return false;
+    const clean = String(email).trim().toLowerCase();
+    if (clean === 'debusahu121@gmail.com') return true;
+    const admins = getLocalStore('admins', []);
+    return admins.some(a => 
+      (a.email && a.email.toLowerCase() === clean) || 
+      (a.username && a.username.toLowerCase() === clean)
+    );
+  },
   // Store Settings & 5km Radius check
   getSettings: async (lat, lon) => {
     if (API_BASE) {
@@ -400,17 +431,24 @@ export const api = {
       }
     }
     const customerPhone = phone ? String(phone).replace(/[^0-9]/g, '') : '9876543210';
+    const isOwner = cleanEmail === 'debusahu121@gmail.com';
+    const isAuthorized = isOwner || api.isAuthorizedAdminEmail(cleanEmail);
+    const role = isOwner ? 'superadmin' : (isAuthorized ? 'admin' : 'user');
+
     return {
       success: true,
       token: 'google-token-' + Date.now(),
+      isAdmin: isAuthorized,
+      adminToken: isAuthorized ? ('admin-jwt-token-' + Date.now()) : null,
       user: {
-        role: 'user',
+        role: role,
         email: cleanEmail,
         name: customerName,
         phone: customerPhone,
         avatar: avatar || null,
         authProvider: 'google',
-        verified: true
+        verified: true,
+        isAdmin: isAuthorized
       }
     };
   },
@@ -461,10 +499,10 @@ export const api = {
     }
 
     const admins = getLocalStore('admins', []);
-    // Mask / strip passwords completely
     const safeAdmins = admins.map(a => ({
       id: a.id,
-      username: a.username,
+      username: a.username || a.email,
+      email: a.email || a.username,
       name: a.name || a.username,
       role: a.role || 'admin',
       createdAt: a.createdAt
@@ -491,17 +529,22 @@ export const api = {
       }
     }
 
+    const email = (adminData.email || adminData.username || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      return { error: 'Please enter a valid Gmail address for the admin' };
+    }
+
     const admins = getLocalStore('admins', []);
-    if (admins.some(a => a.username.toLowerCase() === adminData.username.trim().toLowerCase())) {
-      return { error: 'An admin user with this username already exists' };
+    if (admins.some(a => (a.email && a.email.toLowerCase() === email) || (a.username && a.username.toLowerCase() === email))) {
+      return { error: `Admin with Gmail '${email}' already exists` };
     }
 
     const newAdmin = {
       id: `admin-${Date.now()}`,
-      username: adminData.username.trim(),
-      name: (adminData.name || adminData.username).trim(),
+      username: email,
+      email: email,
+      name: (adminData.name || email.split('@')[0]).trim(),
       role: adminData.role || 'admin',
-      password: adminData.password, // Local browser storage fallback
       createdAt: new Date().toISOString()
     };
     admins.push(newAdmin);
@@ -509,10 +552,11 @@ export const api = {
 
     return {
       success: true,
-      message: 'Admin user added successfully',
+      message: `Admin access granted to ${email}`,
       admin: {
         id: newAdmin.id,
         username: newAdmin.username,
+        email: newAdmin.email,
         name: newAdmin.name,
         role: newAdmin.role,
         createdAt: newAdmin.createdAt
@@ -582,7 +626,7 @@ export const api = {
     return { success: true, message: 'Your password has been changed successfully' };
   },
 
-  deleteAdmin: async (id, token, currentUsername = 'admin') => {
+  deleteAdmin: async (id, token, currentUsername = '') => {
     if (API_BASE) {
       try {
         const res = await fetch(`${API_BASE}/auth/admins/${id}`, {
@@ -598,19 +642,20 @@ export const api = {
     }
 
     let admins = getLocalStore('admins', []);
-    if (admins.length <= 1) {
-      return { error: 'Cannot delete the only remaining admin account' };
-    }
-
     const target = admins.find(a => a.id === id);
     if (!target) return { error: 'Admin account not found' };
-    if (target.username.toLowerCase() === currentUsername.toLowerCase()) {
-      return { error: 'You cannot delete your own active admin account' };
+
+    const targetEmail = (target.email || target.username || '').toLowerCase();
+    if (targetEmail === 'debusahu121@gmail.com') {
+      return { error: 'Master store owner account (debusahu121@gmail.com) cannot be deleted' };
+    }
+    if (currentUsername && targetEmail === currentUsername.toLowerCase()) {
+      return { error: 'You cannot remove your own active admin account' };
     }
 
     admins = admins.filter(a => a.id !== id);
     setLocalStore('admins', admins);
-    return { success: true, message: `Admin account '${target.username}' removed successfully` };
+    return { success: true, message: `Admin access for '${target.name || target.username}' removed successfully` };
   },
 
   // Orders & Delivery Requests

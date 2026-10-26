@@ -78,7 +78,8 @@ router.get('/admins', authenticateAdmin, (req, res) => {
   const db = getDatabase();
   const safeAdmins = (db.admins || []).map(a => ({
     id: a.id,
-    username: a.username,
+    username: a.username || a.email,
+    email: a.email || a.username,
     name: a.name || a.username,
     role: a.role || 'admin',
     createdAt: a.createdAt
@@ -86,35 +87,33 @@ router.get('/admins', authenticateAdmin, (req, res) => {
   return res.json({ success: true, admins: safeAdmins });
 });
 
-// POST /api/auth/admins - Add a new admin user
+// POST /api/auth/admins - Add a new admin user by Gmail address
 router.post('/admins', authenticateAdmin, async (req, res) => {
   try {
-    const { username, password, name, role } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
-    }
-
-    const cleanUsername = username.trim();
-    if (cleanUsername.length < 3) {
-      return res.status(400).json({ error: 'Username must be at least 3 characters' });
-    }
-    if (password.length < 4) {
-      return res.status(400).json({ error: 'Password must be at least 4 characters' });
+    const { username, email, password, name, role } = req.body;
+    const adminEmail = (email || username || '').trim().toLowerCase();
+    if (!adminEmail || !adminEmail.includes('@')) {
+      return res.status(400).json({ error: 'Valid Gmail address is required for admin' });
     }
 
     const db = getDatabase();
     db.admins = db.admins || [];
 
     // Check duplicate
-    if (db.admins.some(a => a.username.toLowerCase() === cleanUsername.toLowerCase())) {
-      return res.status(400).json({ error: 'An admin user with this username already exists' });
+    if (db.admins.some(a => (a.email && a.email.toLowerCase() === adminEmail) || (a.username && a.username.toLowerCase() === adminEmail))) {
+      return res.status(400).json({ error: `An admin with Gmail '${adminEmail}' already exists` });
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    let passwordHash = null;
+    if (password && password.length >= 4) {
+      passwordHash = await bcrypt.hash(password, 10);
+    }
+
     const newAdmin = {
       id: `admin-${Date.now()}`,
-      username: cleanUsername,
-      name: (name || cleanUsername).trim(),
+      username: adminEmail,
+      email: adminEmail,
+      name: (name || adminEmail.split('@')[0]).trim(),
       role: role === 'superadmin' ? 'superadmin' : 'admin',
       passwordHash,
       createdAt: new Date().toISOString()
@@ -125,10 +124,11 @@ router.post('/admins', authenticateAdmin, async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Admin user created successfully',
+      message: `Admin access granted to ${adminEmail}`,
       admin: {
         id: newAdmin.id,
         username: newAdmin.username,
+        email: newAdmin.email,
         name: newAdmin.name,
         role: newAdmin.role,
         createdAt: newAdmin.createdAt
@@ -227,7 +227,11 @@ router.delete('/admins/:id', authenticateAdmin, (req, res) => {
   }
 
   const target = db.admins[targetIndex];
-  if (target.username.toLowerCase() === req.user.username?.toLowerCase()) {
+  const targetEmail = (target.email || target.username || '').toLowerCase();
+  if (targetEmail === 'debusahu121@gmail.com') {
+    return res.status(400).json({ error: 'Master store owner account (debusahu121@gmail.com) cannot be deleted' });
+  }
+  if (req.user?.username && targetEmail === req.user.username.toLowerCase()) {
     return res.status(400).json({ error: 'You cannot delete your own active admin account' });
   }
 
@@ -403,24 +407,48 @@ router.post('/google', (req, res) => {
   }
   const customerPhone = phone ? String(phone).replace(/[^0-9]/g, '') : '9876543210';
 
+  const db = getDatabase();
+  const admins = db.admins || [];
+  const matchedAdmin = admins.find(a =>
+    (a.email && a.email.toLowerCase() === cleanEmail) ||
+    (a.username && a.username.toLowerCase() === cleanEmail)
+  );
+  const isOwner = cleanEmail === 'debusahu121@gmail.com';
+  const isAdmin = isOwner || !!matchedAdmin;
+  const role = isOwner ? 'superadmin' : (isAdmin ? (matchedAdmin?.role || 'admin') : 'user');
+
+  let adminToken = null;
+  if (isAdmin) {
+    adminToken = jwt.sign(
+      { role: 'admin', username: cleanEmail, email: cleanEmail, id: matchedAdmin?.id || 'admin-owner' },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+  }
+
   const token = jwt.sign(
-    { role: 'user', email: cleanEmail, name: customerName, authProvider: 'google' },
+    { role, email: cleanEmail, name: customerName, authProvider: 'google', isAdmin },
     JWT_SECRET,
     { expiresIn: '30d' }
   );
 
   return res.json({
     success: true,
-    message: 'Signed in successfully via Google (Passwordless)',
+    message: isAdmin
+      ? `Signed in as Store Owner/Admin (${customerName})`
+      : 'Signed in successfully via Google (Passwordless)',
     token,
+    isAdmin,
+    adminToken,
     user: {
-      role: 'user',
+      role,
       email: cleanEmail,
       name: customerName,
       phone: customerPhone,
       avatar: avatar || null,
       authProvider: 'google',
-      verified: true
+      verified: true,
+      isAdmin
     }
   });
 });

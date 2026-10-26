@@ -59,3 +59,4 @@ const testCases = [
 testCases.forEach(tc => {
   console.log(JSON.stringify(tc), '=> firstName:', getUserFirstName(tc), '| fullName:', extractFullNameFromEmail(tc?.email));
 });
+

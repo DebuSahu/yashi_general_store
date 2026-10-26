@@ -38,9 +38,21 @@ import {
 import YGSLogo from '../components/YGSLogo';
 import { api } from '../api';
 
-export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated, onLogoutAdmin }) {
-  const [token, setToken] = useState(localStorage.getItem('gs_admin_token') || '');
-  const [currentAdminUser, setCurrentAdminUser] = useState(localStorage.getItem('gs_admin_user') || 'admin');
+export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated, onLogoutAdmin, adminUser }) {
+  const [token, setToken] = useState(() => {
+    try {
+      return adminUser?.token || sessionStorage.getItem('gs_admin_token') || localStorage.getItem('gs_admin_token') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [currentAdminUser, setCurrentAdminUser] = useState(() => {
+    try {
+      return adminUser?.username || adminUser?.email || sessionStorage.getItem('gs_admin_user') || localStorage.getItem('gs_admin_user') || 'debusahu121@gmail.com';
+    } catch {
+      return 'debusahu121@gmail.com';
+    }
+  });
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -62,11 +74,9 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   const [selfPwdLoading, setSelfPwdLoading] = useState(false);
   const [selfPwdMsg, setSelfPwdMsg] = useState({ type: '', text: '' });
 
-  // Add new admin modal
+  // Add new admin modal (Passwordless via Gmail)
   const [addAdminModalOpen, setAddAdminModalOpen] = useState(false);
-  const [newAdminForm, setNewAdminForm] = useState({ username: '', name: '', role: 'admin', password: '', confirmPassword: '' });
-  const [showNewAdminPwd, setShowNewAdminPwd] = useState(false);
-  const [showNewAdminConfirm, setShowNewAdminConfirm] = useState(false);
+  const [newAdminForm, setNewAdminForm] = useState({ email: '', name: '', role: 'admin' });
   const [addAdminLoading, setAddAdminLoading] = useState(false);
   const [addAdminError, setAddAdminError] = useState('');
 
@@ -217,43 +227,33 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   };
 
   // Create New Admin User
+  // Create / Authorize New Admin by Gmail ID
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
     setAddAdminError('');
 
-    if (!newAdminForm.username || !newAdminForm.password) {
-      setAddAdminError('Username and password are required.');
-      return;
-    }
-    if (newAdminForm.username.length < 3) {
-      setAddAdminError('Username must be at least 3 characters.');
-      return;
-    }
-    if (newAdminForm.password.length < 4) {
-      setAddAdminError('Password must be at least 4 characters.');
-      return;
-    }
-    if (newAdminForm.password !== newAdminForm.confirmPassword) {
-      setAddAdminError('Passwords do not match.');
+    const email = (newAdminForm.email || newAdminForm.username || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      setAddAdminError('Please enter a valid Gmail address (e.g. manager@gmail.com).');
       return;
     }
 
     setAddAdminLoading(true);
     try {
       const res = await api.addAdmin({
-        username: newAdminForm.username,
-        name: newAdminForm.name,
-        role: newAdminForm.role,
-        password: newAdminForm.password
+        email,
+        username: email,
+        name: newAdminForm.name?.trim() || email.split('@')[0],
+        role: newAdminForm.role || 'admin'
       }, token);
 
       if (res.success) {
         setAddAdminModalOpen(false);
-        setNewAdminForm({ username: '', name: '', role: 'admin', password: '', confirmPassword: '' });
-        setAdminActionMsg({ type: 'success', text: `Admin user '${res.admin?.username}' created successfully!` });
+        setNewAdminForm({ email: '', name: '', role: 'admin' });
+        setAdminActionMsg({ type: 'success', text: `Admin access granted to '${email}'! They can now log in via Gmail to access the Admin Portal.` });
         loadAdmins();
       } else {
-        setAddAdminError(res.error || 'Failed to create admin user.');
+        setAddAdminError(res.error || 'Failed to grant admin access.');
       }
     } catch (err) {
       setAddAdminError('Error connecting to server.');
@@ -577,101 +577,30 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     }
   };
 
-  // If not logged in as Admin, show login screen
+  // If not authenticated as Admin, show restricted access notice
   if (!token) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100 transition-colors">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-          <div className="flex justify-center mb-3">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center py-12 px-4 text-slate-900 dark:text-slate-100 transition-colors">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 text-center">
+          <div className="flex justify-center mb-4">
             <YGSLogo size="lg" />
           </div>
-          <h2 className="text-center text-2xl font-black text-slate-900 dark:text-white">
-            Yashi General Store Admin
-          </h2>
-          <p className="mt-1 text-center text-xs text-slate-500 dark:text-slate-400">
-            Sign in to manage catalog (Vegetables, Grocery, Store items) and dispatch deliveries (≤5km)
-          </p>
-        </div>
-
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-          <div className="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800">
-            
-            {/* Quick 1-Click Auto Fill Demo Admin */}
-            <div className="mb-4 flex items-center justify-between text-xs bg-purple-50 dark:bg-purple-950/40 p-3 rounded-2xl border border-purple-200 dark:border-purple-800/80">
-              <div className="flex items-center gap-1.5 text-purple-900 dark:text-purple-300">
-                <Lock className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
-                <span>Admin: <strong>admin</strong> / <strong>admin123</strong></span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('admin');
-                  setPassword('admin123');
-                }}
-                className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white font-black text-[11px] rounded-xl transition active:scale-95 shadow-2xs"
-              >
-                Auto Fill
-              </button>
-            </div>
-
-            {loginError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                <span>{loginError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Admin Username
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Enter admin username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Admin Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Enter secure password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                🔒 Restricted access. All authorization attempts are logged and protected.
-              </div>
-
-              <button
-                type="submit"
-                disabled={loginLoading}
-                className="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-50 active:scale-98"
-              >
-                {loginLoading ? 'Signing in...' : 'Sign In as Store Admin'}
-              </button>
-            </form>
-
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
-              <button
-                onClick={onBackToStore}
-                className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" /> Back to Storefront
-              </button>
-            </div>
+          <div className="inline-flex p-3 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-2xl mb-4">
+            <Shield className="w-8 h-8" />
           </div>
+          <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+            Admin Portal Restricted
+          </h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+            The Admin Portal is exclusively for authorized store management. Only registered Gmail administrators (such as <strong>debusahu121@gmail.com</strong>) can access this system.
+          </p>
+          <button
+            onClick={onBackToStore}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Storefront</span>
+          </button>
         </div>
       </div>
     );
@@ -1686,13 +1615,13 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   type="button"
                   onClick={() => {
                     setAddAdminError('');
-                    setNewAdminForm({ username: '', name: '', role: 'admin', password: '', confirmPassword: '' });
+                    setNewAdminForm({ email: '', name: '', role: 'admin' });
                     setAddAdminModalOpen(true);
                   }}
-                  className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5"
+                  className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 shrink-0"
                 >
                   <UserPlus className="w-4 h-4" />
-                  <span>+ Add New Admin User</span>
+                  <span>+ Add Admin by Gmail</span>
                 </button>
               </div>
 
@@ -1710,27 +1639,34 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-gray-100 text-gray-500 font-bold uppercase tracking-wider">
-                        <th className="py-3 px-3">Admin User</th>
+                        <th className="py-3 px-3">Admin Gmail & Name</th>
                         <th className="py-3 px-3">Role</th>
-                        <th className="py-3 px-3">Password Security</th>
-                        <th className="py-3 px-3">Created</th>
+                        <th className="py-3 px-3">Authentication</th>
+                        <th className="py-3 px-3">Date Added</th>
                         <th className="py-3 px-3 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {adminsList.map((adm) => {
-                        const isSelf = adm.username.toLowerCase() === currentAdminUser.toLowerCase();
+                        const adminEmail = (adm.email || adm.username || '').toLowerCase();
+                        const isOwner = adminEmail === 'debusahu121@gmail.com';
+                        const isSelf = adminEmail === currentAdminUser.toLowerCase();
                         return (
                           <tr key={adm.id} className="hover:bg-gray-50/70 transition">
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-black flex items-center justify-center text-xs">
-                                  {adm.username.substring(0, 2).toUpperCase()}
+                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-black flex items-center justify-center text-xs shrink-0">
+                                  {adminEmail.substring(0, 2).toUpperCase()}
                                 </div>
                                 <div>
-                                  <div className="font-extrabold text-gray-900 flex items-center gap-1.5">
-                                    <span>@{adm.username}</span>
-                                    {isSelf && (
+                                  <div className="font-extrabold text-gray-900 flex items-center gap-1.5 flex-wrap">
+                                    <span>{adminEmail}</span>
+                                    {isOwner && (
+                                      <span className="px-1.5 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-black rounded">
+                                        Owner 👑
+                                      </span>
+                                    )}
+                                    {isSelf && !isOwner && (
                                       <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
                                         You
                                       </span>
@@ -1743,20 +1679,18 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                             <td className="py-3 px-3">
                               <span
                                 className={`px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1 ${
-                                  adm.role === 'superadmin'
+                                  adm.role === 'superadmin' || isOwner
                                     ? 'bg-purple-100 text-purple-800'
                                     : 'bg-blue-100 text-blue-800'
                                 }`}
                               >
                                 <ShieldCheck className="w-3 h-3" />
-                                <span>{adm.role === 'superadmin' ? 'Super Admin' : 'Store Admin'}</span>
+                                <span>{adm.role === 'superadmin' || isOwner ? 'Super Admin' : 'Store Admin'}</span>
                               </span>
                             </td>
                             <td className="py-3 px-3">
-                              <span className="font-mono text-gray-400 font-bold tracking-widest text-xs flex items-center gap-1.5">
-                                <Lock className="w-3.5 h-3.5 text-gray-400" />
-                                <span>••••••••</span>
-                                <span className="text-[10px] text-gray-400 font-sans tracking-normal">(Encrypted)</span>
+                              <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] inline-flex items-center gap-1">
+                                <span>Gmail Login (Passwordless)</span>
                               </span>
                             </td>
                             <td className="py-3 px-3 text-gray-500 text-[11px]">
@@ -1764,28 +1698,19 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                             </td>
                             <td className="py-3 px-3 text-right">
                               <div className="flex items-center justify-end gap-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setTargetAdminToReset(adm);
-                                    setResetPwdError('');
-                                    setResetPwdForm({ newPassword: '', confirmPassword: '' });
-                                    setResetPwdModalOpen(true);
-                                  }}
-                                  className="px-2.5 py-1.5 bg-gray-100 hover:bg-purple-50 text-gray-700 hover:text-purple-700 font-bold rounded-lg transition text-[11px] flex items-center gap-1"
-                                  title="Change this admin's password"
-                                >
-                                  <KeyRound className="w-3 h-3" />
-                                  <span>Change Password</span>
-                                </button>
-                                {!isSelf && adminsList.length > 1 && (
+                                {isOwner ? (
+                                  <span className="text-[11px] font-bold text-gray-400 italic">Primary Owner</span>
+                                ) : isSelf ? (
+                                  <span className="text-[11px] font-bold text-gray-400 italic">Active Session</span>
+                                ) : (
                                   <button
                                     type="button"
-                                    onClick={() => handleDeleteAdmin(adm.id, adm.username)}
-                                    className="p-1.5 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-lg transition"
-                                    title="Delete admin account"
+                                    onClick={() => handleDeleteAdmin(adm.id, adminEmail)}
+                                    className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-lg transition text-[11px] flex items-center gap-1"
+                                    title="Revoke admin access for this Gmail"
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash2 className="w-3 h-3" />
+                                    <span>Revoke Access</span>
                                   </button>
                                 )}
                               </div>
@@ -2099,14 +2024,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
         </div>
       )}
 
-      {/* ADD NEW ADMIN MODAL */}
+      {/* ADD NEW ADMIN MODAL (Passwordless Gmail authorization) */}
       {addAdminModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 p-6">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
               <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-purple-600" />
-                <span>Add New Admin User</span>
+                <span>Add Admin by Gmail ID</span>
               </h3>
               <button
                 type="button"
@@ -2125,93 +2050,49 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             )}
 
             <form onSubmit={handleCreateAdmin} className="space-y-3.5">
+              <div className="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-purple-900 text-xs leading-relaxed">
+                ✨ <strong>Passwordless Admin Access:</strong> Enter the user's Gmail address. When they sign in with this Gmail, the Admin Portal will automatically unlock for them!
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1">
-                  Username *
+                  Admin Gmail Address *
                 </label>
                 <input
-                  type="text"
+                  type="email"
                   required
-                  placeholder="e.g. manager_ravi"
-                  value={newAdminForm.username}
-                  onChange={(e) => setNewAdminForm({ ...newAdminForm, username: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  placeholder="e.g. storemanager@gmail.com"
+                  value={newAdminForm.email}
+                  onChange={(e) => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-gray-900"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1">
-                  Display / Full Name
+                  Display / Staff Name
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. Store Manager Ravi"
                   value={newAdminForm.name}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-gray-900"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1">
-                  Role
+                  Admin Privileges
                 </label>
                 <select
                   value={newAdminForm.role}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, role: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-bold"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-bold text-gray-900"
                 >
-                  <option value="admin">Store Admin (Orders & Inventory)</option>
-                  <option value="superadmin">Super Admin (Full Access)</option>
+                  <option value="admin">Store Admin (Manage Orders & Products)</option>
+                  <option value="superadmin">Super Admin (Full Access to Store & Settings)</option>
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
-                  Initial Password *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showNewAdminPwd ? 'text' : 'password'}
-                    required
-                    minLength={4}
-                    placeholder="Min 4 characters"
-                    value={newAdminForm.password}
-                    onChange={(e) => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
-                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewAdminPwd(!showNewAdminPwd)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
-                  >
-                    {showNewAdminPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
-                  Confirm Password *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showNewAdminConfirm ? 'text' : 'password'}
-                    required
-                    minLength={4}
-                    placeholder="Confirm initial password"
-                    value={newAdminForm.confirmPassword}
-                    onChange={(e) => setNewAdminForm({ ...newAdminForm, confirmPassword: e.target.value })}
-                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewAdminConfirm(!showNewAdminConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
-                  >
-                    {showNewAdminConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
@@ -2228,7 +2109,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   className="px-5 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs rounded-xl shadow-md disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {addAdminLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{addAdminLoading ? 'Creating...' : 'Create Admin Account'}</span>
+                  <span>{addAdminLoading ? 'Granting...' : 'Grant Admin Access'}</span>
                 </button>
               </div>
             </form>

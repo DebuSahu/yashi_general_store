@@ -72,7 +72,7 @@ export default function AuthModal({
           });
         } catch (e) {}
 
-        onLoginSuccess(res.user, res.token);
+        onLoginSuccess(res.user, res.token, res);
         onClose();
       } else {
         setError(res?.error || 'Failed to sign in with Google');

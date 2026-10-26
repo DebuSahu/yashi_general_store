@@ -92,7 +92,7 @@ export default function GoogleAuthModal({
           message: `Signed in instantly via Google (${account?.email || ''})`
         });
 
-        onLoginSuccess(res.user, res.token);
+        onLoginSuccess(res.user, res.token, res);
         onClose();
       } else {
         setError(res?.error || 'Failed to sign in with Google');

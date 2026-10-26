@@ -241,20 +241,18 @@ export default function Navbar({
               )}
             </button>
 
-            {/* ALWAYS-ACCESSIBLE STORE ADMIN PORTAL BUTTON */}
-            <button
-              onClick={onOpenAdmin}
-              className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-black rounded-xl shadow-xs transition active:scale-95 shrink-0 ${
-                adminUser
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                  : 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 hover:bg-purple-600 hover:text-white border border-purple-300 dark:border-purple-800'
-              }`}
-              title="Store Admin Portal (Manage Orders, Inventory & Store Settings)"
-            >
-              <ShieldCheck className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{adminUser ? 'Admin Portal' : 'Admin'}</span>
-              <span className="sm:hidden font-extrabold text-[11px]">{adminUser ? 'Portal' : 'Admin'}</span>
-            </button>
+            {/* STORE ADMIN PORTAL BUTTON (Visible ONLY when logged in as authorized admin) */}
+            {adminUser && (
+              <button
+                onClick={onOpenAdmin}
+                className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-black rounded-xl shadow-xs transition active:scale-95 shrink-0 bg-purple-600 hover:bg-purple-700 text-white"
+                title="Store Admin Portal (Manage Orders, Inventory & Store Settings)"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Admin Portal</span>
+                <span className="sm:hidden font-extrabold text-[11px]">Portal</span>
+              </button>
+            )}
 
             {/* Desktop Only: Wishlist Button */}
             <button

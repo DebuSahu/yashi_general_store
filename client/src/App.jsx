@@ -125,23 +125,28 @@ export default function App() {
   // Quick View / Product Detail Modal State
   const [quickViewProduct, setQuickViewProduct] = useState(null);
 
-  // User auth state
+  // User auth state (SessionStorage so user is automatically logged out when exiting the site tab)
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('gs_user');
+      // Clear legacy localStorage keys to enforce clean logout on exit
+      localStorage.removeItem('gs_user');
+      localStorage.removeItem('gs_user_token');
+      const saved = sessionStorage.getItem('gs_user');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
     }
   });
 
-  // Admin auth state
+  // Admin auth state (SessionStorage)
   const [adminUser, setAdminUser] = useState(() => {
     try {
-      const token = localStorage.getItem('gs_admin_token');
-      const savedUser = localStorage.getItem('gs_admin_user');
+      localStorage.removeItem('gs_admin_token');
+      localStorage.removeItem('gs_admin_user');
+      const token = sessionStorage.getItem('gs_admin_token');
+      const savedUser = sessionStorage.getItem('gs_admin_user');
       if (token && savedUser) {
-        return { username: savedUser, token };
+        return { username: savedUser, email: savedUser, token };
       }
     } catch {
       // ignore
@@ -321,16 +326,60 @@ export default function App() {
   const wishlistCount = Object.keys(wishlist).length;
 
   // Auth operations
-  const handleUserVerified = (userData, token) => {
+  const handleUserVerified = (userData, token, fullRes = null) => {
     setUser(userData);
-    localStorage.setItem('gs_user', JSON.stringify(userData));
-    localStorage.setItem('gs_user_token', token);
+    sessionStorage.setItem('gs_user', JSON.stringify(userData));
+    sessionStorage.setItem('gs_user_token', token);
+    localStorage.removeItem('gs_user');
+    localStorage.removeItem('gs_user_token');
+
+    // Check if user is authorized as Admin (Owner debusahu121@gmail.com or authorized admin email)
+    const email = userData?.email?.trim().toLowerCase();
+    const isOwner = email === 'debusahu121@gmail.com';
+    const isAuthorized = isOwner || userData?.isAdmin || fullRes?.isAdmin || api.isAuthorizedAdminEmail(email);
+
+    if (isAuthorized) {
+      const adminToken = fullRes?.adminToken || token || ('admin-jwt-token-' + Date.now());
+      const adminRole = isOwner ? 'superadmin' : (userData?.role === 'superadmin' ? 'superadmin' : 'admin');
+      const adminObj = {
+        username: email,
+        email: email,
+        name: userData?.name || 'Store Admin',
+        role: adminRole,
+        token: adminToken
+      };
+      setAdminUser(adminObj);
+      sessionStorage.setItem('gs_admin_token', adminToken);
+      sessionStorage.setItem('gs_admin_user', email);
+      localStorage.removeItem('gs_admin_token');
+      localStorage.removeItem('gs_admin_user');
+
+      setToast({
+        type: 'success',
+        title: isOwner ? 'Store Owner Logged In 🛡️' : 'Admin Access Granted 🛡️',
+        message: `Admin Portal unlocked for ${email}`
+      });
+    } else {
+      setAdminUser(null);
+      sessionStorage.removeItem('gs_admin_token');
+      sessionStorage.removeItem('gs_admin_user');
+      localStorage.removeItem('gs_admin_token');
+      localStorage.removeItem('gs_admin_user');
+    }
   };
 
   const handleLogoutUser = () => {
     setUser(null);
+    setAdminUser(null);
+    setIsAdminView(false);
+    sessionStorage.removeItem('gs_user');
+    sessionStorage.removeItem('gs_user_token');
+    sessionStorage.removeItem('gs_admin_token');
+    sessionStorage.removeItem('gs_admin_user');
     localStorage.removeItem('gs_user');
     localStorage.removeItem('gs_user_token');
+    localStorage.removeItem('gs_admin_token');
+    localStorage.removeItem('gs_admin_user');
     setToast({
       type: 'success',
       title: 'Logged Out',
@@ -340,22 +389,32 @@ export default function App() {
 
   const handleAdminLoginSuccess = (adminData, token) => {
     const userObj = {
-      username: adminData.username || 'admin',
+      username: adminData.username || adminData.email || 'admin',
+      email: adminData.email || adminData.username || 'admin',
       name: adminData.name || adminData.username || 'Store Admin',
       role: adminData.role || 'admin',
       token
     };
     setAdminUser(userObj);
-    localStorage.setItem('gs_admin_token', token);
-    localStorage.setItem('gs_admin_user', userObj.username);
+    sessionStorage.setItem('gs_admin_token', token);
+    sessionStorage.setItem('gs_admin_user', userObj.username);
+    localStorage.removeItem('gs_admin_token');
+    localStorage.removeItem('gs_admin_user');
     setIsAdminView(true);
   };
 
   const handleLogoutAdmin = () => {
     setAdminUser(null);
+    sessionStorage.removeItem('gs_admin_token');
+    sessionStorage.removeItem('gs_admin_user');
     localStorage.removeItem('gs_admin_token');
     localStorage.removeItem('gs_admin_user');
     setIsAdminView(false);
+    setToast({
+      type: 'info',
+      title: 'Admin Session Ended',
+      message: 'Admin portal locked.'
+    });
   };
 
   // Admin Direct In-Stock / Out of Stock updater from Storefront
@@ -380,6 +439,14 @@ export default function App() {
   };
 
   const handleOpenAdmin = () => {
+    if (!adminUser) {
+      setToast({
+        type: 'error',
+        title: 'Admin Access Denied 🔒',
+        message: 'Admin Portal is strictly restricted to store owners via authorized Gmail login.'
+      });
+      return;
+    }
     setIsAdminView(true);
   };
 
@@ -390,17 +457,29 @@ export default function App() {
     }
   };
 
-  // URL hash routing for #admin
+  // URL hash routing for #admin with strict security guard
   useEffect(() => {
     const checkAdminRoute = () => {
       if (window.location.hash === '#admin' || window.location.search.includes('admin=true')) {
-        setIsAdminView(true);
+        if (adminUser) {
+          setIsAdminView(true);
+        } else {
+          setIsAdminView(false);
+          if (window.location.hash === '#admin') {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search.replace(/[?&]admin=true/, ''));
+          }
+          setToast({
+            type: 'error',
+            title: 'Admin Access Denied 🔒',
+            message: 'Please sign in with your authorized Gmail account (debusahu121@gmail.com) to access Admin Portal.'
+          });
+        }
       }
     };
     checkAdminRoute();
     window.addEventListener('hashchange', checkAdminRoute);
     return () => window.removeEventListener('hashchange', checkAdminRoute);
-  }, []);
+  }, [adminUser]);
 
   const handleResetFilters = () => {
     setSortBy('featured');
@@ -584,10 +663,15 @@ export default function App() {
     sortBy !== 'featured' ||
     searchTerm.trim().length > 0;
 
-  // Switch to Admin Dashboard View if requested (called after all hooks have run)
+  // Switch to Admin Dashboard View if requested (guarded by adminUser authorization)
   if (isAdminView) {
+    if (!adminUser) {
+      setIsAdminView(false);
+      return null;
+    }
     return (
       <AdminDashboard
+        adminUser={adminUser}
         shopSettings={shopSettings}
         onSettingsUpdated={(newSettings) => setShopSettings(newSettings)}
         onBackToStore={handleBackToStore}
@@ -1142,12 +1226,14 @@ export default function App() {
                 >
                   &rarr; Check GPS 5km Radius
                 </button>
-                <button
-                  onClick={() => setIsAdminView(true)}
-                  className="block text-purple-400 hover:text-purple-300 hover:underline font-bold text-left"
-                >
-                  &rarr; 🛡️ Admin Store Management
-                </button>
+                {adminUser && (
+                  <button
+                    onClick={() => setIsAdminView(true)}
+                    className="block text-purple-400 hover:text-purple-300 hover:underline font-bold text-left"
+                  >
+                    &rarr; 🛡️ Admin Store Management
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1409,13 +1495,15 @@ export default function App() {
           <span>Track</span>
         </button>
 
-        <button
-          onClick={handleOpenAdmin}
-          className="flex flex-col items-center justify-center text-purple-700 dark:text-purple-400 hover:text-purple-600 font-extrabold text-[10px]"
-        >
-          <ShieldCheck className="w-5 h-5 mb-0.5" />
-          <span>Admin</span>
-        </button>
+        {adminUser && (
+          <button
+            onClick={handleOpenAdmin}
+            className="flex flex-col items-center justify-center text-purple-700 dark:text-purple-400 hover:text-purple-600 font-extrabold text-[10px]"
+          >
+            <ShieldCheck className="w-5 h-5 mb-0.5" />
+            <span>Admin</span>
+          </button>
+        )}
 
         <button
           onClick={() => setCartDrawerOpen(true)}
