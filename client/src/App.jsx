@@ -673,6 +673,8 @@ export default function App() {
       <AdminDashboard
         adminUser={adminUser}
         shopSettings={shopSettings}
+        theme={theme}
+        toggleTheme={toggleTheme}
         onSettingsUpdated={(newSettings) => setShopSettings(newSettings)}
         onBackToStore={handleBackToStore}
         onLogoutAdmin={handleLogoutAdmin}

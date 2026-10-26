@@ -33,12 +33,14 @@ import {
   UserCheck,
   Users,
   XCircle,
-  Minus
+  Minus,
+  Sun,
+  Moon
 } from 'lucide-react';
 import YGSLogo from '../components/YGSLogo';
 import { api } from '../api';
 
-export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated, onLogoutAdmin, adminUser }) {
+export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated, onLogoutAdmin, adminUser, theme, toggleTheme }) {
   const [token, setToken] = useState(() => {
     try {
       return adminUser?.token || sessionStorage.getItem('gs_admin_token') || localStorage.getItem('gs_admin_token') || '';
@@ -631,6 +633,16 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             </div>
 
             <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
+              {toggleTheme && (
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-1.5 sm:p-2 text-purple-200 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition"
+                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-purple-200" />}
+                </button>
+              )}
               <button
                 onClick={onBackToStore}
                 className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition flex items-center gap-1"
@@ -657,20 +669,20 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-5 sm:mb-6">
           <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
-            <span className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider block truncate">Total Requests</span>
+            <span className="text-[10px] sm:text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider block truncate">Total Requests</span>
             <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 sm:mt-1">{orders.length}</p>
           </div>
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-amber-200 shadow-2xs bg-amber-50/30">
-            <span className="text-[10px] sm:text-xs font-bold text-amber-700 uppercase tracking-wider block truncate">Pending Delivery</span>
-            <p className="text-xl sm:text-2xl font-black text-amber-800 mt-0.5 sm:mt-1">{pendingCount}</p>
+          <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-amber-200 dark:border-amber-900/60 shadow-2xs bg-amber-50/30 dark:bg-amber-950/20">
+            <span className="text-[10px] sm:text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block truncate">Pending Delivery</span>
+            <p className="text-xl sm:text-2xl font-black text-amber-800 dark:text-amber-300 mt-0.5 sm:mt-1">{pendingCount}</p>
           </div>
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-emerald-200 shadow-2xs bg-emerald-50/30">
-            <span className="text-[10px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider block truncate">Delivered</span>
-            <p className="text-xl sm:text-2xl font-black text-emerald-800 mt-0.5 sm:mt-1">{deliveredCount}</p>
+          <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 shadow-2xs bg-emerald-50/30 dark:bg-emerald-950/20">
+            <span className="text-[10px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block truncate">Delivered</span>
+            <p className="text-xl sm:text-2xl font-black text-emerald-800 dark:text-emerald-300 mt-0.5 sm:mt-1">{deliveredCount}</p>
           </div>
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-purple-200 shadow-2xs bg-purple-50/30">
-            <span className="text-[10px] sm:text-xs font-bold text-purple-700 uppercase tracking-wider block truncate">Total Products</span>
-            <p className="text-xl sm:text-2xl font-black text-purple-800 mt-0.5 sm:mt-1">{products.length}</p>
+          <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-purple-200 dark:border-purple-900/60 shadow-2xs bg-purple-50/30 dark:bg-purple-950/20">
+            <span className="text-[10px] sm:text-xs font-bold text-purple-700 dark:text-purple-400 uppercase tracking-wider block truncate">Total Products</span>
+            <p className="text-xl sm:text-2xl font-black text-purple-800 dark:text-purple-300 mt-0.5 sm:mt-1">{products.length}</p>
           </div>
         </div>
 
@@ -681,7 +693,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'orders'
                 ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-gray-50'
+                : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
             }`}
           >
             <Truck className="w-4 h-4 shrink-0" />
@@ -693,7 +705,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'products'
                 ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-gray-50'
+                : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
             }`}
           >
             <Package className="w-4 h-4 shrink-0" />
@@ -705,7 +717,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'settings'
                 ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-gray-50'
+                : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
             }`}
           >
             <Sliders className="w-4 h-4 shrink-0" />
@@ -720,7 +732,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             className={`flex-shrink-0 sm:flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
               activeTab === 'admins'
                 ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-gray-50'
+                : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
             }`}
           >
             <Shield className="w-4 h-4 shrink-0" />
@@ -735,15 +747,15 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             {/* Filter and Refresh */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-bold text-gray-500">Filter Status:</span>
+                <span className="text-xs font-bold text-gray-500 dark:text-slate-400">Filter Status:</span>
                 {['all', 'Pending', 'Accepted', 'Out for Delivery', 'Delivered'].map((st) => (
                   <button
                     key={st}
                     onClick={() => setOrderFilter(st)}
                     className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition ${
                       orderFilter === st
-                        ? 'bg-purple-700 text-white'
-                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                        ? 'bg-purple-700 text-white shadow-xs'
+                        : 'bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     {st}
@@ -753,7 +765,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
               <button
                 onClick={loadOrders}
-                className="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-lg flex items-center gap-1.5 transition"
+                className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300 text-xs font-bold rounded-lg flex items-center gap-1.5 transition"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loadingOrders ? 'animate-spin' : ''}`} />
                 <span>Refresh Requests</span>
@@ -762,10 +774,10 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
             {/* Orders Cards List */}
             {orders.length === 0 ? (
-              <div className="bg-white rounded-3xl p-12 text-center text-gray-400 border border-gray-200">
-                <Truck className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                <p className="font-bold text-base text-gray-600">No delivery requests found</p>
-                <p className="text-xs text-gray-400 mt-1">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center text-gray-400 dark:text-slate-500 border border-gray-200 dark:border-slate-800">
+                <Truck className="w-12 h-12 mx-auto mb-2 text-gray-300 dark:text-slate-600" />
+                <p className="font-bold text-base text-gray-600 dark:text-slate-200">No delivery requests found</p>
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-1">
                   Incoming user delivery requests with GPS location will appear here in real time.
                 </p>
               </div>
@@ -781,41 +793,41 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                 return (
                   <div
                     key={order?.id}
-                    className="bg-white rounded-2xl border border-gray-200 p-3.5 sm:p-5 shadow-sm hover:border-purple-300 transition"
+                    className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-3.5 sm:p-5 shadow-sm hover:border-purple-300 dark:hover:border-purple-700 transition"
                   >
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-gray-100">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-gray-100 dark:border-slate-800">
                       <div>
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                          <span className="text-xs sm:text-sm font-black text-purple-900 bg-purple-100 px-2.5 py-0.5 rounded-md">
+                          <span className="text-xs sm:text-sm font-black text-purple-900 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 px-2.5 py-0.5 rounded-md">
                             {order?.id}
                           </span>
-                          <span className="text-[11px] sm:text-xs text-gray-500">
+                          <span className="text-[11px] sm:text-xs text-gray-500 dark:text-slate-400">
                             {new Date(order?.createdAt || Date.now()).toLocaleString()}
                           </span>
-                          <span className="text-[11px] sm:text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                          <span className="text-[11px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/70 px-2 py-0.5 rounded-full">
                             📍 {order?.distanceKm || '≤ 5.0'} km (≤5km)
                           </span>
                         </div>
 
-                        <h3 className="text-base font-bold text-gray-900 mt-2">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white mt-2">
                           Customer: {order?.customerName || 'Valued Customer'}
                         </h3>
                       </div>
 
                       {/* Status Update Dropdown */}
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs font-bold text-gray-500">Update Status:</span>
+                        <span className="text-xs font-bold text-gray-500 dark:text-slate-400">Update Status:</span>
                         <select
                           value={order.status}
                           onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                          className={`text-xs font-black px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-600 ${
+                          className={`text-xs font-black px-3 py-2 rounded-xl border focus:ring-2 focus:ring-purple-600 ${
                             order.status === 'Pending'
-                              ? 'bg-amber-100 text-amber-900 border-amber-300'
+                              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-800'
                               : order.status === 'Delivered'
-                              ? 'bg-green-100 text-green-900 border-green-300'
+                              ? 'bg-green-100 dark:bg-green-950/60 text-green-900 dark:text-green-200 border-green-300 dark:border-green-800'
                               : order.status === 'Out for Delivery'
-                              ? 'bg-blue-100 text-blue-900 border-blue-300'
-                              : 'bg-gray-100 text-gray-900'
+                              ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-800'
+                              : 'bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white border-gray-300 dark:border-slate-700'
                           }`}
                         >
                           <option value="Pending">Pending</option>
@@ -833,43 +845,43 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       
                       {/* Customer Contact Actions */}
                       <div className="space-y-1.5">
-                        <p className="font-bold text-gray-700 uppercase tracking-wider text-[11px]">
+                        <p className="font-bold text-gray-700 dark:text-slate-400 uppercase tracking-wider text-[11px]">
                           Customer Contact
                         </p>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">
                           +91 {order.customerPhone}
                         </p>
                         <div className="flex items-center gap-2 pt-1">
                           <a
                             href={`tel:${order.customerPhone}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-bold text-xs transition"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-800 dark:text-slate-200 rounded-lg font-bold text-xs transition"
                           >
-                            <Phone className="w-3.5 h-3.5 text-emerald-600" /> Call
+                            <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Call
                           </a>
                           <a
                             href={waUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 hover:bg-green-100 text-green-800 rounded-lg font-bold text-xs transition border border-green-200"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 dark:bg-green-950/50 hover:bg-green-100 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 rounded-lg font-bold text-xs transition border border-green-200 dark:border-green-800"
                           >
-                            <MessageSquare className="w-3.5 h-3.5 text-green-600" /> WhatsApp
+                            <MessageSquare className="w-3.5 h-3.5 text-green-600 dark:text-green-400" /> WhatsApp
                           </a>
                         </div>
                       </div>
 
                       {/* Location & GPS Map */}
                       <div className="space-y-1.5">
-                        <p className="font-bold text-gray-700 uppercase tracking-wider text-[11px]">
+                        <p className="font-bold text-gray-700 dark:text-slate-400 uppercase tracking-wider text-[11px]">
                           Delivery Location
                         </p>
-                        <p className="text-gray-900 font-medium">
+                        <p className="text-gray-900 dark:text-slate-200 font-medium">
                           {order.address}
                         </p>
                         <a
                           href={mapUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold underline text-xs pt-1"
+                          className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold underline text-xs pt-1"
                         >
                           <MapPin className="w-3.5 h-3.5" />
                           <span>Open in Google Maps ({latStr}, {lonStr})</span>
@@ -878,21 +890,21 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       </div>
 
                       {/* Items & Total */}
-                      <div className="space-y-1.5 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                        <div className="flex justify-between font-bold text-gray-700 uppercase tracking-wider text-[11px]">
+                      <div className="space-y-1.5 bg-gray-50 dark:bg-slate-800/80 p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+                        <div className="flex justify-between font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
                           <span>Ordered Items</span>
-                          <span>₹{order?.totalAmount || 0}</span>
+                          <span className="text-gray-900 dark:text-white">₹{order?.totalAmount || 0}</span>
                         </div>
-                        <ul className="space-y-1 text-gray-600 text-[11px]">
+                        <ul className="space-y-1 text-gray-600 dark:text-slate-300 text-[11px]">
                           {(order?.items || []).map((i, idx) => (
                             <li key={idx} className="flex justify-between">
                               <span>{i?.quantity || 1}x {i?.name || 'Item'} ({i?.unit || 'unit'})</span>
-                              <span className="font-semibold text-gray-900">₹{(i?.price || 0) * (i?.quantity || 1)}</span>
+                              <span className="font-semibold text-gray-900 dark:text-white">₹{(i?.price || 0) * (i?.quantity || 1)}</span>
                             </li>
                           ))}
                         </ul>
                         {order.notes && (
-                          <p className="text-[10px] text-gray-500 italic pt-1 border-t border-gray-200">
+                          <p className="text-[10px] text-gray-500 dark:text-slate-400 italic pt-1 border-t border-gray-200 dark:border-slate-700">
                             Note: "{order.notes}"
                           </p>
                         )}
@@ -914,7 +926,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             {/* Header controls */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
-                <span className="text-xs font-bold text-gray-500 whitespace-nowrap">Category:</span>
+                <span className="text-xs font-bold text-gray-500 dark:text-slate-400 whitespace-nowrap">Category:</span>
                 {[
                   { id: 'all', label: 'All Items' },
                   { id: 'dairy', label: 'Dairy Products' },
@@ -930,7 +942,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-bold transition ${
                       productCategoryFilter === cat.id
                         ? 'bg-purple-700 text-white shadow-xs'
-                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-100'
+                        : 'bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     {cat.label}
@@ -948,11 +960,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             </div>
 
             {/* Products Table & Mobile Cards */}
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-2xs">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-2xs">
               {/* Desktop Table View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider">
+                  <thead className="bg-gray-50 dark:bg-slate-800/80 border-b border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 font-bold uppercase tracking-wider">
                     <tr>
                       <th className="p-3.5">Product</th>
                       <th className="p-3.5">Category</th>
@@ -962,20 +974,20 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       <th className="p-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 font-medium">
+                  <tbody className="divide-y divide-gray-100 dark:divide-slate-800 font-medium">
                     {products.map((prod) => (
-                      <tr key={prod.id} className="hover:bg-gray-50/80 transition">
+                      <tr key={prod.id} className="hover:bg-gray-50/80 dark:hover:bg-slate-800/60 transition">
                         <td className="p-3.5 flex items-center space-x-3">
                           <img
                             src={prod.image}
                             alt={prod.name}
-                            className="w-10 h-10 object-cover rounded-lg bg-gray-100 flex-shrink-0"
+                            className="w-10 h-10 object-cover rounded-lg bg-gray-100 dark:bg-slate-800 flex-shrink-0"
                           />
                           <div>
-                            <span className="font-bold text-gray-900 text-sm block">
+                            <span className="font-bold text-gray-900 dark:text-white text-sm block">
                               {prod.name}
                             </span>
-                            <span className="text-[11px] text-gray-400 line-clamp-1">
+                            <span className="text-[11px] text-gray-400 dark:text-slate-400 line-clamp-1">
                               {prod.description}
                             </span>
                           </div>
@@ -985,16 +997,16 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                               prod.category === 'dairy'
-                                ? 'bg-sky-100 text-sky-800'
+                                ? 'bg-sky-100 dark:bg-sky-950/70 text-sky-800 dark:text-sky-300'
                                 : prod.category === 'icecream'
-                                ? 'bg-pink-100 text-pink-800'
+                                ? 'bg-pink-100 dark:bg-pink-950/70 text-pink-800 dark:text-pink-300'
                                 : prod.category === 'vegetables'
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-green-100 dark:bg-green-950/70 text-green-800 dark:text-green-300'
                                 : prod.category === 'grocery'
-                                ? 'bg-amber-100 text-amber-800'
+                                ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300'
                                 : prod.category === 'stationery'
-                                ? 'bg-indigo-100 text-indigo-800'
-                                : 'bg-purple-100 text-purple-800'
+                                ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300'
+                                : 'bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300'
                             }`}
                           >
                             {prod.category === 'dairy' ? 'Dairy Products' : prod.category === 'icecream' ? 'Ice Cream' : prod.category}
@@ -1002,10 +1014,10 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         </td>
 
                         <td className="p-3.5">
-                          <span className="font-black text-emerald-700 text-sm">
+                          <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm">
                             ₹{prod.price}
                           </span>
-                          <span className="text-gray-400 ml-1">/ {prod.unit}</span>
+                          <span className="text-gray-400 dark:text-slate-400 ml-1">/ {prod.unit}</span>
                         </td>
 
                         <td className="p-3.5">
@@ -1013,18 +1025,18 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                             <button
                               type="button"
                               onClick={() => handleQuickStockQty(prod.id, Math.max(0, (prod.stock || 0) - 5))}
-                              className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-xs transition active:scale-90"
+                              className="w-6 h-6 rounded-md bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs transition active:scale-90"
                               title="Decrease stock quantity by 5"
                             >
                               <Minus className="w-3 h-3" />
                             </button>
-                            <span className={`w-8 text-center font-black text-xs ${prod.inStock ? 'text-gray-900' : 'text-red-500 line-through'}`}>
+                            <span className={`w-8 text-center font-black text-xs ${prod.inStock ? 'text-gray-900 dark:text-white' : 'text-red-500 line-through'}`}>
                               {prod.stock || 0}
                             </span>
                             <button
                               type="button"
                               onClick={() => handleQuickStockQty(prod.id, (prod.stock || 0) + 10)}
-                              className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-xs transition active:scale-90"
+                              className="w-6 h-6 rounded-md bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs transition active:scale-90"
                               title="Add 10 to stock quantity"
                             >
                               <Plus className="w-3 h-3" />
@@ -1033,7 +1045,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         </td>
 
                         <td className="p-3.5">
-                          <div className="inline-flex rounded-xl bg-gray-100 p-0.5 border border-gray-200">
+                          <div className="inline-flex rounded-xl bg-gray-100 dark:bg-slate-800 p-0.5 border border-gray-200 dark:border-slate-700">
                             {/* Direct In Stock Button */}
                             <button
                               type="button"
@@ -1041,7 +1053,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                               className={`px-2.5 py-1 text-[11px] font-extrabold rounded-lg flex items-center gap-1 transition ${
                                 prod.inStock
                                   ? 'bg-emerald-600 text-white shadow-xs'
-                                  : 'text-gray-500 hover:text-emerald-700'
+                                  : 'text-gray-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400'
                               }`}
                               title="Directly mark product In Stock"
                             >
@@ -1056,7 +1068,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                               className={`px-2.5 py-1 text-[11px] font-extrabold rounded-lg flex items-center gap-1 transition ${
                                 !prod.inStock
                                   ? 'bg-red-600 text-white shadow-xs'
-                                  : 'text-gray-500 hover:text-red-700'
+                                  : 'text-gray-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400'
                               }`}
                               title="Directly mark product Out of Stock"
                             >
@@ -1069,14 +1081,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         <td className="p-3.5 text-right space-x-2">
                           <button
                             onClick={() => openEditProduct(prod)}
-                            className="p-1.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                            className="p-1.5 text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-slate-800 rounded-lg transition"
                             title="Edit Product"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(prod.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                            className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 rounded-lg transition"
                             title="Delete Product"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -1089,39 +1101,39 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               </div>
 
               {/* Mobile Card List View (<md) */}
-              <div className="md:hidden divide-y divide-gray-100 font-medium">
+              <div className="md:hidden divide-y divide-gray-100 dark:divide-slate-800 font-medium">
                 {products.map((prod) => (
-                  <div key={prod.id} className="p-3 space-y-2.5 bg-white">
+                  <div key={prod.id} className="p-3 space-y-2.5 bg-white dark:bg-slate-900">
                     <div className="flex items-start space-x-2.5">
                       <img
                         src={prod.image}
                         alt={prod.name}
-                        className="w-12 h-12 object-cover rounded-xl bg-gray-100 shrink-0"
+                        className="w-12 h-12 object-cover rounded-xl bg-gray-100 dark:bg-slate-800 shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-1">
-                          <h4 className="font-bold text-gray-900 text-xs leading-snug line-clamp-2">
+                          <h4 className="font-bold text-gray-900 dark:text-white text-xs leading-snug line-clamp-2">
                             {prod.name}
                           </h4>
-                          <span className="font-black text-emerald-700 text-xs sm:text-sm shrink-0">
+                          <span className="font-black text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm shrink-0">
                             ₹{prod.price}
                           </span>
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-0.5 truncate">
+                        <p className="text-[10px] text-gray-400 dark:text-slate-400 mt-0.5 truncate">
                           Unit: {prod.unit}
                         </p>
                         <div className="mt-1 flex items-center gap-1.5 flex-wrap">
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                            prod.category === 'dairy' ? 'bg-sky-100 text-sky-800' :
-                            prod.category === 'icecream' ? 'bg-pink-100 text-pink-800' :
-                            prod.category === 'vegetables' ? 'bg-green-100 text-green-800' :
-                            prod.category === 'grocery' ? 'bg-amber-100 text-amber-800' :
-                            prod.category === 'stationery' ? 'bg-indigo-100 text-indigo-800' :
-                            'bg-purple-100 text-purple-800'
+                            prod.category === 'dairy' ? 'bg-sky-100 dark:bg-sky-950/70 text-sky-800 dark:text-sky-300' :
+                            prod.category === 'icecream' ? 'bg-pink-100 dark:bg-pink-950/70 text-pink-800 dark:text-pink-300' :
+                            prod.category === 'vegetables' ? 'bg-green-100 dark:bg-green-950/70 text-green-800 dark:text-green-300' :
+                            prod.category === 'grocery' ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300' :
+                            prod.category === 'stationery' ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300' :
+                            'bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300'
                           }`}>
                             {prod.category}
                           </span>
-                          <span className={`text-[10px] font-bold ${prod.inStock ? 'text-emerald-700' : 'text-red-600'}`}>
+                          <span className={`text-[10px] font-bold ${prod.inStock ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                             {prod.inStock ? '✓ In Stock' : '✕ Out'}
                           </span>
                         </div>
@@ -1129,36 +1141,36 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     </div>
 
                     {/* Mobile Stock Status Controls & Quick Stepper */}
-                    <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-gray-100">
+                    <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-gray-100 dark:border-slate-800">
                       <div className="flex items-center space-x-1">
-                        <span className="text-[10px] text-gray-500 font-bold">Qty:</span>
+                        <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold">Qty:</span>
                         <button
                           type="button"
                           onClick={() => handleQuickStockQty(prod.id, Math.max(0, (prod.stock || 0) - 5))}
-                          className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-xs active:scale-90"
+                          className="w-6 h-6 rounded-md bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs active:scale-90"
                           title="Decrease 5"
                         >
                           <Minus className="w-2.5 h-2.5" />
                         </button>
-                        <span className={`w-7 text-center font-black text-xs ${prod.inStock ? 'text-gray-900' : 'text-red-500 line-through'}`}>
+                        <span className={`w-7 text-center font-black text-xs ${prod.inStock ? 'text-gray-900 dark:text-white' : 'text-red-500 line-through'}`}>
                           {prod.stock || 0}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleQuickStockQty(prod.id, (prod.stock || 0) + 10)}
-                          className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center text-xs active:scale-90"
+                          className="w-6 h-6 rounded-md bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs active:scale-90"
                           title="Increase 10"
                         >
                           <Plus className="w-2.5 h-2.5" />
                         </button>
                       </div>
 
-                      <div className="inline-flex rounded-lg bg-gray-100 p-0.5 border border-gray-200 shrink-0">
+                      <div className="inline-flex rounded-lg bg-gray-100 dark:bg-slate-800 p-0.5 border border-gray-200 dark:border-slate-700 shrink-0">
                         <button
                           type="button"
                           onClick={() => handleSetStockStatus(prod.id, true)}
                           className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md flex items-center gap-1 transition ${
-                            prod.inStock ? 'bg-emerald-600 text-white shadow-xs' : 'text-gray-500'
+                            prod.inStock ? 'bg-emerald-600 text-white shadow-xs' : 'text-gray-500 dark:text-slate-400'
                           }`}
                         >
                           <CheckCircle2 className="w-3 h-3" />
@@ -1168,7 +1180,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                           type="button"
                           onClick={() => handleSetStockStatus(prod.id, false)}
                           className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md flex items-center gap-1 transition ${
-                            !prod.inStock ? 'bg-red-600 text-white shadow-xs' : 'text-gray-500'
+                            !prod.inStock ? 'bg-red-600 text-white shadow-xs' : 'text-gray-500 dark:text-slate-400'
                           }`}
                         >
                           <XCircle className="w-3 h-3" />
@@ -1179,13 +1191,13 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       <div className="flex items-center space-x-1 shrink-0">
                         <button
                           onClick={() => openEditProduct(prod)}
-                          className="p-1.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg"
+                          className="p-1.5 text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-slate-800 rounded-lg"
                         >
                           <Edit className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(prod.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                          className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 rounded-lg"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1201,39 +1213,39 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
         {/* TAB 3: STORE GPS & 5KM RADIUS SETTINGS */}
         {activeTab === 'settings' && (
-          <div className="bg-white rounded-3xl border border-gray-200 p-6 max-w-2xl shadow-sm">
-            <h3 className="text-base font-extrabold text-gray-900 mb-1">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 p-6 max-w-2xl shadow-sm">
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white mb-1">
               Shop Location & Delivery Zone Settings
             </h3>
-            <p className="text-xs text-gray-500 mb-5">
+            <p className="text-xs text-gray-500 dark:text-slate-400 mb-5">
               The 5km delivery radius restriction is dynamically calculated based on the Shop GPS Coordinates set below.
             </p>
 
             {settingsSaved && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-800 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-600" />
+              <div className="mb-4 p-3 bg-green-50 dark:bg-green-950/60 border border-green-200 dark:border-green-800 rounded-xl text-green-800 dark:text-green-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
                 <span>Store coordinates and delivery settings updated successfully!</span>
               </div>
             )}
 
             <form onSubmit={handleSaveSettings} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Store Name
                 </label>
                 <input
                   type="text"
                   value={settingsForm.storeName}
                   onChange={(e) => setSettingsForm({ ...settingsForm, storeName: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
                 />
               </div>
 
               {/* Store Mobile Number & Store Gmail */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     <span>Store Contact Mobile Number / Phone *</span>
                   </label>
                   <input
@@ -1242,14 +1254,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     placeholder="+91 98765 43210"
                     value={settingsForm.phone}
                     onChange={(e) => setSettingsForm({ ...settingsForm, phone: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-semibold"
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl font-semibold text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
-                  <p className="text-[11px] text-gray-500 mt-1">Displayed to customers across store for support calls</p>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1">Displayed to customers across store for support calls</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     <span>Store Official Gmail / Contact Email *</span>
                   </label>
                   <input
@@ -1258,26 +1270,26 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     placeholder="yashigeneralstore@gmail.com"
                     value={settingsForm.email}
                     onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-semibold"
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl font-semibold text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
-                  <p className="text-[11px] text-gray-500 mt-1">Customer support and official store inquiries</p>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1">Customer support and official store inquiries</p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Shop Physical Address
                 </label>
                 <input
                   type="text"
                   value={settingsForm.address}
                   onChange={(e) => setSettingsForm({ ...settingsForm, address: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Google Maps Location Link
                 </label>
                 <div className="flex gap-2">
@@ -1286,7 +1298,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     value={settingsForm.mapsUrl || ''}
                     onChange={(e) => setSettingsForm({ ...settingsForm, mapsUrl: e.target.value })}
                     placeholder="https://maps.app.goo.gl/..."
-                    className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-mono text-xs"
+                    className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   <a
                     href={settingsForm.mapsUrl || 'https://maps.app.goo.gl/36DwR1dGU2bfv7KD9'}
@@ -1301,7 +1313,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                     Shop GPS Latitude
                   </label>
                   <input
@@ -1309,12 +1321,12 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     step="0.0001"
                     value={settingsForm.latitude}
                     onChange={(e) => setSettingsForm({ ...settingsForm, latitude: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                     Shop GPS Longitude
                   </label>
                   <input
@@ -1322,13 +1334,13 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     step="0.0001"
                     value={settingsForm.longitude}
                     onChange={(e) => setSettingsForm({ ...settingsForm, longitude: e.target.value })}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Strict Max Delivery Radius (in Kilometers)
                 </label>
                 <div className="flex items-center gap-2">
@@ -1339,16 +1351,16 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     max="50"
                     value={settingsForm.maxDeliveryRadiusKm}
                     onChange={(e) => setSettingsForm({ ...settingsForm, maxDeliveryRadiusKm: e.target.value })}
-                    className="w-32 px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-bold"
+                    className="w-32 px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white"
                   />
-                  <span className="text-xs text-gray-500 font-semibold">
+                  <span className="text-xs text-gray-500 dark:text-slate-400 font-semibold">
                     km (Default requirement: 5 km)
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Minimum Order Value (₹)
                 </label>
                 <div className="flex items-center gap-2">
@@ -1358,27 +1370,27 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     min="1"
                     value={settingsForm.minOrderAmount || 100}
                     onChange={(e) => setSettingsForm({ ...settingsForm, minOrderAmount: Number(e.target.value) })}
-                    className="w-32 px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-bold"
+                    className="w-32 px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white"
                   />
-                  <span className="text-xs text-gray-500 font-semibold">
+                  <span className="text-xs text-gray-500 dark:text-slate-400 font-semibold">
                     ₹ (Required: Min ₹100 order value for delivery)
                   </span>
                 </div>
               </div>
 
               {/* SMS Gateway Configuration */}
-              <div className="pt-4 border-t border-gray-100">
-                <h4 className="text-sm font-black text-gray-900 mb-1 flex items-center gap-1.5">
-                  <Phone className="w-4 h-4 text-emerald-600" />
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
+                <h4 className="text-sm font-black text-gray-900 dark:text-white mb-1 flex items-center gap-1.5">
+                  <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Real SMS Gateway (Customer Mobile OTP Delivery)</span>
                 </h4>
-                <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-4 leading-relaxed">
                   By default, the store operates in <strong>Free Demo Mode</strong> with instant on-screen OTP verification (123456). To dispatch real SMS text messages to customer mobile phones, configure your Fast2SMS or Twilio API key below.
                 </p>
 
-                <div className="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <div className="space-y-4 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                       Fast2SMS API Key (Recommended for Indian Mobile Numbers)
                     </label>
                     <input
@@ -1386,16 +1398,16 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       value={settingsForm.fast2smsApiKey || ''}
                       onChange={(e) => setSettingsForm({ ...settingsForm, fast2smsApiKey: e.target.value })}
                       placeholder="Paste your Fast2SMS authorization key..."
-                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-white border border-gray-300 rounded-xl font-mono"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
-                    <p className="text-[11px] text-gray-500 mt-1">
-                      Supports instant Quick OTP route across India. Get an API key from <a href="https://www.fast2sms.com" target="_blank" rel="noreferrer" className="text-emerald-700 font-bold underline">fast2sms.com</a>.
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1">
+                      Supports instant Quick OTP route across India. Get an API key from <a href="https://www.fast2sms.com" target="_blank" rel="noreferrer" className="text-emerald-700 dark:text-emerald-400 font-bold underline">fast2sms.com</a>.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                      <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                         Twilio Account SID (Optional)
                       </label>
                       <input
@@ -1403,11 +1415,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         value={settingsForm.twilioAccountSid || ''}
                         onChange={(e) => setSettingsForm({ ...settingsForm, twilioAccountSid: e.target.value })}
                         placeholder="ACxxxxxxxx..."
-                        className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl font-mono"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                      <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                         Twilio Auth Token
                       </label>
                       <input
@@ -1415,11 +1427,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         value={settingsForm.twilioAuthToken || ''}
                         onChange={(e) => setSettingsForm({ ...settingsForm, twilioAuthToken: e.target.value })}
                         placeholder="Twilio Auth Token..."
-                        className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl font-mono"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
+                      <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                         Twilio Phone Number
                       </label>
                       <input
@@ -1427,7 +1439,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         value={settingsForm.twilioPhoneNumber || ''}
                         onChange={(e) => setSettingsForm({ ...settingsForm, twilioPhoneNumber: e.target.value })}
                         placeholder="+1xxxxxxxxxx"
-                        className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl font-mono"
+                        className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                     </div>
                   </div>
@@ -1454,15 +1466,15 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               <div
                 className={`p-4 rounded-2xl text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 ${
                   adminActionMsg.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+                    : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   {adminActionMsg.type === 'success' ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   ) : (
-                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                    <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
                   )}
                   <span>{adminActionMsg.text}</span>
                 </div>
@@ -1477,18 +1489,18 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             )}
 
             {/* CARD 1: CHANGE SELF PASSWORD */}
-            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-2xs">
-              <div className="flex items-start justify-between flex-wrap gap-2 pb-4 border-b border-gray-100 mb-5">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 p-6 shadow-2xs">
+              <div className="flex items-start justify-between flex-wrap gap-2 pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
                 <div>
-                  <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-                    <KeyRound className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                    <KeyRound className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     <span>Change My Account Password</span>
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Logged in as: <strong className="text-purple-700">@{currentAdminUser}</strong>. Update your login credentials. Passwords are encrypted with bcrypt and are strictly never shown to visitors.
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    Logged in as: <strong className="text-purple-700 dark:text-purple-300">@{currentAdminUser}</strong>. Update your login credentials. Passwords are encrypted with bcrypt and are strictly never shown to visitors.
                   </p>
                 </div>
-                <span className="px-3 py-1 bg-purple-50 text-purple-700 font-bold text-xs rounded-full border border-purple-200 flex items-center gap-1">
+                <span className="px-3 py-1 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold text-xs rounded-full border border-purple-200 dark:border-purple-800 flex items-center gap-1">
                   <Lock className="w-3.5 h-3.5" />
                   <span>Hidden & Encrypted</span>
                 </span>
@@ -1498,14 +1510,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                 <div
                   className={`mb-4 p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 ${
                     selfPwdMsg.type === 'success'
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                      : 'bg-red-50 text-red-800 border border-red-200'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+                      : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800'
                   }`}
                 >
                   {selfPwdMsg.type === 'success' ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   ) : (
-                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                    <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
                   )}
                   <span>{selfPwdMsg.text}</span>
                 </div>
@@ -1513,7 +1525,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
               <form onSubmit={handleChangeSelfPassword} className="space-y-4 max-w-lg">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                     Current Password *
                   </label>
                   <div className="relative">
@@ -1523,12 +1535,12 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       placeholder="Enter your current password"
                       value={selfPwdForm.currentPassword}
                       onChange={(e) => setSelfPwdForm({ ...selfPwdForm, currentPassword: e.target.value })}
-                      className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                      className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSelfCurrent(!showSelfCurrent)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-0.5"
                       title={showSelfCurrent ? 'Hide password' : 'Show password'}
                     >
                       {showSelfCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -1538,7 +1550,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                       New Password *
                     </label>
                     <div className="relative">
@@ -1549,12 +1561,12 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         placeholder="At least 4 characters"
                         value={selfPwdForm.newPassword}
                         onChange={(e) => setSelfPwdForm({ ...selfPwdForm, newPassword: e.target.value })}
-                        className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                        className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       <button
                         type="button"
                         onClick={() => setShowSelfNew(!showSelfNew)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-0.5"
                       >
                         {showSelfNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -1562,7 +1574,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                       Confirm New Password *
                     </label>
                     <div className="relative">
@@ -1573,12 +1585,12 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         placeholder="Repeat new password"
                         value={selfPwdForm.confirmPassword}
                         onChange={(e) => setSelfPwdForm({ ...selfPwdForm, confirmPassword: e.target.value })}
-                        className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                        className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                       <button
                         type="button"
                         onClick={() => setShowSelfConfirm(!showSelfConfirm)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-0.5"
                       >
                         {showSelfConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -1600,14 +1612,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
             </div>
 
             {/* CARD 2: MANAGE STORE ADMIN ACCOUNTS */}
-            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-2xs">
-              <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-gray-100 mb-5">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 p-6 shadow-2xs">
+              <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-gray-100 dark:border-slate-800 mb-5">
                 <div>
-                  <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     <span>Store Administrator Accounts</span>
                   </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                     Authorized staff and store managers who can accept delivery requests, manage stock, and add items.
                   </p>
                 </div>
@@ -1626,19 +1638,19 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               </div>
 
               {loadingAdmins ? (
-                <div className="py-10 text-center text-xs text-gray-500 flex items-center justify-center gap-2">
-                  <RefreshCw className="w-4 h-4 animate-spin text-purple-600" />
+                <div className="py-10 text-center text-xs text-gray-500 dark:text-slate-400 flex items-center justify-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin text-purple-600 dark:text-purple-400" />
                   <span>Loading admin accounts...</span>
                 </div>
               ) : adminsList.length === 0 ? (
-                <div className="py-8 text-center text-xs text-gray-500">
+                <div className="py-8 text-center text-xs text-gray-500 dark:text-slate-400">
                   No additional admin accounts found.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-gray-100 text-gray-500 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                         <th className="py-3 px-3">Admin Gmail & Name</th>
                         <th className="py-3 px-3">Role</th>
                         <th className="py-3 px-3">Authentication</th>
@@ -1646,33 +1658,33 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         <th className="py-3 px-3 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                       {adminsList.map((adm) => {
                         const adminEmail = (adm.email || adm.username || '').toLowerCase();
                         const isOwner = adminEmail === 'debusahu121@gmail.com';
                         const isSelf = adminEmail === currentAdminUser.toLowerCase();
                         return (
-                          <tr key={adm.id} className="hover:bg-gray-50/70 transition">
+                          <tr key={adm.id} className="hover:bg-gray-50/70 dark:hover:bg-slate-800/60 transition">
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-black flex items-center justify-center text-xs shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-black flex items-center justify-center text-xs shrink-0">
                                   {adminEmail.substring(0, 2).toUpperCase()}
                                 </div>
                                 <div>
-                                  <div className="font-extrabold text-gray-900 flex items-center gap-1.5 flex-wrap">
+                                  <div className="font-extrabold text-gray-900 dark:text-white flex items-center gap-1.5 flex-wrap">
                                     <span>{adminEmail}</span>
                                     {isOwner && (
-                                      <span className="px-1.5 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-black rounded">
+                                      <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 text-[10px] font-black rounded">
                                         Owner 👑
                                       </span>
                                     )}
                                     {isSelf && !isOwner && (
-                                      <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
+                                      <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold rounded">
                                         You
                                       </span>
                                     )}
                                   </div>
-                                  <div className="text-gray-500 text-[11px]">{adm.name || 'Store Admin'}</div>
+                                  <div className="text-gray-500 dark:text-slate-400 text-[11px]">{adm.name || 'Store Admin'}</div>
                                 </div>
                               </div>
                             </td>
@@ -1680,8 +1692,8 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                               <span
                                 className={`px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1 ${
                                   adm.role === 'superadmin' || isOwner
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : 'bg-blue-100 text-blue-800'
+                                    ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300'
+                                    : 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300'
                                 }`}
                               >
                                 <ShieldCheck className="w-3 h-3" />
@@ -1689,24 +1701,24 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                               </span>
                             </td>
                             <td className="py-3 px-3">
-                              <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] inline-flex items-center gap-1">
+                              <span className="font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded text-[11px] inline-flex items-center gap-1">
                                 <span>Gmail Login (Passwordless)</span>
                               </span>
                             </td>
-                            <td className="py-3 px-3 text-gray-500 text-[11px]">
+                            <td className="py-3 px-3 text-gray-500 dark:text-slate-400 text-[11px]">
                               {adm.createdAt ? new Date(adm.createdAt).toLocaleDateString() : 'Active'}
                             </td>
                             <td className="py-3 px-3 text-right">
                               <div className="flex items-center justify-end gap-1.5">
                                 {isOwner ? (
-                                  <span className="text-[11px] font-bold text-gray-400 italic">Primary Owner</span>
+                                  <span className="text-[11px] font-bold text-gray-400 dark:text-slate-500 italic">Primary Owner</span>
                                 ) : isSelf ? (
-                                  <span className="text-[11px] font-bold text-gray-400 italic">Active Session</span>
+                                  <span className="text-[11px] font-bold text-gray-400 dark:text-slate-500 italic">Active Session</span>
                                 ) : (
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteAdmin(adm.id, adminEmail)}
-                                    className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-lg transition text-[11px] flex items-center gap-1"
+                                    className="px-2.5 py-1 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 font-bold rounded-lg transition text-[11px] flex items-center gap-1"
                                     title="Revoke admin access for this Gmail"
                                   >
                                     <Trash2 className="w-3 h-3" />
@@ -1731,20 +1743,20 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
       {/* ADD / EDIT PRODUCT MODAL */}
       {productModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-200 p-6">
-            <h3 className="text-base font-extrabold text-gray-900 mb-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-200 dark:border-slate-800 p-6">
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white mb-4">
               {editingProduct ? 'Edit Catalog Item' : 'Add New Item to Catalog'}
             </h3>
 
             {productFormError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
+              <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs">
                 {productFormError}
               </div>
             )}
 
             <form onSubmit={handleSaveProduct} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Item Name *
                 </label>
                 <input
@@ -1753,31 +1765,31 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   placeholder="e.g. Fresh Tomatoes / Royal Basmati Rice"
                   value={productForm.name}
                   onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                  className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                  className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                     Category *
                   </label>
                   <select
                     value={productForm.category}
                     onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl capitalize font-semibold"
+                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl capitalize font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-600"
                   >
-                    <option value="dairy">Dairy Products</option>
-                    <option value="icecream">Ice Cream</option>
-                    <option value="vegetables">Vegetables</option>
-                    <option value="grocery">Grocery</option>
-                    <option value="stationery">Stationery</option>
-                    <option value="general store">General Store</option>
+                    <option value="dairy" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Dairy Products</option>
+                    <option value="icecream" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Ice Cream</option>
+                    <option value="vegetables" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Vegetables</option>
+                    <option value="grocery" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Grocery</option>
+                    <option value="stationery" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Stationery</option>
+                    <option value="general store" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">General Store</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                     Price (₹) *
                   </label>
                   <input
@@ -1787,14 +1799,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     placeholder="35"
                     value={productForm.price}
                     onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                     Unit (e.g. 1 kg / pack) *
                   </label>
                   <input
@@ -1803,12 +1815,12 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     placeholder="1 kg, 500g, 1 pc, pack"
                     value={productForm.unit}
                     onChange={(e) => setProductForm({ ...productForm, unit: e.target.value })}
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                     Stock Quantity
                   </label>
                   <input
@@ -1816,7 +1828,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     min="0"
                     value={productForm.stock}
                     onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                    className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-600"
                   />
                 </div>
               </div>
@@ -1824,17 +1836,17 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               {/* Product Photo: Browse from Local or Web URL */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-gray-700">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
                     Product Photo *
                   </label>
-                  <div className="flex items-center space-x-1 bg-gray-100 p-0.5 rounded-lg text-[11px]">
+                  <div className="flex items-center space-x-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg text-[11px]">
                     <button
                       type="button"
                       onClick={() => setImageMode('browse')}
                       className={`px-2 py-0.5 rounded-md font-bold transition ${
                         imageMode === 'browse'
-                          ? 'bg-white text-purple-700 shadow-2xs'
-                          : 'text-gray-500 hover:text-gray-800'
+                          ? 'bg-white dark:bg-slate-700 text-purple-700 dark:text-purple-300 shadow-2xs'
+                          : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                       }`}
                     >
                       📁 Browse Local Photo
@@ -1844,8 +1856,8 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       onClick={() => setImageMode('url')}
                       className={`px-2 py-0.5 rounded-md font-bold transition ${
                         imageMode === 'url'
-                          ? 'bg-white text-purple-700 shadow-2xs'
-                          : 'text-gray-500 hover:text-gray-800'
+                          ? 'bg-white dark:bg-slate-700 text-purple-700 dark:text-purple-300 shadow-2xs'
+                          : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                       }`}
                     >
                       🔗 Web URL
@@ -1864,22 +1876,22 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
                 {imageMode === 'browse' ? (
                   imagePreview ? (
-                    <div className="relative border border-emerald-200 bg-emerald-50/50 rounded-2xl p-3 flex items-center gap-3">
+                    <div className="relative border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/40 rounded-2xl p-3 flex items-center gap-3">
                       <img
                         src={imagePreview}
                         alt="Product preview"
-                        className="w-20 h-20 rounded-xl object-cover border border-emerald-300 shadow-xs flex-shrink-0 bg-white"
+                        className="w-20 h-20 rounded-xl object-cover border border-emerald-300 dark:border-emerald-700 shadow-xs flex-shrink-0 bg-white dark:bg-slate-800"
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full mb-1">
-                          <Check className="w-3 h-3 text-emerald-600" />
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full mb-1">
+                          <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                           {selectedFile ? 'Local Photo Selected' : 'Product Photo'}
                         </span>
-                        <p className="text-xs font-bold text-gray-800 truncate">
+                        <p className="text-xs font-bold text-gray-800 dark:text-slate-200 truncate">
                           {selectedFile ? selectedFile?.name : 'Image loaded'}
                         </p>
                         {selectedFile && (
-                          <p className="text-[10px] text-gray-500">
+                          <p className="text-[10px] text-gray-500 dark:text-slate-400">
                             Size: {((selectedFile?.size || 0) / 1024).toFixed(1)} KB
                           </p>
                         )}
@@ -1887,14 +1899,14 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="px-2.5 py-1 text-[11px] font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition"
+                            className="px-2.5 py-1 text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800 rounded-lg transition"
                           >
                             Browse Another Photo
                           </button>
                           <button
                             type="button"
                             onClick={handleRemoveSelectedImage}
-                            className="px-2 py-1 text-[11px] font-bold text-red-600 hover:bg-red-50 rounded-lg transition"
+                            className="px-2 py-1 text-[11px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/60 rounded-lg transition"
                           >
                             Remove
                           </button>
@@ -1915,15 +1927,15 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                           handleLocalFileSelect({ target: { files: e.dataTransfer.files } });
                         }
                       }}
-                      className="border-2 border-dashed border-gray-300 hover:border-purple-500 rounded-2xl p-4 sm:p-5 text-center cursor-pointer bg-gray-50/70 hover:bg-purple-50/40 transition group"
+                      className="border-2 border-dashed border-gray-300 dark:border-slate-700 hover:border-purple-500 dark:hover:border-purple-400 rounded-2xl p-4 sm:p-5 text-center cursor-pointer bg-gray-50/70 dark:bg-slate-800/40 hover:bg-purple-50/40 dark:hover:bg-purple-950/30 transition group"
                     >
-                      <div className="w-11 h-11 mx-auto rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+                      <div className="w-11 h-11 mx-auto rounded-2xl bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 flex items-center justify-center mb-2 group-hover:scale-105 transition">
                         <Upload className="w-5 h-5" />
                       </div>
-                      <p className="text-xs font-extrabold text-gray-800 mb-0.5">
+                      <p className="text-xs font-extrabold text-gray-800 dark:text-slate-200 mb-0.5">
                         Click to Browse Photo from Local Storage / Device
                       </p>
-                      <p className="text-[11px] text-gray-500 mb-2.5">
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400 mb-2.5">
                         Supports PNG, JPG, JPEG, WEBP up to 15 MB
                       </p>
                       <button
@@ -1949,10 +1961,10 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         setProductForm({ ...productForm, image: e.target.value });
                         setImagePreview(e.target.value);
                       }}
-                      className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                      className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-600"
                     />
                     {productForm.image && (
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-200">
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                         <img
                           src={productForm.image}
                           alt="Preview"
@@ -1961,7 +1973,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                             e.target.style.display = 'none';
                           }}
                         />
-                        <span className="text-[11px] text-gray-500 truncate flex-1">
+                        <span className="text-[11px] text-gray-500 dark:text-slate-400 truncate flex-1">
                           {productForm.image}
                         </span>
                       </div>
@@ -1971,7 +1983,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -1979,7 +1991,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   placeholder="Short details about quality or origin..."
                   value={productForm.description}
                   onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                  className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl"
+                  className="w-full px-3 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-600"
                 />
               </div>
 
@@ -1989,18 +2001,18 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   id="inStockCheck"
                   checked={productForm.inStock}
                   onChange={(e) => setProductForm({ ...productForm, inStock: e.target.checked })}
-                  className="rounded text-purple-600 focus:ring-purple-500"
+                  className="rounded text-purple-600 focus:ring-purple-500 dark:bg-slate-800 dark:border-slate-700"
                 />
-                <label htmlFor="inStockCheck" className="text-xs font-bold text-gray-700 cursor-pointer">
+                <label htmlFor="inStockCheck" className="text-xs font-bold text-gray-700 dark:text-slate-300 cursor-pointer">
                   Mark as Available in Stock
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setProductModalOpen(false)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl"
+                  className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
                 >
                   Cancel
                 </button>
@@ -2027,35 +2039,35 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
       {/* ADD NEW ADMIN MODAL (Passwordless Gmail authorization) */}
       {addAdminModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 p-6">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-              <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-purple-600" />
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 dark:border-slate-800 p-6">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-800 mb-4">
+              <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 <span>Add Admin by Gmail ID</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setAddAdminModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-1"
+                className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-1"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {addAdminError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 <span>{addAdminError}</span>
               </div>
             )}
 
             <form onSubmit={handleCreateAdmin} className="space-y-3.5">
-              <div className="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-purple-900 text-xs leading-relaxed">
+              <div className="p-3 bg-purple-50 dark:bg-purple-950/60 rounded-2xl border border-purple-100 dark:border-purple-800 text-purple-900 dark:text-purple-200 text-xs leading-relaxed">
                 ✨ <strong>Passwordless Admin Access:</strong> Enter the user's Gmail address. When they sign in with this Gmail, the Admin Portal will automatically unlock for them!
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Admin Gmail Address *
                 </label>
                 <input
@@ -2064,12 +2076,12 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   placeholder="e.g. storemanager@gmail.com"
                   value={newAdminForm.email}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-gray-900"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Display / Staff Name
                 </label>
                 <input
@@ -2077,29 +2089,29 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                   placeholder="e.g. Store Manager Ravi"
                   value={newAdminForm.name}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-gray-900"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Admin Privileges
                 </label>
                 <select
                   value={newAdminForm.role}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, role: e.target.value })}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl font-bold text-gray-900"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white"
                 >
-                  <option value="admin">Store Admin (Manage Orders & Products)</option>
-                  <option value="superadmin">Super Admin (Full Access to Store & Settings)</option>
+                  <option value="admin" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Store Admin (Manage Orders & Products)</option>
+                  <option value="superadmin" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Super Admin (Full Access to Store & Settings)</option>
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setAddAdminModalOpen(false)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl"
+                  className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
                 >
                   Cancel
                 </button>
@@ -2120,27 +2132,27 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
       {/* RESET ADMIN PASSWORD MODAL */}
       {resetPwdModalOpen && targetAdminToReset && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 p-6">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-              <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-purple-600" />
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 dark:border-slate-800 p-6">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-800 mb-4">
+              <h3 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 <span>Reset Admin Password</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setResetPwdModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-1"
+                className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-1"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl text-xs text-purple-900">
+            <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 rounded-xl text-xs text-purple-900 dark:text-purple-200">
               Resetting password for admin account: <strong>@{targetAdminToReset?.username || 'admin'}</strong> ({targetAdminToReset?.name || 'Store Admin'})
             </div>
 
             {resetPwdError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 <span>{resetPwdError}</span>
               </div>
@@ -2148,7 +2160,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
 
             <form onSubmit={handleResetAdminPassword} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   New Password *
                 </label>
                 <div className="relative">
@@ -2159,12 +2171,12 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     placeholder="Enter new password (min 4 chars)"
                     value={resetPwdForm.newPassword}
                     onChange={(e) => setResetPwdForm({ ...resetPwdForm, newPassword: e.target.value })}
-                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   <button
                     type="button"
                     onClick={() => setShowResetPwd(!showResetPwd)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-0.5"
                   >
                     {showResetPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -2172,7 +2184,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                   Confirm New Password *
                 </label>
                 <div className="relative">
@@ -2183,23 +2195,23 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                     placeholder="Confirm new password"
                     value={resetPwdForm.confirmPassword}
                     onChange={(e) => setResetPwdForm({ ...resetPwdForm, confirmPassword: e.target.value })}
-                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600"
+                    className="w-full pl-3.5 pr-10 py-2 text-xs sm:text-sm bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-600 text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                   <button
                     type="button"
                     onClick={() => setShowResetConfirm(!showResetConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-0.5"
                   >
                     {showResetConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setResetPwdModalOpen(false)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl"
+                  className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
                 >
                   Cancel
                 </button>
