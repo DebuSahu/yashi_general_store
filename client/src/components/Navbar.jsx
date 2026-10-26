@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import YGSLogo from './YGSLogo';
 import { GoogleGLogo } from './GoogleAuthModal';
+import { getUserFirstName } from '../utils/userHelper';
 
 export default function Navbar({
   searchTerm,
@@ -49,6 +50,7 @@ export default function Navbar({
 
   const storePhone = shopSettings?.phone || '+91 98765 43210';
   const storeEmail = shopSettings?.email || 'contact@yashigeneralstore.com';
+  const userFirstName = user ? getUserFirstName(user) : '';
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -288,31 +290,32 @@ export default function Navbar({
               <span>Track Orders</span>
             </button>
 
-            {/* Customer Profile / Gmail Login */}
+            {/* Customer Profile / Gmail Login - ONLY FIRST NAME ON TOP */}
             {user ? (
-              <div className="flex items-center space-x-1 sm:space-x-1.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-1.5 sm:px-2.5 py-1 rounded-xl">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl shrink-0 shadow-2xs">
                 {user?.avatar ? (
                   <img
                     src={user.avatar}
-                    alt={user?.name || 'Customer'}
-                    className="w-5 h-5 rounded-full object-cover shrink-0 border border-emerald-300"
+                    alt={userFirstName}
+                    className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover shrink-0 border border-emerald-300 shadow-2xs"
                   />
                 ) : (
-                  <div className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
-                    {(user?.name || 'G').charAt(0).toUpperCase()}
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-600 text-white text-[10px] sm:text-[11px] font-black flex items-center justify-center shrink-0 shadow-2xs">
+                    {userFirstName.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <div className="text-left hidden sm:block">
-                  <p className="text-[11px] font-black text-emerald-950 dark:text-emerald-200 leading-tight">
-                    {user.name || 'Customer'}
-                  </p>
-                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold truncate max-w-[110px]">
-                    {user.email || 'Gmail Logged In'}
-                  </p>
+                <div className="text-left min-w-0">
+                  <span
+                    className="text-[11px] sm:text-xs font-black text-emerald-950 dark:text-emerald-200 leading-none block truncate max-w-[65px] sm:max-w-[105px]"
+                    title={`Signed in as ${userFirstName} (${user?.email || ''})`}
+                  >
+                    {userFirstName}
+                  </span>
                 </div>
                 <button
                   onClick={onLogoutUser}
-                  className="text-[10px] text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 font-bold underline ml-1"
+                  className="text-[10px] text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 font-bold underline ml-0.5 sm:ml-1 shrink-0"
+                  title="Sign out of account"
                 >
                   Logout
                 </button>

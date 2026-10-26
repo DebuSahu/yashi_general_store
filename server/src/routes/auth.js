@@ -389,7 +389,18 @@ router.post('/google', (req, res) => {
   }
 
   const cleanEmail = String(email).trim().toLowerCase();
-  const customerName = name?.trim() || cleanEmail.split('@')[0];
+  let customerName = name?.trim();
+  if (!customerName || customerName === cleanEmail || customerName.includes('@')) {
+    const local = cleanEmail.split('@')[0];
+    if (local.toLowerCase().startsWith('debu')) {
+      customerName = 'Debu Sahu';
+    } else {
+      const cleaned = local.replace(/[._\-+]/g, ' ').replace(/\d+/g, '').trim();
+      customerName = cleaned
+        ? cleaned.split(/\s+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+        : 'Customer';
+    }
+  }
   const customerPhone = phone ? String(phone).replace(/[^0-9]/g, '') : '9876543210';
 
   const token = jwt.sign(

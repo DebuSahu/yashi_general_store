@@ -18,6 +18,7 @@ import LocationPicker from './LocationPicker';
 import { api } from '../api';
 import confetti from 'canvas-confetti';
 import GoogleAuthModal, { GoogleGLogo } from './GoogleAuthModal';
+import { extractFullNameFromEmail } from '../utils/userHelper';
 
 export default function CheckoutModal({
   isOpen,
@@ -56,7 +57,9 @@ export default function CheckoutModal({
   const [guestName, setGuestName] = useState('');
 
   // Delivery details state
-  const [customerName, setCustomerName] = useState(user?.name || '');
+  const [customerName, setCustomerName] = useState(
+    user?.name || (user?.email ? extractFullNameFromEmail(user.email) : '')
+  );
   const [deliveryPhone, setDeliveryPhone] = useState(user?.phone || '');
   const [address, setAddress] = useState('');
   const [landmark, setLandmark] = useState('');

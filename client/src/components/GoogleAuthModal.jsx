@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, CheckCircle2, ShieldCheck, User, Plus, ArrowRight, Sparkles } from 'lucide-react';
 import { api } from '../api';
 import confetti from 'canvas-confetti';
+import { getUserFirstName, extractFullNameFromEmail } from '../utils/userHelper';
 
 export function GoogleGLogo({ className = "w-5 h-5" }) {
   return (
@@ -84,9 +85,10 @@ export default function GoogleAuthModal({
           });
         } catch (e) {}
 
+        const userFirstName = getUserFirstName(account);
         onShowToast?.({
           type: 'success',
-          title: `Welcome, ${(account?.name || 'Customer').split(' ')[0]}! 🎉`,
+          title: `Welcome, ${userFirstName}! 🎉`,
           message: `Signed in instantly via Google (${account?.email || ''})`
         });
 
@@ -110,13 +112,13 @@ export default function GoogleAuthModal({
     }
 
     const email = customEmail.trim().toLowerCase();
-    const name = customName.trim() || email.split('@')[0];
+    const fullName = customName.trim() || extractFullNameFromEmail(email);
 
     handleSignInWithAccount({
-      name,
+      name: fullName,
       email,
       phone: null,
-      initials: name.charAt(0).toUpperCase(),
+      initials: (fullName.charAt(0) || 'G').toUpperCase(),
       color: 'bg-blue-600'
     });
   };
@@ -225,16 +227,14 @@ export default function GoogleAuthModal({
             <form onSubmit={handleCustomSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1">
-                  Your Full Name
+                  Your Full Name <span className="font-normal text-slate-400">(Optional - auto-detected from Gmail if blank)</span>
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Ramesh Kumar"
+                  placeholder="e.g. Ramesh Kumar (or leave blank to auto-detect)"
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold dark:text-white"
-                  autoFocus
                 />
               </div>
 

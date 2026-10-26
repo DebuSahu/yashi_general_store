@@ -1,8 +1,17 @@
 import React from 'react';
 import { Zap, Sparkles, Tag, Truck, ShieldCheck, Heart } from 'lucide-react';
+import { getUserFirstName } from '../utils/userHelper';
 
-export default function AnnouncementTicker() {
+export default function AnnouncementTicker({ user }) {
+  const firstName = user ? getUserFirstName(user) : '';
+
   const announcements = [
+    ...(firstName ? [{
+      icon: Heart,
+      text: `👋 WELCOME BACK, ${firstName.toUpperCase()}!`,
+      sub: "Free doorstep delivery within 5 km approved",
+      color: "text-emerald-300"
+    }] : []),
     {
       icon: Zap,
       text: "⚡ 15-30 MINS SUPERFAST DELIVERY",
