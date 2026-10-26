@@ -135,7 +135,8 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     fast2smsApiKey: shopSettings?.fast2smsApiKey || '',
     twilioAccountSid: shopSettings?.twilioAccountSid || '',
     twilioAuthToken: shopSettings?.twilioAuthToken || '',
-    twilioPhoneNumber: shopSettings?.twilioPhoneNumber || ''
+    twilioPhoneNumber: shopSettings?.twilioPhoneNumber || '',
+    googleClientId: shopSettings?.googleClientId || localStorage.getItem('ygs_google_client_id') || ''
   });
   const [settingsSaved, setSettingsSaved] = useState(false);
 
@@ -1476,6 +1477,46 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       />
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Google OAuth & Google Identity Services (GIS) Configuration */}
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
+                <h4 className="text-sm font-black text-gray-900 dark:text-white mb-1 flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span>Real Google Sign-In (Google Identity Services OAuth)</span>
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-3 leading-relaxed">
+                  Enables real Google OAuth account chooser popup & One Tap on mobile/Chrome. When users tap 'Continue with Google', Google directly displays their phone accounts, authenticates them, and returns verified details.
+                </p>
+
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
+                      Google OAuth Web Client ID
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsForm.googleClientId || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSettingsForm({ ...settingsForm, googleClientId: val });
+                        localStorage.setItem('ygs_google_client_id', val);
+                      }}
+                      placeholder="e.g. 1234567890-abcdefg.apps.googleusercontent.com"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                    />
+                  </div>
+
+                  <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-200 dark:border-blue-900 text-[11px] text-blue-950 dark:text-blue-200 space-y-1">
+                    <p className="font-bold">Setup Instructions for debusahu.github.io:</p>
+                    <ol className="list-decimal list-inside space-y-0.5 text-[10px] text-blue-900 dark:text-blue-300">
+                      <li>Go to Google Cloud Console (<a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="underline font-bold">console.cloud.google.com/apis/credentials</a>)</li>
+                      <li>Click <strong>Create Credentials</strong> &gt; <strong>OAuth client ID</strong> &gt; Application type: <strong>Web application</strong></li>
+                      <li>Under <strong>Authorized JavaScript origins</strong>, add: <code>https://debusahu.github.io</code> and <code>http://localhost:3000</code></li>
+                      <li>Copy the generated Client ID and paste it above, then click <strong>Save Store Settings</strong></li>
+                    </ol>
                   </div>
                 </div>
               </div>

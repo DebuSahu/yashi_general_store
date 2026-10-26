@@ -1383,6 +1383,8 @@ export default function App() {
         onClose={() => setGoogleAuthModalOpen(false)}
         onLoginSuccess={handleUserVerified}
         onShowToast={(t) => setToast(t)}
+        shopSettings={shopSettings}
+        theme={theme}
       />
 
       {/* USER ORDER TRACKER MODAL */}

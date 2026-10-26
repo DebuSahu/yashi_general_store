@@ -222,53 +222,19 @@ export default function AuthModal({
                 </p>
               </div>
 
-              {/* 1-Click Detected Account Button (Only shown if user previously logged in on this device) */}
-              {defaultAccount ? (
-                <div
-                  onClick={() => !signingInGoogle && handleInstantGoogleSignIn(defaultAccount)}
-                  className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-600 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 flex items-center justify-between gap-3 cursor-pointer transition select-none shadow-xs group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-                      {defaultAccount.initials}
-                    </div>
-                    <div className="min-w-0 text-left">
-                      <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate">
-                        {defaultAccount.name}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                        {defaultAccount.email}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0">
-                    {signingInGoogle ? (
-                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 animate-pulse">
-                        Signing in...
-                      </span>
-                    ) : (
-                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-1 group-hover:bg-emerald-600 group-hover:text-white transition">
-                        <span>Continue</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* Sign in with Gmail Account Button */}
+              {/* Official Continue with Google Button */}
               <button
                 type="button"
                 onClick={() => setGoogleModalOpen(true)}
-                className="w-full py-3 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-800 dark:text-white font-black text-xs sm:text-sm rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 shadow-sm flex items-center justify-center gap-3 transition active:scale-98 group"
+                className="w-full py-3.5 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-900 dark:text-white font-black text-sm rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-emerald-500 shadow-sm flex items-center justify-center gap-3 transition active:scale-98 group"
               >
                 <GoogleGLogo className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
-                <span>{defaultAccount ? 'Use another Gmail Account' : 'Sign in with your Gmail Account'}</span>
+                <span>Continue with Google</span>
+                <ArrowRight className="w-4 h-4 text-emerald-600 ml-auto shrink-0" />
               </button>
 
               <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center pt-1">
-                Zero friction • Automatic Google verification • No password needed
+                Authenticates directly with Google • Real phone or Chrome accounts only
               </p>
             </div>
           )}
