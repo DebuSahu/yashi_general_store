@@ -28,7 +28,7 @@ export const initialData = {
     acronym: "YGS",
     tagline: "Your Daily Grocery, Fresh Vegetables, Amul & Namaste India Dairy & Household Essentials",
     phone: "+91 98765 43210",
-    email: "contact@yashigeneralstore.com",
+    email: "debusahu121@gmail.com",
     address: "510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004",
     // Shop coordinates from Google Maps (26.4519124, 80.3537057)
     latitude: 26.4519124,

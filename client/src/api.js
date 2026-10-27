@@ -40,7 +40,7 @@ function setLocalStore(key, value) {
 }
 
 const CURRENT_CATALOG_VERSION = 'v5_73_ai_products';
-const CURRENT_SETTINGS_VERSION = 'v2_kanpur_cantt_location';
+const CURRENT_SETTINGS_VERSION = 'v3_debusahu_store_gmail';
 
 // Initialize local mock data
 function initLocalData() {
@@ -53,11 +53,24 @@ function initLocalData() {
     setLocalStore('catalog_version', CURRENT_CATALOG_VERSION);
   }
 
-  // Auto-upgrade settings with updated store location & Google Maps link
+  // Auto-upgrade settings with updated store location & Google Maps link & store Gmail
   const currentSettingsVersion = getLocalStore('settings_version', null);
   const existingSettings = getLocalStore('settings', null);
-  if (currentSettingsVersion !== CURRENT_SETTINGS_VERSION || !existingSettings || !existingSettings.latitude || existingSettings.latitude < 25) {
-    setLocalStore('settings', defaultData.settings || {});
+  if (
+    currentSettingsVersion !== CURRENT_SETTINGS_VERSION ||
+    !existingSettings ||
+    !existingSettings.latitude ||
+    existingSettings.latitude < 25 ||
+    !existingSettings.email ||
+    existingSettings.email === 'contact@yashigeneralstore.com'
+  ) {
+    setLocalStore('settings', {
+      ...(defaultData.settings || {}),
+      ...(existingSettings || {}),
+      email: (existingSettings && existingSettings.email && existingSettings.email !== 'contact@yashigeneralstore.com')
+        ? existingSettings.email
+        : 'debusahu121@gmail.com'
+    });
     setLocalStore('settings_version', CURRENT_SETTINGS_VERSION);
   }
   if (!getLocalStore('orders', null)) {

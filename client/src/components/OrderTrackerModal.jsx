@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   MessageCircle,
   Mail,
-  ArrowRight
+  ArrowRight,
+  FileText
 } from 'lucide-react';
 import { api } from '../api';
 import { GoogleGLogo } from './GoogleAuthModal';
@@ -25,6 +26,7 @@ import {
   buildStoreWhatsappMessage,
   buildClientWhatsappBillMessage
 } from '../utils/orderReceiptHelper';
+import { downloadInvoicePdf } from '../utils/pdfInvoiceGenerator';
 
 export default function OrderTrackerModal({
   isOpen,
@@ -544,6 +546,15 @@ export default function OrderTrackerModal({
                     </div>
 
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => downloadInvoicePdf({ order, shopSettings })}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-white hover:bg-emerald-600 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700 px-2.5 py-1.5 rounded-xl transition shadow-2xs active:scale-95"
+                        title="Download official PDF Tax Bill"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>PDF Bill</span>
+                      </button>
+
                       <button
                         onClick={() => handlePrint(order)}
                         className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 px-2.5 py-1.5 rounded-xl transition"

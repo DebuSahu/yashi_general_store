@@ -125,7 +125,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   const [settingsForm, setSettingsForm] = useState({
     storeName: shopSettings?.storeName || 'Yashi General Store',
     phone: shopSettings?.phone || '+91 98765 43210',
-    email: shopSettings?.email || 'contact@yashigeneralstore.com',
+    email: shopSettings?.email || 'debusahu121@gmail.com',
     address: shopSettings?.address || '510, Elliot Lane, Near Water Tank, Mirpur Cantonment, Kanpur, Uttar Pradesh - 208004',
     latitude: shopSettings?.latitude || 26.4519124,
     longitude: shopSettings?.longitude || 80.3537057,

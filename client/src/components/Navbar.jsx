@@ -54,7 +54,7 @@ export default function Navbar({
   const mobileMenuRef = useRef(null);
 
   const storePhone = shopSettings?.phone || '+91 98765 43210';
-  const storeEmail = shopSettings?.email || 'contact@yashigeneralstore.com';
+  const storeEmail = shopSettings?.email || 'debusahu121@gmail.com';
   const userFirstName = user ? getUserFirstName(user) : '';
 
   // Close dropdown on click outside

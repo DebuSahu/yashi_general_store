@@ -49,13 +49,15 @@ import {
   Store,
   ShoppingCart,
   MessageCircle,
-  Mail
+  Mail,
+  FileText
 } from 'lucide-react';
 import {
   buildStoreWhatsappMessage,
   buildClientWhatsappBillMessage,
   buildClientEmailBill
 } from './utils/orderReceiptHelper';
+import { downloadInvoicePdf } from './utils/pdfInvoiceGenerator';
 
 export default function App() {
   // Theme state (Dark / Light mode)
@@ -1488,60 +1490,109 @@ export default function App() {
               </div>
             </div>
 
-            {/* Direct WhatsApp & Email Bill Dispatch Buttons */}
-            <div className="space-y-2 pt-1 pb-1">
-              {/* 1. Client WhatsApp Bill Receipt */}
-              <button
-                type="button"
-                onClick={() => {
-                  const clientWhatsapp = orderPlacedSuccess?.clientWhatsapp || buildClientWhatsappBillMessage({
-                    order: orderPlacedSuccess,
-                    totalAmount: orderPlacedSuccess?.totalAmount,
-                    shopSettings
-                  });
-                  if (clientWhatsapp?.url) window.open(clientWhatsapp.url, '_blank');
-                }}
-                className="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 active:scale-98"
-              >
-                <MessageCircle className="w-4 h-4 fill-white" />
-                <span>Send Bill to My WhatsApp (+91 {orderPlacedSuccess?.customerPhone})</span>
-              </button>
+            {/* Automated Dispatch Status (Auto-sent upon placement) */}
+            <div className="space-y-2 pt-1 pb-2">
+              <div className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-left space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-md bg-emerald-600 text-white">
+                      <FileText className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      PDF Bill Automatically Generated
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => downloadInvoicePdf({ order: orderPlacedSuccess, shopSettings })}
+                    className="text-[11px] font-black text-emerald-700 dark:text-emerald-300 hover:underline"
+                  >
+                    Download Again ⬇
+                  </button>
+                </div>
 
-              {/* 2. Store WhatsApp Order Request */}
-              <button
-                type="button"
-                onClick={() => {
-                  const storeWhatsapp = orderPlacedSuccess?.storeWhatsapp || buildStoreWhatsappMessage({
-                    order: orderPlacedSuccess,
-                    totalAmount: orderPlacedSuccess?.totalAmount,
-                    shopSettings
-                  });
-                  if (storeWhatsapp?.url) window.open(storeWhatsapp.url, '_blank');
-                }}
-                className="w-full py-2.5 px-3 bg-green-700 hover:bg-green-800 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 active:scale-98"
-              >
-                <Store className="w-4 h-4" />
-                <span>Send Order Request to Store WhatsApp</span>
-              </button>
+                <div className="flex items-center justify-between pt-1 border-t border-emerald-100 dark:border-emerald-800/80">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-md bg-green-600 text-white">
+                      <Store className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      Order Dispatched to Store WhatsApp
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const storeWhatsapp = orderPlacedSuccess?.storeWhatsapp || buildStoreWhatsappMessage({
+                        order: orderPlacedSuccess,
+                        totalAmount: orderPlacedSuccess?.totalAmount,
+                        shopSettings
+                      });
+                      if (storeWhatsapp?.url) window.open(storeWhatsapp.url, '_blank');
+                    }}
+                    className="text-[11px] font-black text-emerald-700 dark:text-emerald-300 hover:underline"
+                  >
+                    Open Chat 💬
+                  </button>
+                </div>
 
-              {/* 3. Customer Gmail Invoice Receipt */}
-              {orderPlacedSuccess?.customerEmail && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const clientEmail = orderPlacedSuccess?.clientEmail || buildClientEmailBill({
-                      order: orderPlacedSuccess,
-                      totalAmount: orderPlacedSuccess?.totalAmount,
-                      shopSettings
-                    });
-                    if (clientEmail?.mailtoUrl) window.open(clientEmail.mailtoUrl, '_blank');
-                  }}
-                  className="w-full py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
-                >
-                  <Mail className="w-4 h-4 text-emerald-600" />
-                  <span>Send Bill Copy to Gmail ({orderPlacedSuccess.customerEmail})</span>
-                </button>
-              )}
+                <div className="flex items-center justify-between pt-1 border-t border-emerald-100 dark:border-emerald-800/80">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-md bg-emerald-600 text-white">
+                      <MessageCircle className="w-3.5 h-3.5 fill-white" />
+                    </span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      Bill Sent to Your WhatsApp
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const clientWhatsapp = orderPlacedSuccess?.clientWhatsapp || buildClientWhatsappBillMessage({
+                        order: orderPlacedSuccess,
+                        totalAmount: orderPlacedSuccess?.totalAmount,
+                        shopSettings
+                      });
+                      if (clientWhatsapp?.url) window.open(clientWhatsapp.url, '_blank');
+                    }}
+                    className="text-[11px] font-black text-emerald-700 dark:text-emerald-300 hover:underline"
+                  >
+                    Open Bill 💬
+                  </button>
+                </div>
+
+                {orderPlacedSuccess?.customerEmail && (
+                  <div className="flex items-center justify-between pt-1 border-t border-emerald-100 dark:border-emerald-800/80">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1 rounded-md bg-blue-600 text-white">
+                        <Mail className="w-3.5 h-3.5" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white block truncate">
+                          Receipt Dispatched to Gmail
+                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                          From: {shopSettings?.email || 'debusahu121@gmail.com'}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const clientEmail = orderPlacedSuccess?.clientEmail || buildClientEmailBill({
+                          order: orderPlacedSuccess,
+                          totalAmount: orderPlacedSuccess?.totalAmount,
+                          shopSettings
+                        });
+                        if (clientEmail?.gmailComposeUrl) window.open(clientEmail.gmailComposeUrl, '_blank');
+                      }}
+                      className="text-[11px] font-black text-blue-700 dark:text-blue-300 hover:underline shrink-0 ml-2"
+                    >
+                      View Gmail ✉
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">

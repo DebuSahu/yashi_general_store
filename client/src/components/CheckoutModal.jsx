@@ -24,8 +24,10 @@ import { extractFullNameFromEmail } from '../utils/userHelper';
 import {
   buildStoreWhatsappMessage,
   buildClientWhatsappBillMessage,
-  buildClientEmailBill
+  buildClientEmailBill,
+  autoDispatchOrderCommunications
 } from '../utils/orderReceiptHelper';
+import { downloadInvoicePdf } from '../utils/pdfInvoiceGenerator';
 
 export default function CheckoutModal({
   isOpen,
@@ -251,6 +253,14 @@ export default function CheckoutModal({
           shopSettings
         });
 
+        // Automatically dispatch PDF download, store WhatsApp, client WhatsApp, and Gmail bill without asking user!
+        const dispatchResults = autoDispatchOrderCommunications({
+          order: confirmedOrder,
+          items,
+          totalAmount: finalPayable,
+          shopSettings
+        });
+
         const completedOrder = {
           ...confirmedOrder,
           items: items.map((i) => ({
@@ -263,10 +273,11 @@ export default function CheckoutModal({
           })),
           totalAmount: finalPayable,
           placedAt: new Date().toISOString(),
-          customerEmail: user?.email || null,
+          customerEmail: user?.email || confirmedOrder.customerEmail || null,
           storeWhatsapp,
           clientWhatsapp,
-          clientEmail
+          clientEmail,
+          dispatchResults
         };
 
         try {
