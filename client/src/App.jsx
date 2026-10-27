@@ -956,7 +956,7 @@ export default function App() {
       </div>
 
       {/* 5. PRODUCT CATALOG & TOOLBAR */}
-      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-24 sm:py-8 flex-1 min-w-0">
+      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-36 md:py-8 flex-1 min-w-0">
         
         {/* SORT & FILTER TOOLBAR */}
         <SortFilterToolbar
@@ -1181,9 +1181,9 @@ export default function App() {
 
       </main>
 
-      {/* 6. FLOATING CART BAR (Mobile optimized) */}
-      {cartCount > 0 && !cartDrawerOpen && (
-        <div className="fixed bottom-3 inset-x-3 sm:bottom-5 sm:inset-x-4 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom duration-300">
+      {/* 6. FLOATING CART BAR (Positioned above mobile bottom nav bar on mobile, and at bottom-5 on desktop) */}
+      {cartCount > 0 && !cartDrawerOpen && !checkoutModalOpen && (
+        <div className="fixed bottom-[4.5rem] inset-x-3 md:bottom-5 md:inset-x-4 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom duration-300">
           <div
             onClick={() => setCartDrawerOpen(true)}
             className="bg-emerald-700 hover:bg-emerald-800 text-white p-2.5 sm:p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer border border-emerald-500/60 transition active:scale-98"
