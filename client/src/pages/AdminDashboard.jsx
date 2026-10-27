@@ -868,6 +868,11 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                         <p className="text-sm font-bold text-gray-900 dark:text-white">
                           +91 {order.customerPhone}
                         </p>
+                        {order.customerEmail && (
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-bold truncate">
+                            ✉️ {order.customerEmail}
+                          </p>
+                        )}
                         <div className="flex items-center gap-2 pt-1">
                           <a
                             href={`tel:${order.customerPhone}`}

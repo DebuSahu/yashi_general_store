@@ -699,6 +699,7 @@ export const api = {
 
   // Orders & Delivery Requests
   submitOrder: async (orderData) => {
+    let orderResult = null;
     if (API_BASE) {
       try {
         const res = await fetch(`${API_BASE}/orders`, {
@@ -706,58 +707,132 @@ export const api = {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          orderResult = data.order || data;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          return { error: errData.error || 'Failed to submit order to server' };
+        }
       } catch (err) {
         console.warn('Falling back to local order submission:', err.message);
       }
     }
 
-    // Validate 100rs minimum order
-    const total = orderData.totalAmount || orderData.items?.reduce((s, i) => s + (i.price * i.quantity), 0) || 0;
-    if (total < 100) {
-      return {
-        error: `Minimum order value must be ₹100. Your current order total is ₹${total}. Please add items worth at least ₹${100 - total} more to proceed.`
+    if (!orderResult) {
+      const total = orderData.totalAmount || orderData.items?.reduce((s, i) => s + (i.price * i.quantity), 0) || 0;
+      if (total < 100) {
+        return {
+          error: `Minimum order value must be ₹100. Your current order total is ₹${total}. Please add items worth at least ₹${100 - total} more to proceed.`
+        };
+      }
+
+      orderResult = {
+        ...orderData,
+        id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+        totalAmount: total,
+        status: 'Pending',
+        createdAt: new Date().toISOString()
       };
     }
 
-    const orders = getLocalStore('orders', []);
-    const newOrder = {
-      ...orderData,
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
-    orders.unshift(newOrder);
-    setLocalStore('orders', orders);
+    // Persist to both localStorage stores so tracking works instantly
+    try {
+      const orders = getLocalStore('orders', []);
+      const history = getLocalStore('gs_order_history', []);
+      orders.unshift(orderResult);
+      history.unshift(orderResult);
+      setLocalStore('orders', orders);
+      setLocalStore('gs_order_history', history);
+    } catch (e) {}
+
     return {
       success: true,
-      order: newOrder
+      order: orderResult
     };
   },
 
-  getOrders: async (phone = '', status = 'all', token = null) => {
+  getOrders: async (queryOrPhone = '', status = 'all', token = null) => {
+    let serverOrders = null;
     if (API_BASE) {
       try {
         const params = new URLSearchParams();
-        if (phone) params.append('phone', phone);
+        if (queryOrPhone) {
+          if (queryOrPhone.includes('@')) {
+            params.append('email', queryOrPhone.trim().toLowerCase());
+          } else if (queryOrPhone.toLowerCase().startsWith('ord')) {
+            params.append('orderId', queryOrPhone.trim());
+          } else {
+            params.append('phone', queryOrPhone.trim());
+          }
+          params.append('query', queryOrPhone.trim());
+        }
         if (status && status !== 'all') params.append('status', status);
         const headers = {};
         if (token) headers.Authorization = `Bearer ${token}`;
         const res = await fetch(`${API_BASE}/orders?${params.toString()}`, { headers });
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          serverOrders = Array.isArray(data) ? data : (data.orders || []);
+        }
       } catch (err) {
         console.warn('Falling back to local orders query:', err.message);
       }
     }
 
-    let orders = getLocalStore('orders', []);
-    if (phone) {
-      orders = orders.filter(o => o.customerPhone === phone);
+    // Merge with local orders
+    const localStoreOrders = getLocalStore('orders', []);
+    let historyOrders = [];
+    try {
+      historyOrders = JSON.parse(localStorage.getItem('gs_order_history') || '[]');
+    } catch (e) {}
+
+    const allPool = [
+      ...(serverOrders || []),
+      ...localStoreOrders,
+      ...historyOrders
+    ];
+
+    // Deduplicate by ID
+    const seen = new Set();
+    let deduplicated = [];
+    for (const o of allPool) {
+      if (o && o.id && !seen.has(o.id)) {
+        seen.add(o.id);
+        deduplicated.push(o);
+      }
     }
+
+    if (queryOrPhone) {
+      const q = String(queryOrPhone).trim().toLowerCase();
+      const numOnly = q.replace(/[^0-9]/g, '');
+
+      deduplicated = deduplicated.filter(o => {
+        const orderEmail = (o.customerEmail || '').toLowerCase();
+        const orderPhone = (o.customerPhone || '').replace(/[^0-9]/g, '');
+        const orderId = (o.id || '').toLowerCase();
+
+        if (q.includes('@')) {
+          return orderEmail === q;
+        }
+        if (q.startsWith('ord')) {
+          return orderId.includes(q);
+        }
+        if (numOnly.length >= 4) {
+          return orderPhone.includes(numOnly);
+        }
+        return orderEmail.includes(q) || orderId.includes(q) || (o.customerName || '').toLowerCase().includes(q);
+      });
+    }
+
     if (status && status !== 'all') {
-      orders = orders.filter(o => o.status === status);
+      deduplicated = deduplicated.filter(o => (o.status || '').toLowerCase() === status.toLowerCase());
     }
-    return orders;
+
+    return {
+      success: true,
+      orders: deduplicated
+    };
   },
 
   updateOrderStatus: async (id, status, token, note = '') => {

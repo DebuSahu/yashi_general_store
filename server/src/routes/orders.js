@@ -71,21 +71,21 @@ router.post('/', (req, res) => {
   const orderItems = [];
 
   for (const item of items) {
-    const product = (db.products || []).find(p => p.id === (item.id || item.productId));
-    if (!product) {
-      return res.status(400).json({ error: `Product not found: ${item.name || item.id || item.productId}` });
-    }
+    const product = (db.products || []).find(p => String(p.id) === String(item.id || item.productId));
+    const price = product ? product.price : (Number(item.price) || 0);
+    const name = product ? product.name : (item.name || 'Store Product');
+    const unit = product ? product.unit : (item.unit || 'piece');
     const qty = Number(item.quantity) || 1;
-    totalAmount += product.price * qty;
+    totalAmount += price * qty;
 
     orderItems.push({
-      id: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      unit: product.unit,
+      id: item.id || item.productId,
+      name,
+      category: product?.category || 'General',
+      price,
+      unit,
       quantity: qty,
-      itemTotal: product.price * qty
+      itemTotal: price * qty
     });
   }
 
@@ -101,7 +101,7 @@ router.post('/', (req, res) => {
 
   // Deduct stock after order validation passes
   for (const item of items) {
-    const product = (db.products || []).find(p => p.id === (item.id || item.productId));
+    const product = (db.products || []).find(p => String(p.id) === String(item.id || item.productId));
     if (product && product.stock !== undefined) {
       const qty = Number(item.quantity) || 1;
       product.stock = Math.max(0, product.stock - qty);
@@ -142,19 +142,31 @@ router.post('/', (req, res) => {
   });
 });
 
-// 2. Get Orders (Admin sees all, or User filters by phone)
+// 2. Get Orders (Admin sees all, or User filters by email, phone, or orderId)
 router.get('/', (req, res) => {
-  const { phone, status } = req.query;
+  const { phone, email, query, status } = req.query;
   const db = getDatabase();
   let orders = db.orders || [];
 
+  const q = (query || email || '').trim().toLowerCase();
+  if (q) {
+    if (q.includes('@')) {
+      orders = orders.filter(o => (o.customerEmail || '').toLowerCase() === q);
+    } else {
+      orders = orders.filter(o =>
+        (o.id || '').toLowerCase().includes(q) ||
+        (o.customerEmail || '').toLowerCase().includes(q)
+      );
+    }
+  }
+
   if (phone) {
     const cleanPhone = String(phone).replace(/[^0-9]/g, '');
-    orders = orders.filter(o => o.customerPhone === cleanPhone);
+    orders = orders.filter(o => (o.customerPhone || '').replace(/[^0-9]/g, '').includes(cleanPhone));
   }
 
   if (status && status !== 'all') {
-    orders = orders.filter(o => o.status.toLowerCase() === status.toLowerCase());
+    orders = orders.filter(o => (o.status || '').toLowerCase() === status.toLowerCase());
   }
 
   return res.json({

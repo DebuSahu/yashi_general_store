@@ -94,3 +94,4 @@ export function buildClientEmailBill({ order, items = [], totalAmount, shopSetti
     mailtoUrl: email ? `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}` : ''
   };
 }
+

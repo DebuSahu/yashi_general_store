@@ -1401,8 +1401,10 @@ export default function App() {
           setOrderTrackerOpen(false);
           setTargetTrackerOrder(null);
         }}
-        initialPhone={user?.phone || ''}
+        user={user}
         targetOrder={targetTrackerOrder}
+        onOpenGoogleAuth={() => setGoogleAuthModalOpen(true)}
+        shopSettings={shopSettings}
       />
 
       {/* LOCATION ELIGIBILITY CHECKER MODAL */}
