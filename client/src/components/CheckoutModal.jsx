@@ -289,27 +289,27 @@ export default function CheckoutModal({
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
-        <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-2xl w-full flex flex-col h-[100dvh] sm:h-auto sm:max-h-[92vh] border-t sm:border border-slate-200 dark:border-slate-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-200 transition-colors overflow-hidden">
+      <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex sm:items-center justify-center p-0 sm:p-4 overflow-hidden animate-in fade-in duration-200">
+        <div className="bg-white dark:bg-slate-900 w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[92vh] sm:rounded-3xl shadow-2xl flex flex-col border-0 sm:border border-slate-200 dark:border-slate-800 transition-colors overflow-hidden">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
-            <div>
+          <div className="bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0 shadow-sm">
+            <div className="min-w-0">
               <div className="flex items-center space-x-2">
-                <span className="p-1 rounded-xl bg-white/20">
+                <span className="p-1 rounded-xl bg-white/20 shrink-0">
                   <Truck className="w-5 h-5 text-yellow-300" />
                 </span>
-                <h2 className="text-base sm:text-xl font-black">
+                <h2 className="text-base sm:text-xl font-black leading-tight truncate">
                   {step === 1 ? 'Customer Identification' : 'Checkout & Delivery Details'}
                 </h2>
               </div>
-              <p className="text-xs text-white/90 mt-1">
+              <p className="text-xs text-white/90 mt-1 truncate">
                 Yashi General Store • 5 km Neighborhood Doorstep Delivery
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/20 transition"
+              className="p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/20 transition shrink-0 ml-2"
             >
               <X className="w-5 h-5" />
             </button>
@@ -318,22 +318,22 @@ export default function CheckoutModal({
           {/* Step Indicator */}
           <div className="bg-emerald-50 dark:bg-emerald-950/40 px-4 sm:px-6 py-2.5 border-b border-emerald-100 dark:border-emerald-900/60 flex items-center justify-between text-xs font-bold shrink-0">
             <div className={`flex items-center gap-1.5 ${step === 1 ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-500'}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${step === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400'}`}>
                 1
               </span>
               <span>1. Sign In (Gmail)</span>
             </div>
-            <div className="h-0.5 w-12 bg-slate-200 dark:bg-slate-700" />
+            <div className="h-0.5 w-10 sm:w-16 bg-slate-200 dark:bg-slate-700" />
             <div className={`flex items-center gap-1.5 ${step === 2 ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-500'}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${step === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400'}`}>
                 2
               </span>
-              <span>2. Mobile & Delivery Details</span>
+              <span>2. Delivery & Address</span>
             </div>
           </div>
 
           {/* Content Body */}
-          <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 space-y-4 pb-28 sm:pb-6 overscroll-contain">
+          <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 space-y-4 pb-6 overscroll-contain">
             
             {/* STEP 1: GMAIL SIGN IN / GUEST (NO MOBILE/OTP REQUIRED AT LOGIN) */}
             {step === 1 && (
@@ -404,7 +404,7 @@ export default function CheckoutModal({
 
             {/* STEP 2: ADDRESS, MOBILE NUMBER (FOR DELIVERY ONLY), SLOTS, PAYMENT & MAP */}
             {step === 2 && (
-              <form onSubmit={handleSubmitDelivery} className="space-y-4">
+              <form id="checkout-delivery-form" onSubmit={handleSubmitDelivery} className="space-y-4">
                 
                 {orderError && (
                   <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-xl text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
@@ -646,6 +646,76 @@ export default function CheckoutModal({
               </form>
             )}
 
+          </div>
+
+          {/* Sticky Bottom Action Bar (Guarantees Checkout Actions are Always Visible on Mobile & Desktop) */}
+          <div className="shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-3 sm:p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] z-20">
+            {step === 1 ? (
+              <div className="flex items-center justify-between gap-2.5">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGoogleModalOpen(true)}
+                  className="flex-1 py-2.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-800 dark:text-white font-black text-xs sm:text-sm rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-xs flex items-center justify-center gap-2 transition active:scale-98"
+                >
+                  <GoogleGLogo className="w-4 h-4 shrink-0" />
+                  <span>Continue with Google</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                {/* Total amount summary */}
+                <div className="shrink-0 text-left">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                    Total Payable
+                  </p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-400">
+                      ₹{finalPayable}
+                    </span>
+                    {couponDiscount > 0 && (
+                      <span className="text-[10px] font-bold text-slate-400 line-through">
+                        ₹{totalAmount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">
+                    FREE Delivery (≤5km)
+                  </span>
+                </div>
+
+                {/* Sticky Submit Button */}
+                <div className="flex-1 max-w-xs sm:max-w-sm">
+                  <button
+                    type="submit"
+                    form="checkout-delivery-form"
+                    disabled={submitting || (locationData && !locationData.isEligible) || (deliveryPhone || '').replace(/[^0-9]/g, '').length < 10}
+                    className={`w-full py-3 px-3.5 rounded-xl font-black text-xs sm:text-sm text-white shadow-md flex items-center justify-center space-x-1.5 transition active:scale-[0.99] ${
+                      (!locationData || locationData.isEligible) && (deliveryPhone || '').replace(/[^0-9]/g, '').length >= 10
+                        ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
+                        : 'bg-slate-400 dark:bg-slate-700 cursor-not-allowed opacity-75'
+                    }`}
+                  >
+                    <Truck className="w-4 h-4 text-yellow-300 shrink-0" />
+                    <span className="truncate">
+                      {submitting
+                        ? 'Dispatching Request...'
+                        : (deliveryPhone || '').replace(/[^0-9]/g, '').length < 10
+                        ? 'Enter Mobile Number'
+                        : locationData && !locationData.isEligible
+                        ? `Distance > 5km`
+                        : `Place Order (₹${finalPayable})`}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
         </div>

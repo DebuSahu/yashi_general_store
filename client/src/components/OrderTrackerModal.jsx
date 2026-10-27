@@ -193,8 +193,8 @@ export default function OrderTrackerModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-2xl w-full flex flex-col h-[100dvh] sm:h-auto sm:max-h-[92vh] border-t sm:border border-slate-200 dark:border-slate-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-200 transition-colors overflow-hidden text-slate-900 dark:text-white">
+    <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex sm:items-center justify-center p-0 sm:p-4 overflow-hidden animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[92vh] sm:rounded-3xl shadow-2xl flex flex-col border-0 sm:border border-slate-200 dark:border-slate-800 transition-colors overflow-hidden text-slate-900 dark:text-white">
         
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white p-4 sm:p-5 flex items-center justify-between shrink-0 border-b border-emerald-900/60">

@@ -59,7 +59,9 @@ export default function LocationPicker({
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current).setView([shopLat, shopLon], 13);
+      const map = L.map(mapContainerRef.current, {
+        scrollWheelZoom: false
+      }).setView([shopLat, shopLon], 13);
       mapInstanceRef.current = map;
 
       // Clean OpenStreetMap tiles
@@ -210,12 +212,12 @@ export default function LocationPicker({
       )}
 
       {/* Map Canvas */}
-      <div className="w-full h-52 sm:h-64 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 relative shadow-inner">
+      <div className="w-full h-44 sm:h-56 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 relative shadow-inner">
         <div ref={mapContainerRef} className="w-full h-full" />
         
         {/* Floating helper overlay */}
-        <div className="absolute top-2 right-2 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 shadow-xs pointer-events-none">
-          🟢 Green circle = 5 km delivery zone
+        <div className="absolute top-2 right-2 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 shadow-xs pointer-events-none">
+          🟢 5 km Delivery Zone (Tap map or use GPS)
         </div>
       </div>
 
