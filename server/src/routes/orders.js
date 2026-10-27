@@ -1,4 +1,5 @@
 import express from 'express';
+import nodemailer from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
 import { getDatabase, saveDatabase, calculateDistance } from '../db.js';
 import { authenticateAdmin } from './auth.js';
@@ -140,6 +141,59 @@ router.post('/', (req, res) => {
     message: 'Delivery request sent successfully to Yashi General Store!',
     order: newOrder
   });
+});
+
+// 1b. Direct Email Dispatch through Store Gmail with PDF attachment
+router.post('/:id/send-receipt', async (req, res) => {
+  const { to, customerEmail, pdfBase64, filename, subject, body } = req.body;
+  const targetEmail = (to || customerEmail || '').trim().toLowerCase();
+  if (!targetEmail || !targetEmail.includes('@')) {
+    return res.status(400).json({ error: 'Valid customer email is required' });
+  }
+
+  const db = getDatabase();
+  const settings = db.settings || {};
+  const storeEmail = settings.email || process.env.STORE_GMAIL || 'debusahu121@gmail.com';
+  const gmailPass = process.env.GMAIL_APP_PASSWORD || process.env.STORE_GMAIL_APP_PASSWORD;
+
+  if (!gmailPass) {
+    return res.status(200).json({
+      success: false,
+      message: 'Store Gmail App Password not yet configured on server. Configure GMAIL_APP_PASSWORD in .env or Google Apps Script Webhook.'
+    });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: storeEmail,
+        pass: gmailPass
+      }
+    });
+
+    const attachments = [];
+    if (pdfBase64) {
+      attachments.push({
+        filename: filename || `Yashi_General_Store_Bill_${req.params.id}.pdf`,
+        content: Buffer.from(pdfBase64, 'base64'),
+        contentType: 'application/pdf'
+      });
+    }
+
+    await transporter.sendMail({
+      from: `"Yashi General Store" <${storeEmail}>`,
+      to: targetEmail,
+      subject: subject || `Official Tax Invoice & Bill #${req.params.id} - Yashi General Store`,
+      text: body || `Dear Customer,\n\nPlease find attached your official Tax Invoice & Bill #${req.params.id} from Yashi General Store.`,
+      attachments
+    });
+
+    return res.json({ success: true, message: `Email sent through ${storeEmail} to ${targetEmail} with PDF attached!` });
+  } catch (err) {
+    console.error('Nodemailer error:', err);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 // 2. Get Orders (Admin sees all, or User filters by email, phone, or orderId)

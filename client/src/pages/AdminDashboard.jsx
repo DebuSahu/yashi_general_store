@@ -136,7 +136,8 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     twilioAccountSid: shopSettings?.twilioAccountSid || '',
     twilioAuthToken: shopSettings?.twilioAuthToken || '',
     twilioPhoneNumber: shopSettings?.twilioPhoneNumber || '',
-    googleClientId: shopSettings?.googleClientId || localStorage.getItem('ygs_google_client_id') || ''
+    googleClientId: shopSettings?.googleClientId || localStorage.getItem('ygs_google_client_id') || '',
+    emailWebhookUrl: shopSettings?.emailWebhookUrl || localStorage.getItem('ygs_email_webhook_url') || ''
   });
   const [settingsSaved, setSettingsSaved] = useState(false);
 
@@ -1486,6 +1487,65 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                 </div>
               </div>
 
+              {/* Store Gmail Direct PDF Dispatch (Google Apps Script Webhook) */}
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
+                <h4 className="text-sm font-black text-gray-900 dark:text-white mb-1 flex items-center gap-1.5">
+                  <Mail className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Store Gmail Direct Dispatcher ({settingsForm.email || 'debusahu121@gmail.com'} with PDF Attachment)</span>
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-3 leading-relaxed">
+                  Sends customer bills and PDF invoices directly from your personal Store Gmail (<strong>{settingsForm.email || 'debusahu121@gmail.com'}</strong>) with the generated PDF attached, without using any third-party application.
+                </p>
+
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
+                      Google Apps Script Web App URL (Optional / Free)
+                    </label>
+                    <input
+                      type="url"
+                      value={settingsForm.emailWebhookUrl || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSettingsForm({ ...settingsForm, emailWebhookUrl: val });
+                        localStorage.setItem('ygs_email_webhook_url', val);
+                      }}
+                      placeholder="https://script.google.com/macros/s/.../exec"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                    />
+                  </div>
+
+                  <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-900 text-[11px] text-emerald-950 dark:text-emerald-200 space-y-1">
+                    <p className="font-bold">1-Minute Setup Guide for Store Gmail:</p>
+                    <ol className="list-decimal list-inside space-y-0.5 text-[10px] text-emerald-900 dark:text-emerald-300">
+                      <li>Open <a href="https://script.google.com/home/start" target="_blank" rel="noopener noreferrer" className="underline font-bold">script.google.com</a> signed in as <strong>{settingsForm.email || 'debusahu121@gmail.com'}</strong></li>
+                      <li>Click <strong>New project</strong> and paste this exact script:</li>
+                    </ol>
+                    <div className="bg-slate-900 text-slate-100 p-2 rounded-lg font-mono text-[9px] overflow-x-auto select-all">
+                      {`function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var blob = Utilities.newBlob(Utilities.base64Decode(data.pdfBase64), 'application/pdf', data.filename || 'Invoice.pdf');
+    GmailApp.sendEmail(data.to, data.subject, data.body, {
+      name: 'Yashi General Store',
+      replyTo: '${settingsForm.email || 'debusahu121@gmail.com'}',
+      attachments: [blob]
+    });
+    return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`}
+                    </div>
+                    <ol start={3} className="list-decimal list-inside space-y-0.5 text-[10px] text-emerald-900 dark:text-emerald-300">
+                      <li>Click <strong>Deploy &gt; New deployment</strong> &gt; Select type: <strong>Web app</strong></li>
+                      <li>Set <strong>Who has access: Anyone</strong> and click <strong>Deploy</strong></li>
+                      <li>Copy the Web App URL, paste it above, and click <strong>Save Store Settings</strong></li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
               {/* Google OAuth & Google Identity Services (GIS) Configuration */}
               <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
                 <h4 className="text-sm font-black text-gray-900 dark:text-white mb-1 flex items-center gap-1.5">
@@ -1521,6 +1581,65 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
                       <li>Click <strong>Create Credentials</strong> &gt; <strong>OAuth client ID</strong> &gt; Application type: <strong>Web application</strong></li>
                       <li>Under <strong>Authorized JavaScript origins</strong>, add: <code>https://debusahu.github.io</code> and <code>http://localhost:3000</code></li>
                       <li>Copy the generated Client ID and paste it above, then click <strong>Save Store Settings</strong></li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              {/* Store Gmail Direct PDF Dispatch (Google Apps Script Webhook) */}
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
+                <h4 className="text-sm font-black text-gray-900 dark:text-white mb-1 flex items-center gap-1.5">
+                  <Mail className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Store Gmail Direct Dispatcher ({settingsForm.email || 'debusahu121@gmail.com'} with PDF Attachment)</span>
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-3 leading-relaxed">
+                  Sends customer bills and PDF invoices directly from your personal Store Gmail (<strong>{settingsForm.email || 'debusahu121@gmail.com'}</strong>) with the generated PDF attached, without using any third-party application.
+                </p>
+
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
+                      Google Apps Script Web App URL (Optional / Free)
+                    </label>
+                    <input
+                      type="url"
+                      value={settingsForm.emailWebhookUrl || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSettingsForm({ ...settingsForm, emailWebhookUrl: val });
+                        localStorage.setItem('ygs_email_webhook_url', val);
+                      }}
+                      placeholder="https://script.google.com/macros/s/.../exec"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
+                    />
+                  </div>
+
+                  <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-900 text-[11px] text-emerald-950 dark:text-emerald-200 space-y-1">
+                    <p className="font-bold">1-Minute Setup Guide for Store Gmail:</p>
+                    <ol className="list-decimal list-inside space-y-0.5 text-[10px] text-emerald-900 dark:text-emerald-300">
+                      <li>Open <a href="https://script.google.com/home/start" target="_blank" rel="noopener noreferrer" className="underline font-bold">script.google.com</a> signed in as <strong>{settingsForm.email || 'debusahu121@gmail.com'}</strong></li>
+                      <li>Click <strong>New project</strong> and paste this exact script:</li>
+                    </ol>
+                    <div className="bg-slate-900 text-slate-100 p-2 rounded-lg font-mono text-[9px] overflow-x-auto select-all">
+                      {`function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var blob = Utilities.newBlob(Utilities.base64Decode(data.pdfBase64), 'application/pdf', data.filename || 'Invoice.pdf');
+    GmailApp.sendEmail(data.to, data.subject, data.body, {
+      name: 'Yashi General Store',
+      replyTo: '${settingsForm.email || 'debusahu121@gmail.com'}',
+      attachments: [blob]
+    });
+    return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`}
+                    </div>
+                    <ol start={3} className="list-decimal list-inside space-y-0.5 text-[10px] text-emerald-900 dark:text-emerald-300">
+                      <li>Click <strong>Deploy &gt; New deployment</strong> &gt; Select type: <strong>Web app</strong></li>
+                      <li>Set <strong>Who has access: Anyone</strong> and click <strong>Deploy</strong></li>
+                      <li>Copy the Web App URL, paste it above, and click <strong>Save Store Settings</strong></li>
                     </ol>
                   </div>
                 </div>
