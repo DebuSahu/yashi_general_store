@@ -37,6 +37,7 @@ export const initialData = {
     maxDeliveryRadiusKm: 5,
     minOrderAmount: 100,
     deliveryFee: 0, // Free delivery within 5km!
+    googleClientId: "59926349381-1t44eucqdpgl1c4d2gghh8qf3coddf5r.apps.googleusercontent.com",
     adminUsername: "admin",
     adminPasswordHash: "$2a$10$w3.G3rO8gJ2m0yQhC.y2aOK6k0ZkO/99jIe8wRsl4W0wX2Z3A5eE2" // hashed 'admin123'
   },

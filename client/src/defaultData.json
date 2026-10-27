@@ -11,7 +11,8 @@
     "mapsUrl": "https://maps.app.goo.gl/36DwR1dGU2bfv7KD9",
     "maxDeliveryRadiusKm": 5,
     "minOrderAmount": 100,
-    "deliveryFee": 0
+    "deliveryFee": 0,
+    "googleClientId": "59926349381-1t44eucqdpgl1c4d2gghh8qf3coddf5r.apps.googleusercontent.com"
   },
   "products": [
     {

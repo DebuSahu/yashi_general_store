@@ -58,12 +58,15 @@ export default function GoogleAuthModal({
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState('');
 
+  // Built-in Google OAuth Client ID provided by Store Owner
+  const DEFAULT_GOOGLE_CLIENT_ID = '59926349381-1t44eucqdpgl1c4d2gghh8qf3coddf5r.apps.googleusercontent.com';
+
   // Active Google OAuth Client ID
   const [googleClientId, setGoogleClientId] = useState(() => {
     return shopSettings?.googleClientId ||
       import.meta.env.VITE_GOOGLE_CLIENT_ID ||
       localStorage.getItem('ygs_google_client_id') ||
-      '';
+      DEFAULT_GOOGLE_CLIENT_ID;
   });
 
   const [showConfigSetup, setShowConfigSetup] = useState(false);
