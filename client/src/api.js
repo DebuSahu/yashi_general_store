@@ -729,7 +729,10 @@ export const api = {
     };
     orders.unshift(newOrder);
     setLocalStore('orders', orders);
-    return newOrder;
+    return {
+      success: true,
+      order: newOrder
+    };
   },
 
   getOrders: async (phone = '', status = 'all', token = null) => {

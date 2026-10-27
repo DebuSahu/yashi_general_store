@@ -234,22 +234,22 @@ export default function Navbar({
           </div>
 
           {/* Mobile Right: Single Clean Profile / Settings Trigger (Leaves Store Title Uncluttered!) */}
-          <div ref={mobileMenuRef} className="sm:hidden relative shrink-0">
+          <div ref={mobileMenuRef} className="md:hidden relative shrink-0">
             {user ? (
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="flex items-center gap-1.5 p-1 rounded-full border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/80 active:scale-95 transition shadow-2xs"
+                className="flex items-center gap-1.5 p-1 rounded-full border-2 border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/80 active:scale-95 transition shadow-sm"
                 title="Account & Settings Menu"
               >
                 {user?.avatar ? (
                   <img
                     src={user.avatar}
                     alt={userFirstName}
-                    className="w-7 h-7 rounded-full object-cover"
+                    className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">
                     {userFirstName.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -259,57 +259,52 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={onOpenGoogleAuth}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-black text-slate-800 dark:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xs active:scale-95"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-slate-800 dark:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xs active:scale-95"
                 >
-                  <GoogleGLogo className="w-3.5 h-3.5" />
+                  <GoogleGLogo className="w-4 h-4" />
                   <span>Sign In</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="p-1.5 text-slate-600 dark:text-amber-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
-                  title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                >
-                  {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-slate-600" />}
                 </button>
               </div>
             )}
 
-            {/* Mobile Profile & Actions Menu Modal/Overlay (Rendered to body via createPortal so it is NEVER clipped by header!) */}
+            {/* Mobile Profile & Actions Bottom Sheet Drawer (Never Clipped, 100% Readable!) */}
             {mobileMenuOpen && user && typeof document !== 'undefined' && createPortal(
               <div
                 onClick={() => setMobileMenuOpen(false)}
-                className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex items-start justify-end p-3 pt-3 sm:hidden animate-in fade-in duration-150"
+                className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 md:hidden animate-in fade-in duration-200"
               >
                 <div
                   ref={mobileMenuRef}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-80 max-w-[92vw] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3.5 animate-in slide-in-from-right-4 duration-150 max-h-[92vh] overflow-y-auto"
+                  className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 p-5 space-y-4 animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto pb-8 text-slate-900 dark:text-white"
                 >
+                  {/* Drag Handle on mobile */}
+                  <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto -mt-1 mb-2 sm:hidden" />
+
                   {/* Header with Title & Close Button */}
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                      Account & Settings
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      My Account & Settings
                     </span>
                     <button
                       type="button"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition"
+                      className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                     >
                       <X className="w-5 h-5" />
                     </button>
                   </div>
 
                   {/* User Profile Card */}
-                  <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/60 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center gap-3 p-3.5 bg-emerald-50 dark:bg-emerald-950/60 rounded-2xl border border-emerald-200 dark:border-emerald-800">
                     {user?.avatar ? (
                       <img
                         src={user.avatar}
                         alt={userFirstName}
-                        className="w-10 h-10 rounded-full object-cover border-2 border-emerald-400 shrink-0"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-emerald-400 shrink-0"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-black text-sm flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-emerald-600 text-white font-black text-base flex items-center justify-center shrink-0">
                         {userFirstName.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -317,26 +312,26 @@ export default function Navbar({
                       <p className="text-sm font-black text-slate-900 dark:text-white truncate">
                         {user?.name || userFirstName}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                         {user?.email || 'Logged in via Gmail'}
                       </p>
                     </div>
                   </div>
 
                   {/* Menu Actions */}
-                  <div className="space-y-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {/* Theme Toggle */}
+                  <div className="space-y-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {/* Appearance Switcher */}
                     <button
                       type="button"
                       onClick={() => toggleTheme?.()}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition bg-slate-50 dark:bg-slate-800/50"
+                      className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700"
                     >
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2.5">
                         {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
                         <span>Appearance Theme</span>
                       </span>
-                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80">
-                        {theme === 'dark' ? 'Dark 🌙' : 'Light ☀️'}
+                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/80">
+                        {theme === 'dark' ? 'Dark Mode 🌙' : 'Light Mode ☀️'}
                       </span>
                     </button>
 
@@ -348,14 +343,14 @@ export default function Navbar({
                           setMobileMenuOpen(false);
                           onOpenAdmin?.();
                         }}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/60 transition"
+                        className="w-full flex items-center justify-between p-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white shadow-md transition"
                       >
-                        <span className="flex items-center gap-2 font-black">
-                          <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                          <span>Admin Portal</span>
+                        <span className="flex items-center gap-2.5 font-black">
+                          <ShieldCheck className="w-5 h-5 text-yellow-300" />
+                          <span>Store Owner Admin Portal</span>
                         </span>
-                        <span className="text-[10px] bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-0.5 rounded-full font-black">
-                          Store Owner
+                        <span className="text-xs bg-white/20 text-white px-2.5 py-0.5 rounded-full font-black">
+                          Enter →
                         </span>
                       </button>
                     )}
@@ -367,7 +362,7 @@ export default function Navbar({
                         setMobileMenuOpen(false);
                         onOpenOrderHistory?.();
                       }}
-                      className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                      className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-transparent hover:border-slate-200"
                     >
                       <History className="w-4 h-4 text-slate-500" />
                       <span>Past Orders & Reorder</span>
@@ -380,7 +375,7 @@ export default function Navbar({
                         setMobileMenuOpen(false);
                         onOpenOrders?.();
                       }}
-                      className="w-full flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                      className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-transparent hover:border-slate-200"
                     >
                       <PackageCheck className="w-4 h-4 text-emerald-600" />
                       <span>Track Live Orders</span>
@@ -393,14 +388,14 @@ export default function Navbar({
                         setMobileMenuOpen(false);
                         onOpenWishlist?.();
                       }}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                      className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-transparent hover:border-slate-200"
                     >
                       <span className="flex items-center gap-2.5">
                         <Heart className="w-4 h-4 text-rose-500" />
                         <span>My Wishlist</span>
                       </span>
                       {wishlistCount > 0 && (
-                        <span className="text-[10px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-full">
                           {wishlistCount}
                         </span>
                       )}
@@ -414,7 +409,7 @@ export default function Navbar({
                           setMobileMenuOpen(false);
                           onLogoutUser?.();
                         }}
-                        className="w-full flex items-center gap-2.5 p-2.5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition font-bold"
+                        className="w-full flex items-center gap-2.5 p-3 rounded-2xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition font-black"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Sign Out of Account</span>
@@ -427,8 +422,8 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Desktop Only: Action Buttons Toolbar */}
-          <div className="hidden sm:flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+          {/* Desktop Only: Action Buttons Toolbar (Hidden on Mobile) */}
+          <div className="hidden md:flex items-center space-x-1.5 shrink-0">
             
             {/* DARK THEME TOGGLE BUTTON */}
             <button
@@ -451,8 +446,7 @@ export default function Navbar({
                 title="Store Admin Portal (Manage Orders, Inventory & Store Settings)"
               >
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Admin Portal</span>
-                <span className="sm:hidden font-extrabold text-[11px]">Portal</span>
+                <span>Admin Portal</span>
               </button>
             )}
 

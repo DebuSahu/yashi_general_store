@@ -47,8 +47,15 @@ import {
   Sun,
   Moon,
   Store,
-  ShoppingCart
+  ShoppingCart,
+  MessageCircle,
+  Mail
 } from 'lucide-react';
+import {
+  buildStoreWhatsappMessage,
+  buildClientWhatsappBillMessage,
+  buildClientEmailBill
+} from './utils/orderReceiptHelper';
 
 export default function App() {
   // Theme state (Dark / Light mode)
@@ -1479,7 +1486,63 @@ export default function App() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            {/* Direct WhatsApp & Email Bill Dispatch Buttons */}
+            <div className="space-y-2 pt-1 pb-1">
+              {/* 1. Client WhatsApp Bill Receipt */}
+              <button
+                type="button"
+                onClick={() => {
+                  const clientWhatsapp = orderPlacedSuccess?.clientWhatsapp || buildClientWhatsappBillMessage({
+                    order: orderPlacedSuccess,
+                    totalAmount: orderPlacedSuccess?.totalAmount,
+                    shopSettings
+                  });
+                  if (clientWhatsapp?.url) window.open(clientWhatsapp.url, '_blank');
+                }}
+                className="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 active:scale-98"
+              >
+                <MessageCircle className="w-4 h-4 fill-white" />
+                <span>Send Bill to My WhatsApp (+91 {orderPlacedSuccess?.customerPhone})</span>
+              </button>
+
+              {/* 2. Store WhatsApp Order Request */}
+              <button
+                type="button"
+                onClick={() => {
+                  const storeWhatsapp = orderPlacedSuccess?.storeWhatsapp || buildStoreWhatsappMessage({
+                    order: orderPlacedSuccess,
+                    totalAmount: orderPlacedSuccess?.totalAmount,
+                    shopSettings
+                  });
+                  if (storeWhatsapp?.url) window.open(storeWhatsapp.url, '_blank');
+                }}
+                className="w-full py-2.5 px-3 bg-green-700 hover:bg-green-800 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 active:scale-98"
+              >
+                <Store className="w-4 h-4" />
+                <span>Send Order Request to Store WhatsApp</span>
+              </button>
+
+              {/* 3. Customer Gmail Invoice Receipt */}
+              {orderPlacedSuccess?.customerEmail && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const clientEmail = orderPlacedSuccess?.clientEmail || buildClientEmailBill({
+                      order: orderPlacedSuccess,
+                      totalAmount: orderPlacedSuccess?.totalAmount,
+                      shopSettings
+                    });
+                    if (clientEmail?.mailtoUrl) window.open(clientEmail.mailtoUrl, '_blank');
+                  }}
+                  className="w-full py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
+                >
+                  <Mail className="w-4 h-4 text-emerald-600" />
+                  <span>Send Bill Copy to Gmail ({orderPlacedSuccess.customerEmail})</span>
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => {
                   const ord = orderPlacedSuccess;

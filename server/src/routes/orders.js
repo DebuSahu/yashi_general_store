@@ -10,6 +10,7 @@ router.post('/', (req, res) => {
   const {
     customerName,
     customerPhone,
+    customerEmail,
     address,
     latitude,
     longitude,
@@ -115,6 +116,7 @@ router.post('/', (req, res) => {
     id: orderId,
     customerName: customerName?.trim() || 'Customer',
     customerPhone: cleanPhone,
+    customerEmail: (customerEmail || '').trim().toLowerCase() || null,
     address: address.trim(),
     latitude: userLat,
     longitude: userLon,

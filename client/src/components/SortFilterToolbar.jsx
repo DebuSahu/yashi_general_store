@@ -143,12 +143,12 @@ export default function SortFilterToolbar({
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full text-xs font-bold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer truncate"
               >
-                <option value="featured" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Featured / Best Sellers</option>
-                <option value="price-asc" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Price: Low to High</option>
-                <option value="price-desc" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Price: High to Low</option>
-                <option value="rating" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Highest Rated</option>
-                <option value="discount" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Biggest Discount</option>
-                <option value="name" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Product Name (A - Z)</option>
+                <option value="featured" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Featured</option>
+                <option value="price-asc" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Price: Low-High</option>
+                <option value="price-desc" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Price: High-Low</option>
+                <option value="rating" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Top Rated</option>
+                <option value="discount" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Discounts</option>
+                <option value="name" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Name: A to Z</option>
               </select>
             </div>
           </div>
@@ -187,7 +187,69 @@ export default function SortFilterToolbar({
           </div>
         </div>
 
-        {/* Active Filter Tags on Mobile (Clean List/Wrap, No Slide) */}
+        {/* Mobile Filter Quick Chips (Smooth 1-Tap Horizontal Scroll) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-1 w-full flex-nowrap">
+          <button
+            type="button"
+            onClick={() => setFilterVegOnly(!filterVegOnly)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-extrabold transition active:scale-95 border ${
+              filterVegOnly
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Pure Veg</span>
+            {filterVegOnly && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFilterDealsOnly(!filterDealsOnly)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-extrabold transition active:scale-95 border ${
+              filterDealsOnly
+                ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            }`}
+          >
+            <span>🔥 Hot Deals</span>
+            {filterDealsOnly && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFilterInStockOnly(!filterInStockOnly)}
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-extrabold transition active:scale-95 border ${
+              filterInStockOnly
+                ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            }`}
+          >
+            <ShieldCheck className="w-3 h-3" />
+            <span>In Stock</span>
+            {filterInStockOnly && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          {priceRanges.slice(1).map((range) => {
+            const isSelected = selectedPriceRange === range.id;
+            return (
+              <button
+                key={range.id}
+                type="button"
+                onClick={() => setSelectedPriceRange(isSelected ? 'all' : range.id)}
+                className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-xl text-[11px] font-bold transition active:scale-95 border ${
+                  isSelected
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                    : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {range.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active Filter Tags on Mobile */}
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-100 dark:border-slate-800">
             {filterVegOnly && (
@@ -290,12 +352,12 @@ export default function SortFilterToolbar({
                 onChange={(e) => setSortBy(e.target.value)}
                 className="text-[11px] sm:text-xs font-bold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1"
               >
-                <option value="featured">Featured / Best Sellers</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-                <option value="discount">Biggest Discount</option>
-                <option value="name">Product Name (A - Z)</option>
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low-High</option>
+                <option value="price-desc">Price: High-Low</option>
+                <option value="rating">Top Rated</option>
+                <option value="discount">Discounts</option>
+                <option value="name">Name: A to Z</option>
               </select>
             </div>
 
@@ -328,11 +390,11 @@ export default function SortFilterToolbar({
         </div>
 
         {/* Bottom Row: Quick Filter Chips (Veg, Flash Deals, In Stock, Price Range) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth pt-1 pb-0.5 w-full pr-6">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth pt-1 pb-0.5 w-full flex-nowrap pr-2">
           {/* Pure Veg Pill */}
           <button
             onClick={() => setFilterVegOnly(!filterVegOnly)}
-            className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-extrabold transition active:scale-95 border ${
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-extrabold transition active:scale-95 border ${
               filterVegOnly
                 ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                 : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-300'
@@ -348,7 +410,7 @@ export default function SortFilterToolbar({
           {/* Hot Deals Only Pill */}
           <button
             onClick={() => setFilterDealsOnly(!filterDealsOnly)}
-            className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-extrabold transition active:scale-95 border ${
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-extrabold transition active:scale-95 border ${
               filterDealsOnly
                 ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
                 : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-amber-300'
@@ -362,7 +424,7 @@ export default function SortFilterToolbar({
           {/* In Stock Only Pill */}
           <button
             onClick={() => setFilterInStockOnly(!filterInStockOnly)}
-            className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-extrabold transition active:scale-95 border ${
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-extrabold transition active:scale-95 border ${
               filterInStockOnly
                 ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
                 : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-teal-300'
@@ -382,7 +444,7 @@ export default function SortFilterToolbar({
               <button
                 key={range.id}
                 onClick={() => setSelectedPriceRange(range.id)}
-                className={`shrink-0 px-2.5 py-1 rounded-xl text-[11px] font-bold transition active:scale-95 border ${
+                className={`shrink-0 whitespace-nowrap px-2.5 py-1 rounded-xl text-[11px] font-bold transition active:scale-95 border ${
                   isSelected
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                     : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-emerald-300'

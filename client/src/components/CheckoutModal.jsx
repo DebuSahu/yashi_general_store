@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   CheckCircle2,
@@ -12,13 +13,19 @@ import {
   Clock,
   CreditCard,
   User,
-  Mail
+  Mail,
+  Send
 } from 'lucide-react';
 import LocationPicker from './LocationPicker';
 import { api } from '../api';
 import confetti from 'canvas-confetti';
 import GoogleAuthModal, { GoogleGLogo } from './GoogleAuthModal';
 import { extractFullNameFromEmail } from '../utils/userHelper';
+import {
+  buildStoreWhatsappMessage,
+  buildClientWhatsappBillMessage,
+  buildClientEmailBill
+} from '../utils/orderReceiptHelper';
 
 export default function CheckoutModal({
   isOpen,
@@ -56,14 +63,25 @@ export default function CheckoutModal({
   const [authError, setAuthError] = useState('');
   const [guestName, setGuestName] = useState('');
 
-  // Delivery details state
+  // Delivery details state: Customer Name auto-fills from Gmail; Phone starts strictly blank & is required
   const [customerName, setCustomerName] = useState(
-    user?.name || (user?.email ? extractFullNameFromEmail(user.email) : '')
+    () => user?.name || (user?.email ? extractFullNameFromEmail(user.email) : '')
   );
-  const [deliveryPhone, setDeliveryPhone] = useState(user?.phone || '');
+  const [deliveryPhone, setDeliveryPhone] = useState(''); // strictly blank as requested by user
   const [address, setAddress] = useState('');
   const [landmark, setLandmark] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Keep customer name updated if user logs in during checkout or switches accounts
+  useEffect(() => {
+    if (user) {
+      const bestName = user.name || (user.email ? extractFullNameFromEmail(user.email) : '');
+      if (bestName) {
+        setCustomerName(bestName);
+      }
+      setStep(2);
+    }
+  }, [user]);
 
   // Delivery slot selection
   const [deliverySlot, setDeliverySlot] = useState('express');
@@ -203,24 +221,50 @@ export default function CheckoutModal({
       };
 
       const res = await api.submitOrder(orderPayload);
-      if (res.success) {
+      if (res && (res.success || res.id)) {
+        const confirmedOrder = res.order || res;
+
+        // Generate instant WhatsApp messages and Email bill details
+        const storeWhatsapp = buildStoreWhatsappMessage({
+          order: confirmedOrder,
+          items,
+          totalAmount: finalPayable,
+          shopSettings
+        });
+        const clientWhatsapp = buildClientWhatsappBillMessage({
+          order: confirmedOrder,
+          items,
+          totalAmount: finalPayable,
+          shopSettings
+        });
+        const clientEmail = buildClientEmailBill({
+          order: confirmedOrder,
+          items,
+          totalAmount: finalPayable,
+          shopSettings
+        });
+
+        const completedOrder = {
+          ...confirmedOrder,
+          items: items.map((i) => ({
+            id: i.id,
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity,
+            unit: i.unit,
+            image: i.image
+          })),
+          totalAmount: finalPayable,
+          placedAt: new Date().toISOString(),
+          customerEmail: user?.email || null,
+          storeWhatsapp,
+          clientWhatsapp,
+          clientEmail
+        };
+
         try {
           const existingHistory = JSON.parse(localStorage.getItem('gs_order_history') || '[]');
-          const newOrderWithExtra = {
-            ...res.order,
-            items: items.map((i) => ({
-              id: i.id,
-              name: i.name,
-              price: i.price,
-              quantity: i.quantity,
-              unit: i.unit,
-              image: i.image
-            })),
-            totalAmount: finalPayable,
-            placedAt: new Date().toISOString(),
-            status: 'pending'
-          };
-          localStorage.setItem('gs_order_history', JSON.stringify([newOrderWithExtra, ...existingHistory]));
+          localStorage.setItem('gs_order_history', JSON.stringify([completedOrder, ...existingHistory]));
         } catch (e) {}
 
         try {
@@ -231,24 +275,24 @@ export default function CheckoutModal({
           });
         } catch (e) {}
 
-        onOrderPlacedSuccess?.(res.order);
+        onOrderPlacedSuccess?.(completedOrder);
       } else {
-        setOrderError(res.error || 'Failed to place order');
+        setOrderError(res?.error || 'Failed to place order');
       }
     } catch (err) {
-      setOrderError('Failed to place order. Check server connection.');
+      setOrderError('Failed to place order. Check server connection: ' + err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200 transition-colors">
+      <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-2xl w-full flex flex-col h-[100dvh] sm:h-auto sm:max-h-[92vh] border-t sm:border border-slate-200 dark:border-slate-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-200 transition-colors overflow-hidden">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white p-4 sm:p-5 flex items-center justify-between shrink-0">
+          <div className="bg-gradient-to-r from-emerald-700 via-green-600 to-emerald-600 text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
             <div>
               <div className="flex items-center space-x-2">
                 <span className="p-1 rounded-xl bg-white/20">
@@ -288,7 +332,7 @@ export default function CheckoutModal({
           </div>
 
           {/* Content Body */}
-          <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
+          <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 space-y-4 pb-28 sm:pb-6 overscroll-contain">
             
             {/* STEP 1: GMAIL SIGN IN / GUEST (NO MOBILE/OTP REQUIRED AT LOGIN) */}
             {step === 1 && (
@@ -384,10 +428,11 @@ export default function CheckoutModal({
                     />
                   </div>
 
-                  {/* MOBILE NUMBER: Only asked here when placing the order! */}
+                  {/* MOBILE NUMBER: Strictly Blank & Required! */}
                   <div>
-                    <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1">
-                      Mobile Number for Delivery Call *
+                    <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                      <span>Mobile Number for Delivery Call *</span>
+                      <span className="text-[10px] text-rose-600 dark:text-rose-400 font-black">Required</span>
                     </label>
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-slate-500 pointer-events-none">
@@ -399,10 +444,10 @@ export default function CheckoutModal({
                         inputMode="numeric"
                         pattern="[0-9]*"
                         maxLength="10"
-                        placeholder="98765 43210"
+                        placeholder="Enter 10-digit mobile number"
                         value={deliveryPhone}
                         onChange={(e) => setDeliveryPhone(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-full pl-12 pr-4 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold dark:text-white"
+                        className="w-full pl-12 pr-4 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold dark:text-white placeholder:text-slate-400"
                       />
                     </div>
                   </div>
@@ -612,6 +657,7 @@ export default function CheckoutModal({
         onLoginSuccess={handleGoogleSuccess}
         onShowToast={onShowToast}
       />
-    </>
+    </>,
+    document.body
   );
 }
