@@ -490,6 +490,32 @@ export default function App() {
     return () => window.removeEventListener('hashchange', checkAdminRoute);
   }, [adminUser]);
 
+  // Handle direct ?bill=... or ?invoice=... links from WhatsApp & Gmail
+  useEffect(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const targetBillId = searchParams.get('bill') || searchParams.get('invoice');
+      if (targetBillId) {
+        api.getOrderById(targetBillId).then((foundOrder) => {
+          if (foundOrder) {
+            setTargetTrackerOrder(foundOrder);
+            setOrderTrackerOpen(true);
+            try {
+              downloadInvoicePdf({ order: foundOrder, shopSettings });
+            } catch (err) {}
+            setToast({
+              type: 'success',
+              title: 'Official Tax Invoice 📄',
+              message: `Order #${foundOrder.id} loaded & PDF bill downloaded!`
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Bill param routing error:', e);
+    }
+  }, [shopSettings]);
+
   const handleResetFilters = () => {
     setSortBy('featured');
     setFilterVegOnly(false);

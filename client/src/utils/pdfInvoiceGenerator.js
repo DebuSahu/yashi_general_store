@@ -343,3 +343,4 @@ export function getInvoicePdfBlob({ order, items = [], shopSettings = {}, applie
     return null;
   }
 }
+

@@ -848,6 +848,22 @@ export const api = {
     };
   },
 
+  getOrderById: async (orderId) => {
+    if (!orderId) return null;
+    const cleanId = String(orderId).trim();
+    try {
+      const res = await api.getOrders(cleanId);
+      if (res && res.orders && res.orders.length > 0) {
+        const match = res.orders.find(o => String(o.id).toLowerCase() === cleanId.toLowerCase());
+        if (match) return match;
+        return res.orders[0];
+      }
+    } catch (e) {
+      console.warn('getOrderById error:', e);
+    }
+    return null;
+  },
+
   updateOrderStatus: async (id, status, token, note = '') => {
     if (API_BASE) {
       try {
