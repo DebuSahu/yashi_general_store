@@ -55,6 +55,7 @@ import {
   buildClientEmailBill
 } from './utils/orderReceiptHelper';
 import { downloadInvoicePdf } from './utils/pdfInvoiceGenerator';
+import FestivalHeroBanner from './components/FestivalHeroBanner';
 
 export default function App() {
   // Theme state (Dark / Light mode)
@@ -125,6 +126,10 @@ export default function App() {
   // Applied Coupon State
   const [appliedCoupon, setAppliedCoupon] = useState(null);
 
+  // Offers & Festival Deals state
+  const [offers, setOffers] = useState([]);
+  const [dismissedHeroBanner, setDismissedHeroBanner] = useState(false);
+
   // Toast Notification state
   const [toast, setToast] = useState(null);
 
@@ -183,12 +188,13 @@ export default function App() {
     localStorage.setItem('gs_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  // Load shop settings and products
+  // Load shop settings, products and promotional offers
   const loadInitialData = async () => {
     try {
-      const [settingsRes, productsRes] = await Promise.all([
+      const [settingsRes, productsRes, offersRes] = await Promise.all([
         api.getSettings(),
-        api.getProducts(selectedCategory, searchTerm)
+        api.getProducts(selectedCategory, searchTerm),
+        api.getOffers().catch(() => ({ offers: [] }))
       ]);
 
       if (settingsRes?.settings) {
@@ -211,6 +217,12 @@ export default function App() {
       }
 
       setProducts(prods);
+
+      if (offersRes?.offers && Array.isArray(offersRes.offers)) {
+        setOffers(offersRes.offers);
+      } else if (defaultData.offers && Array.isArray(defaultData.offers)) {
+        setOffers(defaultData.offers);
+      }
     } catch (err) {
       console.error('Error fetching initial store data:', err);
     } finally {
@@ -458,9 +470,61 @@ export default function App() {
 
   const handleBackToStore = () => {
     setIsAdminView(false);
+    loadInitialData();
     if (window.location.hash === '#admin') {
       window.history.pushState(null, '', window.location.pathname + window.location.search);
     }
+  };
+
+  const handleClaimOffer = (offer) => {
+    if (!offer) return;
+    if (offer.code) {
+      setAppliedCoupon({
+        code: offer.code.toUpperCase(),
+        description: offer.tagline,
+        minOrder: offer.minOrderAmount || 0,
+        type: offer.type,
+        value: offer.discountValue || 0,
+        maxDiscount: offer.maxDiscount || null,
+        scope: offer.scope || 'all',
+        targetCategory: offer.targetCategory || 'all',
+        targetProductIds: offer.targetProductIds || [],
+        bogoBuyQty: offer.bogoBuyQty || 1,
+        bogoGetQty: offer.bogoGetQty || 1,
+        badgeText: offer.badgeText
+      });
+      setToast({
+        type: 'coupon',
+        title: 'Offer Activated! 🎉',
+        message: `Promo code ${offer.code} applied to your cart!`
+      });
+    }
+    if (offer.scope === 'category' && offer.targetCategory && offer.targetCategory !== 'all') {
+      setSelectedCategory(offer.targetCategory);
+    }
+    const catalogEl = document.getElementById('catalog-section');
+    if (catalogEl) {
+      catalogEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const getMatchedOfferForProduct = (product) => {
+    if (!product || !offers || offers.length === 0) return null;
+    const direct = offers.find(
+      (o) => o.isActive && o.scope === 'product' && o.targetProductIds?.includes(product.id)
+    );
+    if (direct) return direct;
+    const catMatch = offers.find(
+      (o) =>
+        o.isActive &&
+        o.scope === 'category' &&
+        (o.targetCategory === 'all' ||
+          (product.category || '').toLowerCase() === (o.targetCategory || '').toLowerCase())
+    );
+    if (catMatch) return catMatch;
+    const storeWide = offers.find((o) => o.isActive && o.scope === 'all');
+    if (storeWide) return storeWide;
+    return null;
   };
 
   // URL hash routing for #admin with strict security guard
@@ -718,7 +782,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-100 selection:text-emerald-900 w-full max-w-full overflow-x-hidden transition-colors duration-200">
       
       {/* 0. LIVE ANIMATED TICKER MARQUEE */}
-      <AnnouncementTicker user={user} />
+      <AnnouncementTicker user={user} offers={offers} />
 
       {/* 1. TOP ANNOUNCEMENT BANNER (Strict 5km delivery notice) */}
       <DeliveryNoticeBanner
@@ -756,6 +820,15 @@ export default function App() {
         theme={theme}
         toggleTheme={toggleTheme}
       />
+
+      {/* 2.5 LIVE FESTIVAL & OFFERS HERO BANNER */}
+      {!dismissedHeroBanner && offers.find((o) => o.isActive && o.showHeroBanner) && (
+        <FestivalHeroBanner
+          offer={offers.find((o) => o.isActive && o.showHeroBanner)}
+          onClaimOffer={handleClaimOffer}
+          onDismiss={() => setDismissedHeroBanner(true)}
+        />
+      )}
 
       {/* 3. HERO SECTION WITH VIBRANT ANIMATIONS */}
       <section className="relative bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white overflow-hidden py-7 sm:py-14 lg:py-16 w-full max-w-full">
@@ -956,7 +1029,7 @@ export default function App() {
       </div>
 
       {/* 5. PRODUCT CATALOG & TOOLBAR */}
-      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-36 md:py-8 flex-1 min-w-0">
+      <main id="catalog-section" className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-44 md:py-8 flex-1 min-w-0">
         
         {/* SORT & FILTER TOOLBAR */}
         <SortFilterToolbar
@@ -1052,6 +1125,7 @@ export default function App() {
                     onToggleWishlist={handleToggleWishlist}
                     onOpenQuickView={(p) => setQuickViewProduct(p)}
                     onShowToast={(t) => setToast(t)}
+                    matchedOffer={getMatchedOfferForProduct(product)}
                   />
                 ))}
               </div>
@@ -1169,6 +1243,7 @@ export default function App() {
                         onToggleWishlist={handleToggleWishlist}
                         onOpenQuickView={(p) => setQuickViewProduct(p)}
                         onShowToast={(t) => setToast(t)}
+                        matchedOffer={getMatchedOfferForProduct(product)}
                       />
                     ))}
                   </div>
@@ -1181,15 +1256,15 @@ export default function App() {
 
       </main>
 
-      {/* 6. FLOATING CART BAR (Positioned above mobile bottom nav bar on mobile, and at bottom-5 on desktop) */}
+      {/* 6. FLOATING CART BAR (Positioned safely above mobile bottom nav bar on mobile, and at bottom-5 on desktop) */}
       {cartCount > 0 && !cartDrawerOpen && !checkoutModalOpen && (
-        <div className="fixed bottom-[4.5rem] inset-x-3 md:bottom-5 md:inset-x-4 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom duration-300">
+        <div className="fixed bottom-[4.75rem] inset-x-3.5 md:bottom-5 md:inset-x-4 max-w-lg mx-auto z-50 animate-in slide-in-from-bottom duration-300 pointer-events-auto">
           <div
             onClick={() => setCartDrawerOpen(true)}
-            className="bg-emerald-700 hover:bg-emerald-800 text-white p-2.5 sm:p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer border border-emerald-500/60 transition active:scale-98"
+            className="bg-emerald-700 hover:bg-emerald-800 text-white py-2.5 px-3.5 sm:p-3.5 rounded-2xl shadow-[0_10px_25px_-5px_rgba(5,150,105,0.45)] flex items-center justify-between cursor-pointer border border-emerald-500/60 transition active:scale-98 select-none"
           >
-            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-              <span className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-emerald-800 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
+            <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+              <span className="w-8 h-8 sm:w-9 sm:h-9 bg-white text-emerald-800 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
                 {cartCount}
               </span>
               <div className="min-w-0">
@@ -1202,7 +1277,7 @@ export default function App() {
                     ₹{cartTotal}
                   </span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-emerald-200 truncate">
+                <p className="text-[10px] sm:text-[11px] text-emerald-200 truncate font-semibold">
                   {cartTotal < (shopSettings?.minOrderAmount || 100)
                     ? `Add ₹${(shopSettings?.minOrderAmount || 100) - cartTotal} more for Min ₹100`
                     : 'Free 5km Delivery • Ready to Order'}
@@ -1211,7 +1286,7 @@ export default function App() {
             </div>
 
             <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 ml-2">
-              <span className="text-xs font-black bg-white text-emerald-900 px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-xs">
+              <span className="text-xs font-black bg-white text-emerald-900 px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm hover:bg-emerald-50 transition">
                 <span>View Cart</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </span>
@@ -1376,6 +1451,7 @@ export default function App() {
         setAppliedCoupon={setAppliedCoupon}
         allProducts={products}
         onShowToast={(t) => setToast(t)}
+        offers={offers}
         onProceedCheckout={() => {
           setCartDrawerOpen(false);
           setCheckoutModalOpen(true);
@@ -1582,7 +1658,7 @@ export default function App() {
 
 
       {/* MOBILE BOTTOM FLOATING NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl transition-colors">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around shadow-2xl transition-colors">
         <button
           onClick={() => {
             setSelectedCategory('all');

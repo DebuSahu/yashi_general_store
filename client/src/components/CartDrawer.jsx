@@ -29,7 +29,8 @@ export default function CartDrawer({
   appliedCoupon,
   setAppliedCoupon,
   allProducts = [],
-  onShowToast
+  onShowToast,
+  offers = []
 }) {
 
   const [couponInput, setCouponInput] = useState('');
@@ -45,8 +46,26 @@ export default function CartDrawer({
   }, 0);
   const totalProductSavings = Math.max(0, totalMrp - totalAmount);
 
-  // Available coupons
-  const availableCoupons = [
+  // Available coupons: dynamically merged from active admin offers + standard store coupons
+  const dynamicDeals = (offers || [])
+    .filter((o) => o.isActive && o.code)
+    .map((o) => ({
+      id: o.id,
+      code: o.code.toUpperCase(),
+      description: o.tagline || (o.type === 'bogo' ? `Buy ${o.bogoBuyQty} Get ${o.bogoGetQty} Free` : `${o.discountValue}% OFF`),
+      minOrder: o.minOrderAmount || 0,
+      type: o.type,
+      value: o.discountValue || 0,
+      maxDiscount: o.maxDiscount || null,
+      scope: o.scope || 'all',
+      targetCategory: o.targetCategory || 'all',
+      targetProductIds: o.targetProductIds || [],
+      bogoBuyQty: o.bogoBuyQty || 1,
+      bogoGetQty: o.bogoGetQty || 1,
+      badgeText: o.badgeText
+    }));
+
+  const standardCoupons = [
     {
       code: 'YASHI50',
       description: 'Flat ₹50 OFF on orders above ₹299',
@@ -71,15 +90,54 @@ export default function CartDrawer({
     }
   ];
 
+  const codeSet = new Set();
+  const availableCoupons = [];
+  [...dynamicDeals, ...standardCoupons].forEach((c) => {
+    if (!codeSet.has(c.code)) {
+      codeSet.add(c.code);
+      availableCoupons.push(c);
+    }
+  });
+
+  // Calculate discount for currently applied coupon
   let couponDiscount = 0;
   if (appliedCoupon) {
-    if (appliedCoupon?.type === 'flat') {
-      couponDiscount = appliedCoupon?.value || 0;
-    } else if (appliedCoupon?.type === 'percent') {
-      couponDiscount = Math.min(
-        appliedCoupon?.maxDiscount || 100,
-        Math.round((totalAmount * (appliedCoupon?.value || 0)) / 100)
-      );
+    if (appliedCoupon.type === 'flat') {
+      couponDiscount = Math.min(totalAmount, appliedCoupon.value || 0);
+    } else if (appliedCoupon.type === 'percent') {
+      let eligibleSubtotal = totalAmount;
+      if (appliedCoupon.scope === 'category') {
+        eligibleSubtotal = items
+          .filter((i) => appliedCoupon.targetCategory === 'all' || (i.category || '').toLowerCase() === (appliedCoupon.targetCategory || '').toLowerCase())
+          .reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+      } else if (appliedCoupon.scope === 'product') {
+        eligibleSubtotal = items
+          .filter((i) => appliedCoupon.targetProductIds?.includes(i.id))
+          .reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+      }
+      const rawDiscount = Math.round((eligibleSubtotal * (Number(appliedCoupon.value) || 0)) / 100);
+      couponDiscount = appliedCoupon.maxDiscount ? Math.min(Number(appliedCoupon.maxDiscount), rawDiscount) : rawDiscount;
+    } else if (appliedCoupon.type === 'bogo') {
+      let bogoDiscount = 0;
+      items.forEach((item) => {
+        let isEligible = false;
+        if (appliedCoupon.scope === 'product') {
+          isEligible = appliedCoupon.targetProductIds?.includes(item.id);
+        } else if (appliedCoupon.scope === 'category') {
+          isEligible = appliedCoupon.targetCategory === 'all' || (item.category || '').toLowerCase() === (appliedCoupon.targetCategory || '').toLowerCase();
+        } else {
+          isEligible = true;
+        }
+
+        if (isEligible) {
+          const buyQty = Number(appliedCoupon.bogoBuyQty) || 1;
+          const getQty = Number(appliedCoupon.bogoGetQty) || 1;
+          const bundleSize = buyQty + getQty;
+          const freeUnits = Math.floor((Number(item.quantity) || 1) / bundleSize) * getQty;
+          bogoDiscount += freeUnits * (Number(item.price) || 0);
+        }
+      });
+      couponDiscount = bogoDiscount;
     }
   }
 
@@ -93,6 +151,20 @@ export default function CartDrawer({
       setCouponError(`Min order of ₹${coupon?.minOrder} required for ${coupon?.code}`);
       return;
     }
+
+    if (coupon.type === 'bogo') {
+      let hasEligible = false;
+      items.forEach((item) => {
+        if (coupon.scope === 'product' && coupon.targetProductIds?.includes(item.id)) hasEligible = true;
+        else if (coupon.scope === 'category' && (coupon.targetCategory === 'all' || (item.category || '').toLowerCase() === (coupon.targetCategory || '').toLowerCase())) hasEligible = true;
+        else if (coupon.scope === 'all') hasEligible = true;
+      });
+      if (!hasEligible) {
+        setCouponError(`Add eligible items to your basket to claim ${coupon.code}!`);
+        return;
+      }
+    }
+
     setAppliedCoupon(coupon);
     try {
       confetti({

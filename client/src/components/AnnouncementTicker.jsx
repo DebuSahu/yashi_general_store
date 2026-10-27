@@ -2,10 +2,20 @@ import React from 'react';
 import { Zap, Sparkles, Tag, Truck, ShieldCheck, Heart } from 'lucide-react';
 import { getUserFirstName } from '../utils/userHelper';
 
-export default function AnnouncementTicker({ user }) {
+export default function AnnouncementTicker({ user, offers = [] }) {
   const firstName = user ? getUserFirstName(user) : '';
 
+  const activeOfferAnnouncements = (offers || [])
+    .filter((o) => o.isActive && o.showInAnnouncement)
+    .map((o) => ({
+      icon: Sparkles,
+      text: `🔥 ${o.badgeText || o.title.toUpperCase()}${o.code ? ` • USE: ${o.code}` : ''}`,
+      sub: o.tagline || 'Special Festival Deal Live Now!',
+      color: 'text-amber-300'
+    }));
+
   const announcements = [
+    ...activeOfferAnnouncements,
     ...(firstName ? [{
       icon: Heart,
       text: `👋 WELCOME BACK, ${firstName.toUpperCase()}!`,

@@ -42,16 +42,45 @@ export default function CheckoutModal({
   const items = Object.values(cart);
   const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Calculate discount from coupon if any
+  // Calculate discount from coupon if any (Supports flat, scoped percent, and BOGO freebies)
   let couponDiscount = 0;
   if (appliedCoupon) {
     if (appliedCoupon.type === 'flat') {
-      couponDiscount = appliedCoupon.value;
+      couponDiscount = Math.min(totalAmount, Number(appliedCoupon.value) || 0);
     } else if (appliedCoupon.type === 'percent') {
-      couponDiscount = Math.min(
-        appliedCoupon.maxDiscount || 100,
-        Math.round((totalAmount * appliedCoupon.value) / 100)
-      );
+      let eligibleSubtotal = totalAmount;
+      if (appliedCoupon.scope === 'category') {
+        eligibleSubtotal = items
+          .filter((i) => appliedCoupon.targetCategory === 'all' || (i.category || '').toLowerCase() === (appliedCoupon.targetCategory || '').toLowerCase())
+          .reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+      } else if (appliedCoupon.scope === 'product') {
+        eligibleSubtotal = items
+          .filter((i) => appliedCoupon.targetProductIds?.includes(i.id))
+          .reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+      }
+      const rawDiscount = Math.round((eligibleSubtotal * (Number(appliedCoupon.value) || 0)) / 100);
+      couponDiscount = appliedCoupon.maxDiscount ? Math.min(Number(appliedCoupon.maxDiscount), rawDiscount) : rawDiscount;
+    } else if (appliedCoupon.type === 'bogo') {
+      let bogoDiscount = 0;
+      items.forEach((item) => {
+        let isEligible = false;
+        if (appliedCoupon.scope === 'product') {
+          isEligible = appliedCoupon.targetProductIds?.includes(item.id);
+        } else if (appliedCoupon.scope === 'category') {
+          isEligible = appliedCoupon.targetCategory === 'all' || (item.category || '').toLowerCase() === (appliedCoupon.targetCategory || '').toLowerCase();
+        } else {
+          isEligible = true;
+        }
+
+        if (isEligible) {
+          const buyQty = Number(appliedCoupon.bogoBuyQty) || 1;
+          const getQty = Number(appliedCoupon.bogoGetQty) || 1;
+          const bundleSize = buyQty + getQty;
+          const freeUnits = Math.floor((Number(item.quantity) || 1) / bundleSize) * getQty;
+          bogoDiscount += freeUnits * (Number(item.price) || 0);
+        }
+      });
+      couponDiscount = bogoDiscount;
     }
   }
 

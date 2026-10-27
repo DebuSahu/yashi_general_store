@@ -1449,5 +1449,87 @@
       "role": "superadmin",
       "createdAt": "2026-10-25T13:21:35.346Z"
     }
+  ],
+  "offers": [
+    {
+      "id": "offer-diwali-2026",
+      "title": "Diwali Maha Bumper Sale 🪔",
+      "tagline": "Celebrate with 20% OFF on all festival orders above ₹249!",
+      "code": "DIWALI20",
+      "type": "percent",
+      "discountValue": 20,
+      "scope": "all",
+      "targetCategory": "all",
+      "targetProductIds": [],
+      "minOrderAmount": 249,
+      "maxDiscount": 150,
+      "badgeText": "🪔 DIWALI 20% OFF",
+      "bannerTheme": "festival",
+      "showInAnnouncement": true,
+      "showHeroBanner": true,
+      "isActive": true,
+      "createdAt": "2026-10-27T10:00:00.000Z"
+    },
+    {
+      "id": "offer-bogo-paneer",
+      "title": "Buy 1 Get 1 Free on Fresh Malai Paneer 🎁",
+      "tagline": "Special BOGO deal! Add 1 pack of Fresh Paneer and get 1 free!",
+      "code": "BOGOPANEER",
+      "type": "bogo",
+      "discountValue": 100,
+      "bogoBuyQty": 1,
+      "bogoGetQty": 1,
+      "scope": "product",
+      "targetCategory": "dairy",
+      "targetProductIds": [
+        "dairy-amul-4"
+      ],
+      "minOrderAmount": 0,
+      "maxDiscount": 92,
+      "badgeText": "🎁 BUY 1 GET 1 FREE",
+      "bannerTheme": "bogo",
+      "showInAnnouncement": true,
+      "showHeroBanner": true,
+      "isActive": true,
+      "createdAt": "2026-10-27T10:00:00.000Z"
+    },
+    {
+      "id": "offer-veggies-30",
+      "title": "Farm Fresh Green Veggies 30% OFF 🥦",
+      "tagline": "Fresh harvest discount! 30% discount on all seasonal vegetables.",
+      "code": "VEGGIE30",
+      "type": "percent",
+      "discountValue": 30,
+      "scope": "category",
+      "targetCategory": "vegetables",
+      "targetProductIds": [],
+      "minOrderAmount": 150,
+      "maxDiscount": 100,
+      "badgeText": "🥦 30% VEGGIE SPECIAL",
+      "bannerTheme": "festival",
+      "showInAnnouncement": true,
+      "showHeroBanner": false,
+      "isActive": false,
+      "createdAt": "2026-10-27T10:00:00.000Z"
+    },
+    {
+      "id": "offer-flat-50",
+      "title": "Weekend Shopping Dhamaka - Flat ₹50 OFF 💰",
+      "tagline": "Flat ₹50 savings on any general grocery basket above ₹299.",
+      "code": "YASHI50",
+      "type": "flat",
+      "discountValue": 50,
+      "scope": "all",
+      "targetCategory": "all",
+      "targetProductIds": [],
+      "minOrderAmount": 299,
+      "maxDiscount": 50,
+      "badgeText": "🎉 FLAT ₹50 OFF",
+      "bannerTheme": "mega",
+      "showInAnnouncement": true,
+      "showHeroBanner": false,
+      "isActive": true,
+      "createdAt": "2026-10-27T10:00:00.000Z"
+    }
   ]
 }

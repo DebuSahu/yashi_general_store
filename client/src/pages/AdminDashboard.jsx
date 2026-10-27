@@ -35,10 +35,22 @@ import {
   XCircle,
   Minus,
   Sun,
-  Moon
+  Moon,
+  Tag,
+  Sparkles,
+  Gift,
+  Percent,
+  Calendar,
+  Flame,
+  PartyPopper,
+  CheckSquare,
+  Square,
+  Search,
+  Copy
 } from 'lucide-react';
 import YGSLogo from '../components/YGSLogo';
 import { api } from '../api';
+import AdminOffersManager from '../components/AdminOffersManager';
 
 export default function AdminDashboard({ onBackToStore, shopSettings, onSettingsUpdated, onLogoutAdmin, adminUser, theme, toggleTheme }) {
   const [token, setToken] = useState(() => {
@@ -118,6 +130,36 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Offers & Festival Deals states
+  const [offers, setOffers] = useState([]);
+  const [loadingOffers, setLoadingOffers] = useState(false);
+  const [offerFilter, setOfferFilter] = useState('all');
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [editingOffer, setEditingOffer] = useState(null);
+  const [offerProductSearch, setOfferProductSearch] = useState('');
+  const [savingOffer, setSavingOffer] = useState(false);
+  const [offerFormError, setOfferFormError] = useState('');
+  const [offerActionMsg, setOfferActionMsg] = useState({ type: '', text: '' });
+  const [offerForm, setOfferForm] = useState({
+    title: '',
+    tagline: '',
+    code: '',
+    type: 'percent',
+    discountValue: 20,
+    bogoBuyQty: 1,
+    bogoGetQty: 1,
+    scope: 'all',
+    targetCategory: 'all',
+    targetProductIds: [],
+    minOrderAmount: 0,
+    maxDiscount: '',
+    badgeText: '',
+    bannerTheme: 'festival',
+    showInAnnouncement: true,
+    showHeroBanner: true,
+    isActive: true
+  });
   const [imageMode, setImageMode] = useState('browse'); // 'browse' | 'url'
   const fileInputRef = useRef(null);
 
@@ -348,17 +390,210 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     }
   };
 
+  const loadOffers = async () => {
+    setLoadingOffers(true);
+    try {
+      const res = await api.getOffers();
+      if (res?.offers) {
+        setOffers(res.offers);
+      }
+    } catch (err) {
+      console.error('Error fetching offers:', err);
+    } finally {
+      setLoadingOffers(false);
+    }
+  };
+
+  const handleToggleOfferLive = async (offerId) => {
+    try {
+      const res = await api.toggleOfferLive(offerId, token);
+      if (res?.success) {
+        setOffers(prev => prev.map(o => o.id === offerId ? { ...o, isActive: res.isActive } : o));
+        setOfferActionMsg({
+          type: 'success',
+          text: res.message || 'Offer status updated'
+        });
+        setTimeout(() => setOfferActionMsg({ type: '', text: '' }), 4000);
+      }
+    } catch (err) {
+      alert('Failed to toggle offer: ' + err.message);
+    }
+  };
+
+  const handleDeleteOffer = async (offerId) => {
+    const target = offers.find(o => o.id === offerId);
+    if (!window.confirm(`Are you sure you want to delete the offer "${target?.title || 'this deal'}"?`)) return;
+    try {
+      const res = await api.deleteOffer(offerId, token);
+      if (res?.success) {
+        setOffers(prev => prev.filter(o => o.id !== offerId));
+        setOfferActionMsg({
+          type: 'success',
+          text: `Offer deleted successfully.`
+        });
+        setTimeout(() => setOfferActionMsg({ type: '', text: '' }), 4000);
+      }
+    } catch (err) {
+      alert('Failed to delete offer: ' + err.message);
+    }
+  };
+
+  const openCreateOffer = (preset = null) => {
+    setEditingOffer(null);
+    setOfferProductSearch('');
+    setOfferFormError('');
+    if (preset) {
+      setOfferForm({
+        title: preset.title || '',
+        tagline: preset.tagline || '',
+        code: preset.code || '',
+        type: preset.type || 'percent',
+        discountValue: preset.discountValue ?? 20,
+        bogoBuyQty: preset.bogoBuyQty || 1,
+        bogoGetQty: preset.bogoGetQty || 1,
+        scope: preset.scope || 'all',
+        targetCategory: preset.targetCategory || 'all',
+        targetProductIds: preset.targetProductIds || [],
+        minOrderAmount: preset.minOrderAmount || 0,
+        maxDiscount: preset.maxDiscount || '',
+        badgeText: preset.badgeText || '',
+        bannerTheme: preset.bannerTheme || 'festival',
+        showInAnnouncement: preset.showInAnnouncement ?? true,
+        showHeroBanner: preset.showHeroBanner ?? true,
+        isActive: preset.isActive ?? true
+      });
+    } else {
+      setOfferForm({
+        title: '',
+        tagline: '',
+        code: '',
+        type: 'percent',
+        discountValue: 20,
+        bogoBuyQty: 1,
+        bogoGetQty: 1,
+        scope: 'all',
+        targetCategory: 'all',
+        targetProductIds: [],
+        minOrderAmount: 0,
+        maxDiscount: '',
+        badgeText: '',
+        bannerTheme: 'festival',
+        showInAnnouncement: true,
+        showHeroBanner: true,
+        isActive: true
+      });
+    }
+    setOfferModalOpen(true);
+  };
+
+  const openEditOffer = (offer) => {
+    setEditingOffer(offer);
+    setOfferProductSearch('');
+    setOfferFormError('');
+    setOfferForm({
+      title: offer.title || '',
+      tagline: offer.tagline || '',
+      code: offer.code || '',
+      type: offer.type || 'percent',
+      discountValue: offer.discountValue ?? 0,
+      bogoBuyQty: offer.bogoBuyQty || 1,
+      bogoGetQty: offer.bogoGetQty || 1,
+      scope: offer.scope || 'all',
+      targetCategory: offer.targetCategory || 'all',
+      targetProductIds: offer.targetProductIds || [],
+      minOrderAmount: offer.minOrderAmount || 0,
+      maxDiscount: offer.maxDiscount ?? '',
+      badgeText: offer.badgeText || '',
+      bannerTheme: offer.bannerTheme || 'festival',
+      showInAnnouncement: offer.showInAnnouncement ?? true,
+      showHeroBanner: offer.showHeroBanner ?? true,
+      isActive: offer.isActive ?? true
+    });
+    setOfferModalOpen(true);
+  };
+
+  const toggleProductInOffer = (productId) => {
+    setOfferForm(prev => {
+      const exists = prev.targetProductIds.includes(productId);
+      return {
+        ...prev,
+        targetProductIds: exists
+          ? prev.targetProductIds.filter(id => id !== productId)
+          : [...prev.targetProductIds, productId]
+      };
+    });
+  };
+
+  const handleSaveOffer = async (e) => {
+    e.preventDefault();
+    setOfferFormError('');
+
+    if (!offerForm.title.trim()) {
+      setOfferFormError('Please enter an Offer / Festival title');
+      return;
+    }
+
+    if (offerForm.scope === 'product' && (!offerForm.targetProductIds || offerForm.targetProductIds.length === 0)) {
+      setOfferFormError('Please select at least 1 product for product-specific offer');
+      return;
+    }
+
+    setSavingOffer(true);
+    try {
+      const payload = {
+        ...offerForm,
+        title: offerForm.title.trim(),
+        tagline: offerForm.tagline.trim(),
+        code: offerForm.code.trim().toUpperCase(),
+        discountValue: Number(offerForm.discountValue) || 0,
+        bogoBuyQty: Number(offerForm.bogoBuyQty) || 1,
+        bogoGetQty: Number(offerForm.bogoGetQty) || 1,
+        minOrderAmount: Number(offerForm.minOrderAmount) || 0,
+        maxDiscount: offerForm.maxDiscount !== '' && offerForm.maxDiscount !== null ? Number(offerForm.maxDiscount) : null,
+        badgeText: offerForm.badgeText.trim()
+      };
+
+      if (editingOffer) {
+        const res = await api.updateOffer(editingOffer.id, payload, token);
+        if (res?.success) {
+          setOffers(prev => prev.map(o => o.id === editingOffer.id ? res.offer : o));
+          setOfferModalOpen(false);
+          setOfferActionMsg({ type: 'success', text: `Offer "${payload.title}" updated successfully!` });
+          setTimeout(() => setOfferActionMsg({ type: '', text: '' }), 4000);
+        } else {
+          setOfferFormError(res?.error || 'Failed to update offer');
+        }
+      } else {
+        const res = await api.createOffer(payload, token);
+        if (res?.success) {
+          setOffers(prev => [res.offer, ...prev]);
+          setOfferModalOpen(false);
+          setOfferActionMsg({ type: 'success', text: `Offer "${payload.title}" created & Live!` });
+          setTimeout(() => setOfferActionMsg({ type: '', text: '' }), 4000);
+        } else {
+          setOfferFormError(res?.error || 'Failed to create offer');
+        }
+      }
+    } catch (err) {
+      setOfferFormError('Error saving offer: ' + err.message);
+    } finally {
+      setSavingOffer(false);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       loadOrders();
       loadProducts();
       loadAdmins();
+      loadOffers();
     }
   }, [token, orderFilter, productCategoryFilter]);
 
   useEffect(() => {
-    if (token && activeTab === 'admins') {
-      loadAdmins();
+    if (token && (activeTab === 'admins' || activeTab === 'offers')) {
+      if (activeTab === 'admins') loadAdmins();
+      if (activeTab === 'offers') loadOffers();
     }
   }, [activeTab]);
 
@@ -712,6 +947,21 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
           >
             <Package className="w-4 h-4 shrink-0" />
             <span>Inventory ({products.length})</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('offers');
+              loadOffers();
+            }}
+            className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition whitespace-nowrap ${
+              activeTab === 'offers'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-gray-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-gray-50 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Tag className="w-4 h-4 shrink-0" />
+            <span>Offers & Deals ({offers.filter(o => o.isActive).length} Live)</span>
           </button>
 
           <button
@@ -1935,6 +2185,17 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
               )}
             </div>
           </div>
+        )}
+
+        {/* TAB 5: OFFERS & FESTIVAL DEALS */}
+        {activeTab === 'offers' && (
+          <AdminOffersManager
+            offers={offers}
+            loadingOffers={loadingOffers}
+            products={products}
+            token={token}
+            onOffersUpdated={(newOffers) => setOffers(newOffers)}
+          />
         )}
 
       </div>

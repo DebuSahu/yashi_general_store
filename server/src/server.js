@@ -9,6 +9,7 @@ import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import settingsRoutes from './routes/settings.js';
 import uploadRoutes from './routes/upload.js';
+import offersRoutes from './routes/offers.js';
 
 dotenv.config();
 
@@ -62,6 +63,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/offers', offersRoutes);
 
 // Serve built frontend if exists
 if (fs.existsSync(CLIENT_DIST)) {

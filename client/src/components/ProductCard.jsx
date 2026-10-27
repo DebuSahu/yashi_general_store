@@ -28,7 +28,8 @@ export default function ProductCard({
   isWishlisted = false,
   onToggleWishlist,
   onOpenQuickView,
-  onShowToast
+  onShowToast,
+  matchedOffer = null
 }) {
   const isOutOfStock = product?.inStock === false || product?.stock === 0;
   const [imgSrc, setImgSrc] = useState(product?.image || '');
@@ -184,12 +185,19 @@ export default function ProductCard({
           </button>
         </div>
 
-        {/* Savings Ribbon / Badge */}
-        {discount > 0 && !isOutOfStock && (
-          <div className="absolute bottom-2 left-2 flex items-center gap-1">
-            <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-md tracking-wider">
-              {discount}% OFF
-            </span>
+        {/* Savings Ribbon / Offer Badge */}
+        {!isOutOfStock && (
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 max-w-[85%] z-10">
+            {matchedOffer?.badgeText ? (
+              <span className="bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 text-white text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-md tracking-wider flex items-center gap-1 truncate animate-pulse">
+                <Sparkles className="w-2.5 h-2.5 shrink-0" />
+                <span className="truncate">{matchedOffer.badgeText}</span>
+              </span>
+            ) : discount > 0 ? (
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-md tracking-wider">
+                {discount}% OFF
+              </span>
+            ) : null}
           </div>
         )}
 

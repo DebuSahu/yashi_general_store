@@ -83,6 +83,11 @@ function initLocalData() {
   if (!getLocalStore('orders', null)) {
     setLocalStore('orders', []);
   }
+  // Initialize offers
+  let localOffers = getLocalStore('offers', null);
+  if (!localOffers || !Array.isArray(localOffers) || localOffers.length === 0) {
+    setLocalStore('offers', defaultData.offers || []);
+  }
   const primaryOwnerEmail = 'debusahu121@gmail.com';
   let admins = getLocalStore('admins', null);
   if (!admins || !Array.isArray(admins) || admins.length === 0) {
@@ -898,5 +903,161 @@ export const api = {
       return { success: true, message: 'Order status updated', order };
     }
     return { error: 'Order not found' };
+  },
+
+  // ==========================================
+  // OFFERS & FESTIVAL DEALS (Admin Customization)
+  // ==========================================
+  getOffers: async (activeOnly = false) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/offers?activeOnly=${activeOnly}`);
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local offers:', err.message);
+      }
+    }
+    const all = getLocalStore('offers', defaultData.offers || []);
+    const offers = activeOnly ? all.filter(o => o.isActive) : all;
+    return { success: true, count: offers.length, offers };
+  },
+
+  createOffer: async (offerData, token) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/offers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(offerData)
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local createOffer:', err.message);
+      }
+    }
+
+    const offers = getLocalStore('offers', defaultData.offers || []);
+    const newOffer = {
+      ...offerData,
+      id: `offer-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+      title: (offerData.title || '').trim(),
+      tagline: (offerData.tagline || '').trim(),
+      code: (offerData.code || '').trim().toUpperCase(),
+      type: offerData.type || 'percent',
+      discountValue: Number(offerData.discountValue) || 0,
+      bogoBuyQty: Math.max(1, Number(offerData.bogoBuyQty) || 1),
+      bogoGetQty: Math.max(1, Number(offerData.bogoGetQty) || 1),
+      scope: offerData.scope || 'all',
+      targetCategory: offerData.targetCategory || 'all',
+      targetProductIds: Array.isArray(offerData.targetProductIds) ? offerData.targetProductIds : [],
+      minOrderAmount: Math.max(0, Number(offerData.minOrderAmount) || 0),
+      maxDiscount: offerData.maxDiscount !== null && offerData.maxDiscount !== undefined && offerData.maxDiscount !== '' ? Number(offerData.maxDiscount) : null,
+      badgeText: (offerData.badgeText || '').trim(),
+      bannerTheme: offerData.bannerTheme || 'festival',
+      showInAnnouncement: Boolean(offerData.showInAnnouncement),
+      showHeroBanner: Boolean(offerData.showHeroBanner),
+      isActive: Boolean(offerData.isActive),
+      startDate: offerData.startDate || null,
+      endDate: offerData.endDate || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    offers.unshift(newOffer);
+    setLocalStore('offers', offers);
+    return { success: true, message: `Offer "${newOffer.title}" created successfully!`, offer: newOffer };
+  },
+
+  updateOffer: async (id, offerData, token) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/offers/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(offerData)
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local updateOffer:', err.message);
+      }
+    }
+
+    const offers = getLocalStore('offers', defaultData.offers || []);
+    const idx = offers.findIndex(o => o.id === id);
+    if (idx !== -1) {
+      const updated = {
+        ...offers[idx],
+        ...offerData,
+        id: offers[idx].id,
+        updatedAt: new Date().toISOString()
+      };
+      offers[idx] = updated;
+      setLocalStore('offers', offers);
+      return { success: true, message: `Offer "${updated.title}" updated successfully!`, offer: updated };
+    }
+    return { error: 'Offer not found' };
+  },
+
+  toggleOfferLive: async (id, token) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/offers/${id}/toggle-live`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local toggleOfferLive:', err.message);
+      }
+    }
+
+    const offers = getLocalStore('offers', defaultData.offers || []);
+    const offer = offers.find(o => o.id === id);
+    if (offer) {
+      offer.isActive = !offer.isActive;
+      offer.updatedAt = new Date().toISOString();
+      setLocalStore('offers', offers);
+      return {
+        success: true,
+        message: offer.isActive ? `Offer "${offer.title}" is now LIVE! 🎉` : `Offer "${offer.title}" is now PAUSED.`,
+        isActive: offer.isActive,
+        offer
+      };
+    }
+    return { error: 'Offer not found' };
+  },
+
+  deleteOffer: async (id, token) => {
+    if (API_BASE) {
+      try {
+        const res = await fetch(`${API_BASE}/offers/${id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (res.ok) return await res.json();
+      } catch (err) {
+        console.warn('Falling back to local deleteOffer:', err.message);
+      }
+    }
+
+    const offers = getLocalStore('offers', defaultData.offers || []);
+    const idx = offers.findIndex(o => o.id === id);
+    if (idx !== -1) {
+      const removed = offers.splice(idx, 1)[0];
+      setLocalStore('offers', offers);
+      return { success: true, message: `Offer "${removed.title}" deleted.`, offer: removed };
+    }
+    return { error: 'Offer not found' };
   }
 };
