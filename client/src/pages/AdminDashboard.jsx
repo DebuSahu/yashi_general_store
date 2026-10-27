@@ -137,7 +137,7 @@ export default function AdminDashboard({ onBackToStore, shopSettings, onSettings
     twilioAuthToken: shopSettings?.twilioAuthToken || '',
     twilioPhoneNumber: shopSettings?.twilioPhoneNumber || '',
     googleClientId: shopSettings?.googleClientId || localStorage.getItem('ygs_google_client_id') || '',
-    emailWebhookUrl: shopSettings?.emailWebhookUrl || localStorage.getItem('ygs_email_webhook_url') || ''
+    emailWebhookUrl: shopSettings?.emailWebhookUrl || localStorage.getItem('ygs_email_webhook_url') || 'https://script.google.com/macros/s/AKfycbxGQA2IyTH85cT2I0FLZcH3I2-rcwmZUcdNM0h6JRi4RyYfswOEhDkJvK3ChGzNEDDb/exec'
   });
   const [settingsSaved, setSettingsSaved] = useState(false);
 

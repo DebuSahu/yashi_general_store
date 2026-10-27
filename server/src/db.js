@@ -38,6 +38,8 @@ export const initialData = {
     minOrderAmount: 100,
     deliveryFee: 0, // Free delivery within 5km!
     googleClientId: "59926349381-1t44eucqdpgl1c4d2gghh8qf3coddf5r.apps.googleusercontent.com",
+    emailWebhookUrl: "https://script.google.com/macros/s/AKfycbxGQA2IyTH85cT2I0FLZcH3I2-rcwmZUcdNM0h6JRi4RyYfswOEhDkJvK3ChGzNEDDb/exec",
+    emailDeploymentId: "AKfycbxGQA2IyTH85cT2I0FLZcH3I2-rcwmZUcdNM0h6JRi4RyYfswOEhDkJvK3ChGzNEDDb",
     adminUsername: "admin",
     adminPasswordHash: "$2a$10$w3.G3rO8gJ2m0yQhC.y2aOK6k0ZkO/99jIe8wRsl4W0wX2Z3A5eE2" // hashed 'admin123'
   },

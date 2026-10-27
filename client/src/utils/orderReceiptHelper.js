@@ -1,6 +1,8 @@
 // Professional Order Receipt & Communication Helper for Yashi General Store
 import { downloadInvoicePdf, getInvoicePdfBase64, shareInvoicePdf } from './pdfInvoiceGenerator';
 
+export const DEFAULT_EMAIL_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxGQA2IyTH85cT2I0FLZcH3I2-rcwmZUcdNM0h6JRi4RyYfswOEhDkJvK3ChGzNEDDb/exec';
+
 const STORE_BASE_URL = typeof window !== 'undefined' && window.location.origin
   ? (window.location.origin + window.location.pathname).replace(/\/$/, '')
   : 'https://DebuSahu.github.io/yashi_general_store';
@@ -242,12 +244,12 @@ export async function sendReceiptDirectToCustomerGmail({ order, items = [], tota
   let dispatched = false;
 
   // 1. Direct Dispatch via Google Apps Script Web App (Sends directly from debusahu121@gmail.com with PDF attached)
-  const webhookUrl = shopSettings?.emailWebhookUrl;
+  const webhookUrl = shopSettings?.emailWebhookUrl || localStorage.getItem('ygs_email_webhook_url') || DEFAULT_EMAIL_WEBHOOK_URL;
   if (webhookUrl && webhookUrl.startsWith('https://script.google.com')) {
     try {
-      const res = await fetch(webhookUrl, {
+      await fetch(webhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(emailPayload),
         mode: 'no-cors' // Google Apps Script Web App cross-origin support
       });

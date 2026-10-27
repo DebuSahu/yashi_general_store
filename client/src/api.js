@@ -40,7 +40,7 @@ function setLocalStore(key, value) {
 }
 
 const CURRENT_CATALOG_VERSION = 'v5_73_ai_products';
-const CURRENT_SETTINGS_VERSION = 'v3_debusahu_store_gmail';
+const CURRENT_SETTINGS_VERSION = 'v4_google_apps_script_webhook';
 
 // Initialize local mock data
 function initLocalData() {
@@ -53,24 +53,31 @@ function initLocalData() {
     setLocalStore('catalog_version', CURRENT_CATALOG_VERSION);
   }
 
-  // Auto-upgrade settings with updated store location & Google Maps link & store Gmail
+  // Auto-upgrade settings with updated store location, store Gmail, and Google Apps Script Webhook
   const currentSettingsVersion = getLocalStore('settings_version', null);
   const existingSettings = getLocalStore('settings', null);
+  const configuredWebhook = 'https://script.google.com/macros/s/AKfycbxGQA2IyTH85cT2I0FLZcH3I2-rcwmZUcdNM0h6JRi4RyYfswOEhDkJvK3ChGzNEDDb/exec';
+  const configuredDeploymentId = 'AKfycbxGQA2IyTH85cT2I0FLZcH3I2-rcwmZUcdNM0h6JRi4RyYfswOEhDkJvK3ChGzNEDDb';
+
   if (
     currentSettingsVersion !== CURRENT_SETTINGS_VERSION ||
     !existingSettings ||
     !existingSettings.latitude ||
     existingSettings.latitude < 25 ||
     !existingSettings.email ||
-    existingSettings.email === 'contact@yashigeneralstore.com'
+    existingSettings.email === 'contact@yashigeneralstore.com' ||
+    !existingSettings.emailWebhookUrl
   ) {
     setLocalStore('settings', {
       ...(defaultData.settings || {}),
       ...(existingSettings || {}),
       email: (existingSettings && existingSettings.email && existingSettings.email !== 'contact@yashigeneralstore.com')
         ? existingSettings.email
-        : 'debusahu121@gmail.com'
+        : 'debusahu121@gmail.com',
+      emailWebhookUrl: configuredWebhook,
+      emailDeploymentId: configuredDeploymentId
     });
+    localStorage.setItem('ygs_email_webhook_url', configuredWebhook);
     setLocalStore('settings_version', CURRENT_SETTINGS_VERSION);
   }
   if (!getLocalStore('orders', null)) {
