@@ -15,17 +15,12 @@ import {
   Sparkles,
   Navigation,
   ShieldCheck,
-  MessageCircle,
   Mail,
   ArrowRight,
   FileText
 } from 'lucide-react';
 import { api } from '../api';
 import { GoogleGLogo } from './GoogleAuthModal';
-import {
-  buildStoreWhatsappMessage,
-  buildClientWhatsappBillMessage
-} from '../utils/orderReceiptHelper';
 import { downloadInvoicePdf } from '../utils/pdfInvoiceGenerator';
 
 export default function OrderTrackerModal({
@@ -346,17 +341,6 @@ export default function OrderTrackerModal({
               const isCancelled = (order.status || '').toLowerCase() === 'cancelled';
               const isDelivered = (order.status || '').toLowerCase() === 'delivered';
 
-              const storeWhatsapp = buildStoreWhatsappMessage({
-                order,
-                totalAmount: order.totalAmount,
-                shopSettings
-              });
-              const clientWhatsapp = buildClientWhatsappBillMessage({
-                order,
-                totalAmount: order.totalAmount,
-                shopSettings
-              });
-
               return (
                 <div
                   key={order.id}
@@ -519,40 +503,16 @@ export default function OrderTrackerModal({
                     </div>
                   </div>
 
-                  {/* Actions: WhatsApp Bill, WhatsApp Store, Print Receipt */}
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {order.customerPhone && (
-                        <a
-                          href={clientWhatsapp.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl shadow-2xs transition active:scale-95"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5 fill-white" />
-                          <span>Bill on WhatsApp</span>
-                        </a>
-                      )}
-
-                      <a
-                        href={storeWhatsapp.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 transition"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span>Store WhatsApp</span>
-                      </a>
-                    </div>
-
+                  {/* Actions: Download PDF Bill, Print, Call Store */}
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-end gap-2">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => downloadInvoicePdf({ order, shopSettings })}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-white hover:bg-emerald-600 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700 px-2.5 py-1.5 rounded-xl transition shadow-2xs active:scale-95"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-white hover:bg-emerald-600 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700 px-3 py-1.5 rounded-xl transition shadow-2xs active:scale-95"
                         title="Download official PDF Tax Bill"
                       >
                         <FileText className="w-3.5 h-3.5" />
-                        <span>PDF Bill</span>
+                        <span>Download PDF Bill</span>
                       </button>
 
                       <button

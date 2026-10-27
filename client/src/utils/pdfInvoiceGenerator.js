@@ -360,28 +360,4 @@ export function getInvoicePdfBase64({ order, items = [], shopSettings = {}, appl
   }
 }
 
-/**
- * Shares the actual PDF document file via mobile Web Share API directly to WhatsApp / Gmail
- */
-export async function shareInvoicePdf({ order, items = [], shopSettings = {}, appliedCoupon = null }) {
-  try {
-    const doc = generateInvoicePdf({ order, items, shopSettings, appliedCoupon });
-    const pdfBlob = doc.output('blob');
-    const filename = `Yashi_General_Store_Bill_${order?.id || 'ORD'}.pdf`;
-    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: `Official Bill #${order?.id} - Yashi General Store`,
-        text: `Namaste ${order?.customerName || 'Customer'}! Here is your official PDF Bill #${order?.id} from Yashi General Store.`
-      });
-      return { success: true };
-    }
-  } catch (err) {
-    console.warn('Native PDF file share note:', err);
-  }
-  return { success: false };
-}
-
 

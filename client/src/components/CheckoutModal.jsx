@@ -22,8 +22,6 @@ import confetti from 'canvas-confetti';
 import GoogleAuthModal, { GoogleGLogo } from './GoogleAuthModal';
 import { extractFullNameFromEmail } from '../utils/userHelper';
 import {
-  buildStoreWhatsappMessage,
-  buildClientWhatsappBillMessage,
   buildClientEmailBill,
   autoDispatchOrderCommunications
 } from '../utils/orderReceiptHelper';
@@ -233,19 +231,6 @@ export default function CheckoutModal({
       if (res && (res.success || res.id)) {
         const confirmedOrder = res.order || res;
 
-        // Generate instant WhatsApp messages and Email bill details
-        const storeWhatsapp = buildStoreWhatsappMessage({
-          order: confirmedOrder,
-          items,
-          totalAmount: finalPayable,
-          shopSettings
-        });
-        const clientWhatsapp = buildClientWhatsappBillMessage({
-          order: confirmedOrder,
-          items,
-          totalAmount: finalPayable,
-          shopSettings
-        });
         const clientEmail = buildClientEmailBill({
           order: confirmedOrder,
           items,
@@ -253,7 +238,7 @@ export default function CheckoutModal({
           shopSettings
         });
 
-        // Automatically dispatch PDF download, store WhatsApp, client WhatsApp, and Gmail bill without asking user!
+        // Automatically download PDF bill and dispatch email receipt via Store Gmail (debusahu121@gmail.com)
         const dispatchResults = autoDispatchOrderCommunications({
           order: confirmedOrder,
           items,
@@ -274,8 +259,6 @@ export default function CheckoutModal({
           totalAmount: finalPayable,
           placedAt: new Date().toISOString(),
           customerEmail: user?.email || confirmedOrder.customerEmail || null,
-          storeWhatsapp,
-          clientWhatsapp,
           clientEmail,
           dispatchResults
         };

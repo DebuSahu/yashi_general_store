@@ -1,5 +1,5 @@
 // Professional Order Receipt & Communication Helper for Yashi General Store
-import { downloadInvoicePdf, getInvoicePdfBase64, shareInvoicePdf } from './pdfInvoiceGenerator';
+import { downloadInvoicePdf, getInvoicePdfBase64 } from './pdfInvoiceGenerator';
 
 export const DEFAULT_EMAIL_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxGQA2IyTH85cT2I0FLZcH3I2-rcwmZUcdNM0h6JRi4RyYfswOEhDkJvK3ChGzNEDDb/exec';
 
@@ -288,12 +288,10 @@ export async function sendReceiptDirectToCustomerGmail({ order, items = [], tota
  * Automatically dispatches:
  * 1. PDF Bill downloaded to customer device
  * 2. Directly sends email through Store Gmail (debusahu121@gmail.com) with PDF attached
- * 3. Directly sends WhatsApp to CUSTOMER'S MOBILE NUMBER (NOT self mobile!)
  */
 export function autoDispatchOrderCommunications({ order, items = [], totalAmount, shopSettings = {} }) {
   const results = {
     pdfDownloaded: false,
-    clientWhatsappDispatched: false,
     emailDispatched: false
   };
 
@@ -316,24 +314,6 @@ export function autoDispatchOrderCommunications({ order, items = [], totalAmount
     }
   } catch (e) {
     console.warn('Email dispatch error:', e);
-  }
-
-  // 3. Directly send to CUSTOMER'S WHATSAPP MOBILE (NOT self mobile!)
-  try {
-    const clientWhatsapp = buildClientWhatsappBillMessage({ order, items, totalAmount, shopSettings });
-    if (clientWhatsapp?.url) {
-      // Programmatic link click directly targeting customer's phone
-      const a = document.createElement('a');
-      a.href = clientWhatsapp.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      results.clientWhatsappDispatched = true;
-    }
-  } catch (e) {
-    console.warn('Customer WhatsApp dispatch error:', e);
   }
 
   return results;
